@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import './theme/_tokens.scss';
+@import './theme/_taiga-bridge.scss';
+@import './theme/_base.scss';
+@import './theme/_components.scss';
+@import './theme/_utilities.css';

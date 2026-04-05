@@ -1,0 +1,19 @@
+.btn-primary {
+  --tui-background-accent-1: var(--app-brand-500);
+  --tui-background-accent-1-hover: var(--app-brand-400);
+  --tui-background-accent-1-pressed: var(--app-brand-600);
+  --tui-text-primary-on-accent-1: var(--app-white);
+  font-weight: 400 !important;
+  border-radius: 1rem !important;
+}
+
+[data-appearance='primary-tooltip'] {
+  background: var(--app-brand-500) !important;
+  padding: 0.6rem !important;
+  color: var(--app-white) !important;
+}
+
+[tuiAppearance][data-appearance='textfield'] {
+  box-shadow: none !important;
+  --tui-duration: 0ms !important;
+}

@@ -1,0 +1,36 @@
+/* This is the critical file.
+   Override Taiga tokens on the themed scope, not only on :root. */
+
+:root,
+[tuiTheme='light'] {
+  --tui-duration: 10ms !important;
+
+  --tui-background-base: var(--app-bg);
+  --tui-background-elevation-1: var(--app-surface);
+  --tui-background-elevation-2: var(--app-surface-2);
+
+  --tui-text-primary: var(--app-fg);
+  --tui-text-secondary: var(--app-grey-600);
+  --tui-text-negative: var(--app-error-400) !important;
+
+  --tui-border-normal: var(--app-border);
+  --tui-border-focus: var(--app-brand-500);
+
+  --tui-status-positive: var(--app-success-500);
+  --tui-status-warning: var(--app-warning-500);
+  --tui-status-negative: var(--app-error-500) !important;
+}
+
+:root,
+[tuiTheme='dark'] {
+  --tui-duration: 20ms;
+  --tui-background-base: var(--app-bg);
+  --tui-background-elevation-1: var(--app-surface);
+  --tui-background-elevation-2: var(--app-surface-2);
+
+  --tui-text-primary: var(--app-fg);
+  --tui-text-secondary: var(--app-grey-500);
+
+  --tui-border-normal: var(--app-border);
+  --tui-border-focus: var(--app-brand-600);
+}

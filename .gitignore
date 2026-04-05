@@ -1,0 +1,6 @@
+.zed
+
+.env*
+!.env.example
+
+*.log

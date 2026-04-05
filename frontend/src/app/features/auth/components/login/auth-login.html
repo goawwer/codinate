@@ -1,0 +1,49 @@
+<div class="min-h-screen flex items-center justify-center px-4 bg-app-brand-100">
+  <form
+    tuiAppearance="floating"
+    tuiCardLarge
+    tuiForm="m"
+    class="w-full max-w-md"
+    [formGroup]="loginForm"
+    (ngSubmit)="onSubmit()"
+  >
+    <header tuiHeader>
+      <h2 tuiTitle>{{ 'auth.title' | translate }}</h2>
+    </header>
+
+    <tui-textfield>
+      <label tuiLabel>{{ 'auth.fields.username' | translate }}</label>
+      <input
+        tuiTextfield
+        formControlName="username"
+        [placeholder]="'auth.placeholders.username' | translate"
+      />
+    </tui-textfield>
+
+    <tui-error formControlName="username" [error]="[] | tuiFieldError | async" />
+
+    <tui-textfield>
+      <label tuiLabel>{{ 'auth.fields.password' | translate }}</label>
+      <input
+        tuiTextfield
+        [type]="showPassword ? 'text' : 'password'"
+        formControlName="password"
+        [placeholder]="'auth.placeholders.password' | translate"
+      />
+      <tui-icon
+        [icon]="showPassword ? '@tui.eye-off' : '@tui.eye'"
+        tuiHintDirection="right"
+        [tuiTooltip]="(showPassword ? 'auth.actions.hidePassword' : 'auth.actions.showPassword') | translate"
+        tuiHintAppearance="primary-tooltip"
+        class="cursor-pointer"
+        (click)="togglePassword()"
+      />
+    </tui-textfield>
+
+    <tui-error formControlName="password" [error]="[] | tuiFieldError | async" />
+
+    <footer class="flex justify-end">
+      <button tuiButton class="btn-primary" size="m">{{ 'auth.actions.signIn' | translate}}</button>
+    </footer>
+  </form>
+</div>

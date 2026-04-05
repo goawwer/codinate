@@ -1,0 +1,34 @@
+{
+  "generic": {
+    "validation": {
+      "required": "Это поле обязательно"
+    }
+  },
+  "auth": {
+    "title": "Логин",
+    "fields": {
+      "username": "Имя пользователя",
+      "password": "Пароль"
+    },
+    "placeholders": {
+      "username": "Введите имя пользователя",
+      "password": "Введите пароль"
+    },
+    "actions": {
+      "showPassword": "Показать пароль",
+      "hidePassword": "Скрыть пароль",
+      "signIn": "Войти"
+    },
+    "errors": {
+      "usernameMinLength": "Минимальная длина имени пользователя: {{ requiredLength }}",
+      "usernameMaxLength": "Максимальная длина имени пользователя: {{ requiredLength }}",
+      "passwordMinLength": "Минимальная длина пароля: {{requiredLength}}",
+      "signInFailed": "Ошибка авторизации"
+    }
+  },
+  "user": {
+    "errors": {
+      "currentUserLoadFailed": "Не удалось получить текущего пользователя"
+    }
+  }
+}

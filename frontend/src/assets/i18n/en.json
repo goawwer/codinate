@@ -1,0 +1,34 @@
+{
+  "generic": {
+    "validation": {
+      "required": "This field is required"
+    }
+  },
+  "auth": {
+    "title": "Login",
+    "fields": {
+      "username": "Username",
+      "password": "Password"
+    },
+    "placeholders": {
+      "username": "Enter your username",
+      "password": "Enter your password"
+    },
+    "actions": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "signIn": "Sign in"
+    },
+    "errors": {
+      "usernameMinLength": "Minimum username length: {{ requiredLength }}",
+      "usernameMaxLength": "Maximum username length: {{ requiredLength }}",
+      "passwordMinLength": "Minimum password length: {{ requiredLength }}",
+      "signInFailed": "Authorization error"
+    }
+  },
+  "user": {
+    "errors": {
+      "currentUserLoadFailed": "Failed to retrieve the current user"
+    }
+  }
+}

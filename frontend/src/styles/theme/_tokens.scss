@@ -1,0 +1,96 @@
+:root {
+  --app-bg: #fbfbfb;
+  --app-fg: #141414;
+
+  --app-white: #fbfbfb;
+  --app-black: #141414;
+
+  --app-grey-50: #f4f5f5;
+  --app-grey-100: #e7e8e9;
+  --app-grey-200: #d1d3d6;
+  --app-grey-300: #b7babe;
+  --app-grey-400: #9ca0a5;
+  --app-grey-500: #82878e;
+  --app-grey-600: #686d73;
+  --app-grey-700: #505358;
+  --app-grey-800: #383a3e;
+  --app-grey-900: #1f2123;
+  --app-grey-950: #070808;
+
+  --app-brand-50: #f4f6fb;
+  --app-brand-100: #e8eef7;
+  --app-brand-200: #c2d1ea;
+  --app-brand-300: #9cb5dd;
+  --app-brand-400: #7699d1;
+  --app-brand-500: #507cc4;
+  --app-brand-600: #3963a8;
+  --app-brand-700: #2c4d82;
+  --app-brand-800: #22406c;
+  --app-brand-900: #122035;
+  --app-brand-950: #09101b;
+
+  --app-success-50: #f4fbf5;
+  --app-success-100: #e0f5e5;
+  --app-success-200: #bae8c5;
+  --app-success-300: #94dba5;
+  --app-success-400: #6ece84;
+  --app-success-500: #47c164;
+  --app-success-600: #36a04f;
+  --app-success-700: #297a3c;
+  --app-success-800: #1c5429;
+  --app-success-900: #0f2e16;
+  --app-success-950: #091b0d;
+
+  --app-warning-50: #fdf8f2;
+  --app-warning-100: #faeddb;
+  --app-warning-200: #f3d6af;
+  --app-warning-300: #edbf82;
+  --app-warning-400: #e6a856;
+  --app-warning-500: #e09028;
+  --app-warning-600: #bb761b;
+  --app-warning-700: #8e5a15;
+  --app-warning-800: #623e0e;
+  --app-warning-900: #352208;
+  --app-warning-950: #1f1405;
+
+  --app-error-50: #fcf3f3;
+  --app-error-100: #f3d3d3;
+  --app-error-200: #e8abab;
+  --app-error-300: #dd8383;
+  --app-error-400: #d15c5c;
+  --app-error-500: #c43737;
+  --app-error-600: #9c2b2b;
+  --app-error-700: #742020;
+  --app-error-800: #4c1515;
+  --app-error-900: #240a0a;
+  --app-error-950: #140606;
+}
+
+html.dark {
+  --app-bg: #141414;
+  --app-fg: #fbfbfb;
+
+  --app-grey-50: #070808;
+  --app-grey-100: #1f2123;
+  --app-grey-200: #383a3e;
+  --app-grey-300: #505358;
+  --app-grey-400: #686d73;
+  --app-grey-500: #82878e;
+  --app-grey-600: #9ca0a5;
+  --app-grey-700: #b7babe;
+  --app-grey-800: #d1d3d6;
+  --app-grey-900: #e7e8e9;
+  --app-grey-950: #f4f5f5;
+
+  --app-brand-50: #09101b;
+  --app-brand-100: #122035;
+  --app-brand-200: #22406c;
+  --app-brand-300: #2c4d82;
+  --app-brand-400: #3963a8;
+  --app-brand-500: #507cc4;
+  --app-brand-600: #7699d1;
+  --app-brand-700: #9cb5dd;
+  --app-brand-800: #c2d1ea;
+  --app-brand-900: #e8eef7;
+  --app-brand-950: #f4f6fb;
+}
