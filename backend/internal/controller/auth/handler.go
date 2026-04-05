@@ -9,6 +9,18 @@ import (
 	"github.com/google/uuid"
 )
 
+// login
+//
+//	@Tags			auth
+//	@Summary		Login
+//	@Description	Post body with username and password
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		loginInput	true	"Body with username and password"
+//	@Success		200		{object}	nil
+//	@Failure		400		{object}	string	"Bad Request"
+//	@Failure		500		{object}	string	"Internal Server Error"
+//	@Router			/auth/login  [post]
 func login(w http.ResponseWriter, r *http.Request) {
 	var input loginInput
 
@@ -45,6 +57,17 @@ func login(w http.ResponseWriter, r *http.Request) {
 	middleware.SetAuthCookieByTokenPair(w, tokenPair)
 }
 
+// refresh
+//
+//	@Tags			auth
+//	@Summary		Refresh
+//	@Description	Take refresh token and generate new token pair & delete exitsting refresh token in database
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	nil
+//	@Failure		400	{object}	string	"Bad Request"
+//	@Failure		500	{object}	string	"Internal Server Error"
+//	@Router			/auth/refresh  [get]
 func refresh(w http.ResponseWriter, r *http.Request) {
 	tokenPair, err := middleware.HandleRefreshToken(r)
 	if err != nil {
@@ -57,6 +80,17 @@ func refresh(w http.ResponseWriter, r *http.Request) {
 	middleware.SetAuthCookieByTokenPair(w, tokenPair)
 }
 
+// logout
+//
+//	@Tags			auth
+//	@Summary		Logout
+//	@Description	Remove access and refresh cookie
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	nil
+//	@Failure		400	{object}	string	"Bad Request"
+//	@Failure		500	{object}	string	"Internal Server Error"
+//	@Router			/auth/logout  [get]
 func logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "access",
@@ -73,5 +107,5 @@ func logout(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	http.Redirect(w, r, "/api/auth/login", http.StatusOK)
+	http.Redirect(w, r, "/auth/login", http.StatusOK)
 }

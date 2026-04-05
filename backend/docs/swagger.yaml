@@ -1,4 +1,137 @@
+definitions:
+  auth.loginInput:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  enum.Role:
+    enum:
+    - owner
+    - admin
+    - user
+    type: string
+    x-enum-varnames:
+    - OwnerRole
+    - AdminRole
+    - UserRole
+  user.Row:
+    properties:
+      createdAt:
+        type: string
+      disabled:
+        type: boolean
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      profilePicture:
+        type: string
+      role:
+        $ref: '#/definitions/enum.Role'
+      surname:
+        type: string
+      username:
+        type: string
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /api/current/user:
+    get:
+      consumes:
+      - application/json
+      description: Takes user from access token cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.Row'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get current user
+      tags:
+      - current
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Post body with username and password
+      parameters:
+      - description: Body with username and password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.loginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Login
+      tags:
+      - auth
+  /auth/logout:
+    get:
+      consumes:
+      - application/json
+      description: Remove access and refresh cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Logout
+      tags:
+      - auth
+  /auth/refresh:
+    get:
+      consumes:
+      - application/json
+      description: Take refresh token and generate new token pair & delete exitsting
+        refresh token in database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Refresh
+      tags:
+      - auth
 swagger: "2.0"
