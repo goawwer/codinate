@@ -1,6 +1,7 @@
 import { TuiRoot } from '@taiga-ui/core';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -9,9 +10,5 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.scss',
 })
 export class App {
-  isDark = false;
-
-  toggleTheme(): void {
-    this.isDark = !this.isDark;
-  }
+  readonly theme = inject(ThemeService);
 }

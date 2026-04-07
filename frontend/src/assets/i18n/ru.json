@@ -26,6 +26,13 @@
       "signInFailed": "Ошибка авторизации"
     }
   },
+  "navbar": {
+    "all": "Все",
+    "mine": "Мои задачи",
+    "teams": "Команды",
+    "projects": "Проекты",
+    "admin": "Админ-панель"
+  },
   "user": {
     "errors": {
       "currentUserLoadFailed": "Не удалось получить текущего пользователя"

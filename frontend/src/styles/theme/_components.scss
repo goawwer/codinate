@@ -17,3 +17,7 @@
   box-shadow: none !important;
   --tui-duration: 0ms !important;
 }
+
+[tuiAppearance][data-appearance='floating'] {
+  box-shadow: none !important;
+}

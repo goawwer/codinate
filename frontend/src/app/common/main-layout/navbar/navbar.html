@@ -1,0 +1,35 @@
+<nav class="flex items-center justify-between rounded-3xl bg-(--app-grey-100) px-10 py-2.5">
+  <div class="flex gap-8">
+    <a class="cursor-pointer" routerLink="/all" routerLinkActive="font-bold">
+      {{ 'navbar.all' | translate }}
+    </a>
+
+    <a class="cursor-pointer" routerLink="/mine" routerLinkActive="font-bold">
+      {{ 'navbar.mine' | translate }}
+    </a>
+
+    <a class="cursor-pointer" routerLink="/teams" routerLinkActive="font-bold">
+      {{ 'navbar.teams' | translate }}
+    </a>
+
+    <a class="cursor-pointer" routerLink="/projects" routerLinkActive="font-bold">
+      {{ 'navbar.projects' | translate }}
+    </a>
+
+    @if (userStore.isAtLeastAdmin()){
+    <a class="cursor-pointer" routerLink="/admin" routerLinkActive="font-bold">
+      {{ 'navbar.admin' | translate }}
+    </a>
+    }
+  </div>
+
+  <div class="flex items-center gap-8">
+    <button type="button" class="cursor-pointer hover:opacity-20" (click)="this.theme.toggle()">
+      <tui-icon [icon]="this.theme.isDark() ? '@tui.sun' : '@tui.moon'" />
+    </button>
+
+    <a>
+      <app-profile-picture></app-profile-picture>
+    </a>
+  </div>
+</nav>

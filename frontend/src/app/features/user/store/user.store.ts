@@ -15,6 +15,7 @@ import { AlertService } from '../../../core/declarations/services/alert.service'
 import { StoreStatus } from '../../../core/declarations/types/store-statuses.type';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, EMPTY, exhaustMap, pipe, tap } from 'rxjs';
+import { AT_LEAST_ADMIN } from '../types/enum/role.enum';
 
 type UserState = {
   user: User | null;
@@ -34,6 +35,10 @@ export const UserStore = signalStore(
       const status = store.status();
 
       return status && [StoreStatus.Loading, StoreStatus.Saving].includes(status);
+    }),
+    isAtLeastAdmin: computed(() => {
+      const role = store.user()?.role;
+      return role != null && AT_LEAST_ADMIN.includes(role);
     }),
   })),
   withMethods(

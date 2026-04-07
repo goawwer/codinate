@@ -16,6 +16,7 @@ import { provideApiConfig } from './core/declarations/providers/api-config.provi
 import { apiConfigUrl } from './core/declarations/constants/url';
 import { apiRootUrlInterceptorFn } from './core/interceptor/api-root-url.interceptor';
 import { AppInitService } from './core/services/app-init.service';
+import { authInterceptor } from './core/interceptor/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [

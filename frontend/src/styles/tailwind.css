@@ -3,4 +3,5 @@
 @import './theme/_taiga-bridge.scss';
 @import './theme/_base.scss';
 @import './theme/_components.scss';
-@import './theme/_utilities.css';
+
+@custom-variant dark (&:where([tuiTheme='dark'], [tuiTheme='dark'] *));

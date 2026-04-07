@@ -1,22 +1,5 @@
-:root {
-  --app-bg: #fbfbfb;
-  --app-fg: #141414;
-
-  --app-white: #fbfbfb;
-  --app-black: #141414;
-
-  --app-grey-50: #f4f5f5;
-  --app-grey-100: #e7e8e9;
-  --app-grey-200: #d1d3d6;
-  --app-grey-300: #b7babe;
-  --app-grey-400: #9ca0a5;
-  --app-grey-500: #82878e;
-  --app-grey-600: #686d73;
-  --app-grey-700: #505358;
-  --app-grey-800: #383a3e;
-  --app-grey-900: #1f2123;
-  --app-grey-950: #070808;
-
+[tuiTheme='light'],
+[tuiTheme='dark'] {
   --app-brand-50: #f4f6fb;
   --app-brand-100: #e8eef7;
   --app-brand-200: #c2d1ea;
@@ -66,21 +49,40 @@
   --app-error-950: #140606;
 }
 
-html.dark {
+[tuiTheme='light'] {
+  --app-bg: #fbfbfb;
+  --app-fg: #141414;
+
+  --app-white: #fbfbfb;
+  --app-black: #141414;
+
+  --app-grey-50: #f4f5f5;
+  --app-grey-100: #e7e8e9;
+  --app-grey-200: #d1d3d6;
+  --app-grey-300: #b7babe;
+  --app-grey-400: #9ca0a5;
+  --app-grey-500: #82878e;
+  --app-grey-600: #686d73;
+  --app-grey-700: #505358;
+  --app-grey-800: #383a3e;
+  --app-grey-900: #1f2123;
+  --app-grey-950: #070808;
+}
+
+[tuiTheme='dark'] {
   --app-bg: #141414;
   --app-fg: #fbfbfb;
 
-  --app-grey-50: #070808;
-  --app-grey-100: #1f2123;
-  --app-grey-200: #383a3e;
-  --app-grey-300: #505358;
-  --app-grey-400: #686d73;
-  --app-grey-500: #82878e;
-  --app-grey-600: #9ca0a5;
-  --app-grey-700: #b7babe;
-  --app-grey-800: #d1d3d6;
-  --app-grey-900: #e7e8e9;
-  --app-grey-950: #f4f5f5;
+  --app-grey-50: #1f2123;
+  --app-grey-100: #383a3e;
+  --app-grey-200: #505358;
+  --app-grey-300: #686d73;
+  --app-grey-400: #82878e;
+  --app-grey-500: #9ca0a5;
+  --app-grey-600: #b7babe;
+  --app-grey-700: #d1d3d6;
+  --app-grey-800: #e7e8e9;
+  --app-grey-900: #f4f5f5;
 
   --app-brand-50: #09101b;
   --app-brand-100: #122035;

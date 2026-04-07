@@ -69,12 +69,14 @@ export const AuthStore = signalStore(
             userStore.setUser(user);
           } else {
             patchState(store, { ...initialAuthState });
-
             userStore.clearUser();
           }
-        } catch {
-          patchState(store, { ...initialAuthState });
-          userStore.clearUser();
+        } catch (err: any) {
+          if (err.status === 401) {
+            patchState(store, { ...initialAuthState });
+            userStore.clearUser();
+            router.navigate(['/auth/login']);
+          }
         }
       },
 

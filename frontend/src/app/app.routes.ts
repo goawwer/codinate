@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthLayout } from './features/auth/components/layout/auth-layout';
 import { AuthLogin } from './features/auth/components/login/auth-login';
 import { authGuardFn } from './core/guards/auth.guard';
-import { MainLayoutComponent } from './core/main-layout/main-layout.component';
+import { MainLayoutComponent } from './common/main-layout/main-layout';
 
 export const routes: Routes = [
   {

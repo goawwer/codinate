@@ -26,6 +26,13 @@
       "signInFailed": "Authorization error"
     }
   },
+  "navbar": {
+    "all": "All",
+    "mine": "My tasks",
+    "teams": "Teams",
+    "projects": "Projects",
+    "admin": "Admin-dashboard"
+  },
   "user": {
     "errors": {
       "currentUserLoadFailed": "Failed to retrieve the current user"

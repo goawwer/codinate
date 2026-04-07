@@ -1,0 +1,9 @@
+<div class="cursor-pointer">
+  @if (user(); as user) { @if (user.profilePicture) {
+  <tui-avatar [size]="size" [src]="profilePictureSrc()" />
+  } @else {
+  <tui-avatar [size]="size" [src]="avatarLetters()" [style.background]="avatarColor()" />
+  } } @else {
+  <tui-avatar [size]="size" [src]="'?'" />
+  }
+</div>

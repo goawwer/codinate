@@ -82,39 +82,35 @@ func ParseTokenToClaims(tokenString string) (*CustomClaims, error) {
 
 func HandleMiddlewareWithAccessToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("access")
-		if err != nil {
-			if errors.Is(err, http.ErrNoCookie) {
-				logger.Debugf("failed to get access cookie, try to get refresh token")
+		var claims *CustomClaims
 
-				tokenPair, err := HandleRefreshToken(r)
-				if err != nil {
-					http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-					return
-				}
-
-				SetAuthCookieByTokenPair(w, tokenPair)
+		accessCookie, err := r.Cookie("access")
+		if err == nil {
+			claims, err = ParseTokenToClaims(accessCookie.Value)
+			if err == nil {
+				ctx := context.WithValue(r.Context(), claimsKey, claims)
+				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
 
-			logger.ErrorWithFields(map[string]any{
-				"Middleware": "HandleMiddlewareWithAccessToken",
-			}, "failed to get cookie")
+			if !errors.Is(err, errTokenExpired) {
+				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				return
+			}
+		}
+
+		tokenPair, err := HandleRefreshToken(r)
+		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
 
-		claims, err := ParseTokenToClaims(cookie.Value)
+		SetAuthCookieByTokenPair(w, tokenPair)
+
+		claims, err = ParseTokenToClaims(tokenPair.AccessToken)
 		if err != nil {
-			if errors.Is(err, errTokenExpired) {
-				logger.Error("token expired")
-				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-				return
-			} else {
-				logger.Errorf("invalid token: %v", err)
-				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-				return
-			}
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
 		}
 
 		ctx := context.WithValue(r.Context(), claimsKey, claims)
