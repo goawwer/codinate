@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"time"
@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	ID             uuid.UUID `db:"id"`
+	Id             uuid.UUID `db:"id"`
 	Name           string    `db:"name"`
 	Surname        string    `db:"surname"`
 	Email          string    `db:"email"`

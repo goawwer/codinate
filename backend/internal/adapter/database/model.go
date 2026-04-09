@@ -11,6 +11,7 @@ import (
 )
 
 type database interface {
+	SelectContext(ctx context.Context, dst any, query string, args ...any) error
 	Exec(query string, args ...any) (sql.Result, error)
 	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 	Query(query string, args ...any) (*sqlx.Rows, error)

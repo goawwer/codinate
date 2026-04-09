@@ -23,5 +23,5 @@ func (s *CoreUiService) GetCurrentUser() (*user.Row, error) {
 		return nil, err
 	}
 
-	return repository.GetUserRepo().GetUserById(s.Request.Context(), uuid.MustParse(claims.UserID))
+	return repository.GetUserRepo().GetById(s.Request.Context(), uuid.MustParse(claims.UserID))
 }

@@ -20,7 +20,7 @@ type contextKey string
 
 const (
 	claimsKey contextKey = "claims"
-	rolesKey  contextKey = "roles"
+	RolesKey  contextKey = "roles"
 )
 
 var (

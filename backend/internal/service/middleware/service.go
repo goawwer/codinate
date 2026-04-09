@@ -9,6 +9,8 @@ import (
 	"slices"
 	"time"
 
+	"github.com/goawwer/codinate/internal/adapter/dto"
+	"github.com/goawwer/codinate/internal/adapter/model/enum"
 	"github.com/goawwer/codinate/pkg/logger"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -169,14 +171,14 @@ func RoleValidator(next http.Handler) http.Handler {
 			return
 		}
 
-		allowedRoles, ok := r.Context().Value(rolesKey).([]string)
+		allowedRoles, ok := r.Context().Value(RolesKey).([]enum.Role)
 		if !ok || len(allowedRoles) == 0 {
 			logger.Debug("no role limits")
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		if slices.Contains(allowedRoles, claims.Role) {
+		if slices.Contains(allowedRoles, dto.ResolveUserRole(claims.Role)) {
 			next.ServeHTTP(w, r)
 			return
 		}

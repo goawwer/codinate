@@ -6,8 +6,9 @@ const (
 	OwnerRole Role = "owner"
 	AdminRole Role = "admin"
 	UserRole  Role = "user"
+	NoRole    Role = ""
 )
 
-var AtLeastOnwer = []string{string(OwnerRole)}
-var AtLeastAdmin = []string{string(OwnerRole), string(AdminRole)}
-var AnyUser = []string{string(UserRole), string(AdminRole), string(OwnerRole)}
+var AtLeastOwner = []Role{OwnerRole}
+var AtLeastAdmin = []Role{OwnerRole, AdminRole}
+var AnyUser = []Role{UserRole, AdminRole, OwnerRole}

@@ -1,3 +1,3 @@
 package current
 
-type currentService struct{}
+type service struct{}

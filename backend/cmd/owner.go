@@ -42,7 +42,7 @@ func createOwner(params ownerParams) {
 		panic("failed to generate hash for password")
 	}
 
-	if err := repository.GetUserRepo().CreateUser(ctx, &models.User{
+	if err := repository.GetUserRepo().Create(ctx, &models.User{
 		Name:           params.name,
 		Surname:        params.surname,
 		Username:       params.username,

@@ -8,7 +8,7 @@ import (
 )
 
 func Register() {
-	ui.RegisterGet("/current/user", enum.AnyUser, reflect.TypeOf(currentService{}), getCurrentUser)
+	ui.RegisterGet("/current/user", enum.AnyUser, reflect.TypeOf(service{}), getCurrentUser)
 }
 
 // user
