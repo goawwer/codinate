@@ -18,6 +18,10 @@ func (InvalidCredentialsError) Error() string {
 	return "invalid credentials"
 }
 
+func deleteRefreshTokenBy(ctx context.Context, tokenID uuid.UUID) error {
+	return repository.GetAuthRepo().RemoveTokenBy(ctx, tokenID)
+}
+
 func getUserAtLogin(ctx context.Context, input loginInput) (uuid.UUID, string, error) {
 	if util.IsAnyStringEmpty(input.Password, input.Username) {
 		return uuid.Nil, "", InvalidCredentialsError{}

@@ -3,7 +3,7 @@ package current
 import (
 	"reflect"
 
-	"github.com/goawwer/codinate/internal/adapter/models/enum"
+	"github.com/goawwer/codinate/internal/adapter/model/enum"
 	"github.com/goawwer/codinate/internal/controller/ui"
 )
 

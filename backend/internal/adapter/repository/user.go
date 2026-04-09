@@ -5,7 +5,7 @@ import (
 
 	"github.com/goawwer/codinate/internal/adapter/database"
 	"github.com/goawwer/codinate/internal/adapter/dto/user"
-	"github.com/goawwer/codinate/internal/adapter/models"
+	models "github.com/goawwer/codinate/internal/adapter/model"
 	"github.com/google/uuid"
 )
 
@@ -42,7 +42,7 @@ func (r userRepoImpl) GetUserById(ctx context.Context, id uuid.UUID) (*user.Row,
 	err := r.QueryRowContext(ctx, `
 		SELECT
 			id, name, surname, email, username,
-			profile_picture_path, role, disabled, created_at
+			picture_name, role, disabled, created_at
 		FROM users
 		WHERE id = $1
 	`, id).StructScan(&user)

@@ -4,9 +4,10 @@ import (
 	"context"
 	"crypto/hmac"
 	"fmt"
+	"net/http"
 	"time"
 
-	"github.com/goawwer/codinate/internal/adapter/models"
+	models "github.com/goawwer/codinate/internal/adapter/model"
 	"github.com/goawwer/codinate/internal/adapter/repository"
 	"github.com/goawwer/codinate/pkg/logger"
 	"github.com/golang-jwt/jwt/v5"
@@ -138,4 +139,25 @@ func resolveAuthDurations(cfg *config) (accessDuration, refreshDuration, session
 	}
 
 	return accessDuration, refreshDuration, sessionDuration, nil
+}
+
+func removeTokenBy(ctx context.Context, tokenID uuid.UUID) error {
+	return repository.GetAuthRepo().RemoveTokenBy(ctx, tokenID)
+}
+
+func clearAuthCookies(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	})
 }

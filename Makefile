@@ -17,3 +17,6 @@ migrate_down:
 
 migrate_force:
 	migrate -database ${DB_URL} -path backend/internal/adapter/migrations force $(v)
+
+migrate_drop:
+	migrate -database ${DB_URL} -path backend/internal/adapter/migrations drop

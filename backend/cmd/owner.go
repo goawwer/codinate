@@ -6,7 +6,7 @@ import (
 
 	"github.com/goawwer/codinate/config"
 	"github.com/goawwer/codinate/internal/adapter/database"
-	"github.com/goawwer/codinate/internal/adapter/models"
+	models "github.com/goawwer/codinate/internal/adapter/model"
 	"github.com/goawwer/codinate/internal/adapter/repository"
 	"github.com/goawwer/codinate/pkg/logger"
 	"github.com/goawwer/codinate/pkg/util"

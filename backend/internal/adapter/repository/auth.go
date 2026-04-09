@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/goawwer/codinate/internal/adapter/database"
-	"github.com/goawwer/codinate/internal/adapter/models"
+	models "github.com/goawwer/codinate/internal/adapter/model"
 	"github.com/goawwer/codinate/pkg/logger"
 	"github.com/google/uuid"
 )
@@ -18,6 +18,7 @@ type AuthRepository interface {
 	ConsumeRefreshToken(ctx context.Context, token models.Refresh) (time.Time, error)
 	GetLoginInfoByUsername(ctx context.Context, name string) (uuid.UUID, string, string, error)
 	CleanupExpiredRefreshTokens(ctx context.Context) error
+	RemoveTokenBy(ctx context.Context, tokenId uuid.UUID) error
 }
 
 type authRepoImpl struct {
@@ -104,6 +105,15 @@ func (r *authRepoImpl) CleanupExpiredRefreshTokens(ctx context.Context) error {
             WHERE rn > 1
         )
 	`)
+
+	return err
+}
+
+func (r *authRepoImpl) RemoveTokenBy(ctx context.Context, tokenId uuid.UUID) error {
+	_, err := r.QueryContext(ctx, `
+		DELETE FROM refresh_tokens
+		WHERE id = $1
+	`, tokenId)
 
 	return err
 }

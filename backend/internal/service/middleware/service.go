@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/http"
 	"slices"
 	"time"
@@ -122,7 +123,7 @@ func HandleRefreshToken(r *http.Request) (*TokenPair, error) {
 	cookie, err := r.Cookie("refresh")
 	if err != nil {
 		if errors.Is(err, errTokenExpired) {
-			logger.Error("refresh token expired, try to invoke new with session")
+			logger.Error("refresh token expired")
 		} else {
 			logger.Errorf("invalid token: %v", err)
 		}
@@ -149,6 +150,9 @@ func HandleRefreshToken(r *http.Request) (*TokenPair, error) {
 
 func GetClaimsFromRequest(r *http.Request) (*CustomClaims, error) {
 	claims, ok := r.Context().Value(claimsKey).(*CustomClaims)
+
+	fmt.Printf("%+v", claims)
+
 	if !ok {
 		return nil, errors.New("failed to get claims")
 	}
@@ -198,4 +202,50 @@ func SetAuthCookieByTokenPair(w http.ResponseWriter, token *TokenPair) {
 		Path:     "/",
 		Expires:  token.RefreshTokenExp,
 	})
+}
+
+func HandleLogout(w http.ResponseWriter, r *http.Request) error {
+	defer clearAuthCookies(w)
+
+	cookie, err := r.Cookie("refresh")
+	if err != nil {
+		if errors.Is(err, errTokenExpired) {
+			logger.Error("refresh token expired")
+		} else {
+			logger.Errorf("invalid token: %v", err)
+		}
+
+		return errTokenInvalid
+	}
+
+	claims, err := ParseTokenToClaims(cookie.Value)
+	if err != nil || claims.TokenType != "refresh" {
+		logger.Error("invalid refresh token: ", err)
+		return err
+	}
+
+	tokenID, err := uuid.Parse(claims.TokenID)
+	if err != nil {
+		logger.Errorf("failed to parse token ID on logout: %v", err)
+		return fmt.Errorf("failed to parse token ID on logout: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	defer cancel()
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- removeTokenBy(r.Context(), tokenID)
+	}()
+
+	select {
+	case err := <-errCh:
+		if err != nil {
+			logger.Errorf("failed to delete refresh token while logout: %v", err)
+		}
+	case <-ctx.Done():
+		logger.Errorf("timeout deleting refresh token on logout: %v", ctx.Err())
+	}
+
+	return nil
 }

@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/goawwer/codinate/internal/adapter/models/enum"
+	"github.com/goawwer/codinate/internal/adapter/model/enum"
 	"github.com/google/uuid"
 )
 

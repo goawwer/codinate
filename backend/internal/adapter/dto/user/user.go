@@ -3,7 +3,7 @@ package user
 import (
 	"time"
 
-	"github.com/goawwer/codinate/internal/adapter/models/enum"
+	"github.com/goawwer/codinate/internal/adapter/model/enum"
 )
 
 type Row struct {
@@ -12,7 +12,7 @@ type Row struct {
 	Surname        string    `db:"surname" json:"surname"`
 	Email          string    `db:"email" json:"email"`
 	Username       string    `db:"username" json:"username"`
-	ProfilePicture *string   `db:"profile_picture_path" json:"profilePicture"`
+	ProfilePicture *string   `db:"picture_name" json:"profilePicture"`
 	Role           enum.Role `db:"role" json:"role"`
 	Disabled       bool      `db:"disabled" json:"disabled"`
 	CreatedAt      time.Time `db:"created_at" json:"createdAt"`

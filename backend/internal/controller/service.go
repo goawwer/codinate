@@ -8,6 +8,9 @@ import (
 )
 
 type Service interface {
+	GetRequest() *http.Request
+	GetResponse() http.ResponseWriter
+	GetService() any
 	GetPathParameterAsString(name string) (string, error)
 	GetUrlParamAsString(name string) (string, error)
 }

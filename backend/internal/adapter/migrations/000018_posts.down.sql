@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS posts;
+DROP TYPE IF EXISTS post_types;
+DROP TYPE IF EXISTS post_parent_type;

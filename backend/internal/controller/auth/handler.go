@@ -92,20 +92,7 @@ func refresh(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{object}	string	"Internal Server Error"
 //	@Router			/auth/logout  [get]
 func logout(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "access",
-		Value:    "",
-		Path:     "/",
-		MaxAge:   -1,
-		HttpOnly: true,
-	})
-	http.SetCookie(w, &http.Cookie{
-		Name:     "refresh",
-		Value:    "",
-		Path:     "/",
-		MaxAge:   -1,
-		HttpOnly: true,
-	})
-
-	http.Redirect(w, r, "/auth/login", http.StatusOK)
+	if err := middleware.HandleLogout(w, r); err != nil {
+		logger.Errorf("failed to handle logout properly: %v", err)
+	}
 }
