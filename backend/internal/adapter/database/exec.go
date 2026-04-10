@@ -37,6 +37,15 @@ func GetCoreRepository() *CoreRepository {
 	}
 }
 
+func (db databaseWrapper) SelectContext(ctx context.Context, dst any, query string, args ...any) error {
+	start := time.Now()
+	err := db.DB.SelectContext(ctx, dst, query, args...)
+	duration := time.Since(start)
+
+	db.logIfNeeded("SelectContext", query, duration, err)
+	return err
+}
+
 func (db databaseWrapper) Exec(query string, args ...any) (sql.Result, error) {
 	start := time.Now()
 	result, err := db.DB.Exec(query, args...)

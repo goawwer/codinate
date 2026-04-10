@@ -1,10 +1,14 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"reflect"
+	"strconv"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 type Service interface {
@@ -12,7 +16,9 @@ type Service interface {
 	GetResponse() http.ResponseWriter
 	GetService() any
 	GetPathParameterAsString(name string) (string, error)
+	GetPathParamAsInt(name string) (int, error)
 	GetUrlParamAsString(name string) (string, error)
+	GetBodyAs(model interface{}) error
 }
 
 type CoreService struct {
@@ -42,6 +48,15 @@ func (s *CoreService) GetPathParameterAsString(name string) (string, error) {
 	return param, nil
 }
 
+func (s *CoreService) GetPathParamAsInt(name string) (int, error) {
+	paramStr := chi.URLParam(s.Request, name)
+	if paramStr == "" {
+		return 0, fmt.Errorf("path parameter '%s' not found", name)
+	}
+
+	return strconv.Atoi(paramStr)
+}
+
 func (s *CoreService) GetUrlParamAsString(name string) (string, error) {
 	params, ok := s.Request.URL.Query()[name]
 	if !ok {
@@ -49,4 +64,18 @@ func (s *CoreService) GetUrlParamAsString(name string) (string, error) {
 	}
 
 	return params[0], nil
+}
+
+func (s *CoreService) GetBodyAs(model interface{}) error {
+	rv := reflect.ValueOf(model)
+	if rv.Kind() != reflect.Ptr || rv.IsNil() {
+		return &json.InvalidUnmarshalError{Type: reflect.TypeOf(model)}
+	}
+
+	body, err := io.ReadAll(s.Request.Body)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(body, &model)
 }

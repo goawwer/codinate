@@ -11,11 +11,31 @@ definitions:
     - owner
     - admin
     - user
+    - ""
     type: string
     x-enum-varnames:
     - OwnerRole
     - AdminRole
     - UserRole
+    - NoRole
+  shared.NameInput:
+    properties:
+      name:
+        type: string
+    type: object
+  user.CreateInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      surname:
+        type: string
+    type: object
   user.Row:
     properties:
       createdAt:
@@ -28,10 +48,33 @@ definitions:
         type: string
       name:
         type: string
-      profilePicture:
+      password:
+        type: string
+      picture:
         type: string
       role:
         $ref: '#/definitions/enum.Role'
+      surname:
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+  user.UpdateInput:
+    properties:
+      disabled:
+        type: boolean
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      profilePicture:
+        type: string
+      role:
+        type: string
       surname:
         type: string
       username:
@@ -63,6 +106,512 @@ paths:
       summary: Get current user
       tags:
       - current
+  /api/employee/roles:
+    get:
+      consumes:
+      - application/json
+      description: Get all roles for employees
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get roles
+      tags:
+      - roles
+  /api/employee/roles/add:
+    post:
+      consumes:
+      - application/json
+      description: Post body with role name
+      parameters:
+      - description: Body with role name
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/shared.NameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add role
+      tags:
+      - roles
+  /api/employee/roles/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete role by id
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete role
+      tags:
+      - roles
+  /api/employee/roles/delete/all:
+    delete:
+      consumes:
+      - application/json
+      description: Delete role all employee roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete roles
+      tags:
+      - roles
+  /api/employee/roles/update/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update role by id and new name
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Body with new role name
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/shared.NameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update role
+      tags:
+      - roles
+  /api/task/priorities:
+    get:
+      consumes:
+      - application/json
+      description: Get all task priorities
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get priorities
+      tags:
+      - task/priority
+  /api/task/priorities/add:
+    post:
+      consumes:
+      - application/json
+      description: Post body with priority name
+      parameters:
+      - description: Body with priority name
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/shared.NameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add priority
+      tags:
+      - task/priority
+  /api/task/priorities/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete task priority by id
+      parameters:
+      - description: Priority ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete priority
+      tags:
+      - task/priority
+  /api/task/priorities/delete/all:
+    delete:
+      consumes:
+      - application/json
+      description: Delete all task priorities
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete all priorities
+      tags:
+      - task/priority
+  /api/task/priorities/update/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update task priority name by id
+      parameters:
+      - description: Priority ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Body with new priority name
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/shared.NameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update priority
+      tags:
+      - task/priority
+  /api/task/statuses:
+    get:
+      consumes:
+      - application/json
+      description: Get all task statuses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get statuses
+      tags:
+      - task/status
+  /api/task/statuses/add:
+    post:
+      consumes:
+      - application/json
+      description: Post body with status name
+      parameters:
+      - description: Body with status name
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/shared.NameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add status
+      tags:
+      - task/status
+  /api/task/statuses/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete task status by id
+      parameters:
+      - description: Status ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete status
+      tags:
+      - task/status
+  /api/task/statuses/delete/all:
+    delete:
+      consumes:
+      - application/json
+      description: Delete all task statuses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete all statuses
+      tags:
+      - task/status
+  /api/task/statuses/update/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update task status name by id
+      parameters:
+      - description: Status ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Body with new status name
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/shared.NameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update status
+      tags:
+      - task/status
+  /api/user/{id}:
+    get:
+      description: Returns a single user by their UUID
+      parameters:
+      - description: User UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.Row'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get user by ID
+      tags:
+      - user
+  /api/user/add:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account
+      parameters:
+      - description: User data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create user
+      tags:
+      - user
+  /api/user/all:
+    get:
+      description: Returns a list of all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/user.Row'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all users
+      tags:
+      - user
+  /api/user/delete/{id}:
+    delete:
+      description: Deletes a user by their UUID
+      parameters:
+      - description: User UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete user by ID
+      tags:
+      - user
+  /api/user/update/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Updates only the provided fields of a user
+      parameters:
+      - description: User UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update user by ID
+      tags:
+      - user
   /auth/login:
     post:
       consumes:
