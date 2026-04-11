@@ -11,6 +11,6 @@ export class AuthApiService {
   private http = inject(HttpClient);
 
   signIn(body: LoginBody): Observable<void> {
-    return this.http.post<void>(this.loginURL, body, { withCredentials: true });
+    return this.http.post<void>(this.loginURL, body);
   }
 }

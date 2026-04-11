@@ -1,34 +1,27 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthStore } from '../../features/auth/store/auth.store';
-import { UserStore } from '../../features/user/store/user.store';
 import { catchError, throwError } from 'rxjs';
+import { AuthStateService } from '../services/auth-state.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  const authStore = inject(AuthStore);
-  const userStore = inject(UserStore);
+  const authState = inject(AuthStateService);
 
-  const isAsset = req.url.startsWith('assets/') || req.url.startsWith('/assets/');
-
-  if (isAsset) {
+  if (req.url.startsWith('assets/') || req.url.startsWith('/assets/')) {
     return next(req);
   }
 
-  if (!req.url.startsWith('/api')) {
-    return next(req);
-  }
+  const apiReq = req.clone({ withCredentials: true });
 
-  return next(req).pipe(
-    catchError((err) => {
-      if (err.status === 401) {
-        authStore.logout();
-        userStore.clearUser();
+  return next(apiReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401 && authState.initialized()) {
+        authState.initialized.set(false);
         router.navigate(['/auth/login']);
       }
 
-      return throwError(() => err);
+      return throwError(() => error);
     }),
   );
 };

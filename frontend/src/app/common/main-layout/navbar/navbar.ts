@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ProfilePicture } from '../../profile-picture/profile-picture';
 import { TuiIcon } from '@taiga-ui/core';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -7,7 +8,7 @@ import { UserStore } from '../../../features/user/store/user.store';
 
 @Component({
   selector: 'app-navbar',
-  imports: [ProfilePicture, TuiIcon, TranslatePipe],
+  imports: [ProfilePicture, TuiIcon, TranslatePipe, RouterLink, RouterLinkActive],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })

@@ -11,6 +11,6 @@ export class CurrentApiService {
   private httpClient = inject(HttpClient);
 
   user(): Observable<User> {
-    return this.httpClient.get<User>(`${this.baseURL}/user`, { withCredentials: true });
+    return this.httpClient.get<User>(`${this.baseURL}/user`);
   }
 }

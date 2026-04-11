@@ -2,6 +2,22 @@
   "generic": {
     "validation": {
       "required": "This field is required"
+    },
+    "actions": {
+      "default": "Actions",
+      "add": "Add",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "create": "Create"
+    },
+    "statuses": {
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "user": "User"
     }
   },
   "auth": {
@@ -36,6 +52,40 @@
   "user": {
     "errors": {
       "currentUserLoadFailed": "Failed to retrieve the current user"
+    }
+  },
+  "models": {
+    "user": {
+      "name": "Name",
+      "surname": "Surname",
+      "username": "Username",
+      "email": "Email",
+      "role": "Role",
+      "disabled": "Disabled",
+      "status": "Status",
+      "createdAt": "Created at",
+      "updatedAt": "Update at"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "users": {
+        "status": {
+          "default": "Status"
+        },
+        "hints": {
+          "add": "Create a new user account",
+          "delete": "Delete selected users",
+          "edit": "Edit user profile"
+        },
+        "placeholders": {
+          "search": "Search by name, username or email"
+        },
+        "dialogs": {
+          "deleteTitle": "Delete users",
+          "deleteContent": "Are you sure you want to delete {{ count }} user(s)? This action cannot be undone."
+        }
+      }
     }
   }
 }

@@ -29,4 +29,15 @@ export class AlertService {
       .pipe(first())
       .subscribe();
   }
+
+  public success(content: PolymorpheusContent, options: Partial<IAlertOptions> = {}) {
+    return this.alertService
+      .open(content, {
+        ...this.defaultOptions,
+        ...options,
+        appearance: 'success',
+      })
+      .pipe(first())
+      .subscribe();
+  }
 }

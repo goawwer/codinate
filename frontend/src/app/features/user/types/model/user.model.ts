@@ -8,7 +8,8 @@ export interface User {
   username: string;
   email: string;
   role: ValueOf<typeof EnumUserRole>;
-  profilePicture: string;
+  picture: string;
   disabled: boolean;
   createdAt: string;
+  updatedAt: string;
 }

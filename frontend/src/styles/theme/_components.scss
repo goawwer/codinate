@@ -2,15 +2,24 @@
   --tui-background-accent-1: var(--app-brand-500);
   --tui-background-accent-1-hover: var(--app-brand-400);
   --tui-background-accent-1-pressed: var(--app-brand-600);
-  --tui-text-primary-on-accent-1: var(--app-white);
+  --tui-text-primary-on-accent-1: var(--app-text-on-accent);
   font-weight: 400 !important;
+  padding: 1rem !important;
+  font-size: 16px !important;
   border-radius: 1rem !important;
 }
 
 [data-appearance='primary-tooltip'] {
-  background: var(--app-brand-500) !important;
-  padding: 0.6rem !important;
-  color: var(--app-white) !important;
+  background: var(--app-grey-100) !important;
+  max-width: 20rem !important;
+  padding: 0.8rem !important;
+  color: var(--app-fg) !important;
+  --tui-duration: 0ms !important;
+
+  &::before,
+  &::after {
+    display: none !important;
+  }
 }
 
 [tuiAppearance][data-appearance='textfield'] {
@@ -20,4 +29,14 @@
 
 [tuiAppearance][data-appearance='floating'] {
   box-shadow: none !important;
+}
+
+[tuiCheckbox] {
+  border-width: 0.09rem;
+}
+
+[tuiTh],
+[tuiTd] {
+  border-inline-end: none !important;
+  border-inline-start: none !important;
 }
