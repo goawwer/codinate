@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"strings"
 
 	"github.com/goawwer/codinate/internal/adapter/dto"
 	"github.com/goawwer/codinate/internal/adapter/dto/user"
@@ -28,12 +27,10 @@ func (s *service) createNewUser(ctx context.Context, input user.CreateInput) err
 		return err
 	}
 
-	username, _, _ := strings.Cut(input.Email, "@")
-
 	return repository.GetUserRepo().Create(ctx, &model.User{
 		Name:           input.Name,
 		Surname:        input.Surname,
-		Username:       username,
+		Username:       input.Username,
 		Email:          input.Email,
 		HashedPassword: hashedPassword,
 		RoleId:         input.RoleId,

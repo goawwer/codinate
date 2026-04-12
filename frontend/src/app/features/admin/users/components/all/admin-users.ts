@@ -3,10 +3,11 @@ import { filter } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { AppDialogService } from '../../../../../common/dialogs/dialog.service';
 import { User } from '../../../../user/types/model/user.model';
-import { AdminUsersStore } from '../../store/admin-users.store';
+import { UserStore } from '../../../../user/store/user.store';
 import { EmployeeRolesStore } from '../../../../employee/store/employee-roles.store';
 import { USERSDASHBOARDIMPORTS } from './admin-users.imports';
 import { APP_SIZE, AppSize } from '../../../../../core/declarations/tokens/size.token';
+import { UserDialogComponent, UserDialogData } from '../dialog/user-dialog.component';
 
 type Column = {
   key: keyof User;
@@ -24,7 +25,7 @@ type Column = {
   styleUrl: './admin-users.scss',
 })
 export class AdminUsers implements OnInit {
-  readonly store = inject(AdminUsersStore);
+  readonly store = inject(UserStore);
   readonly rolesStore = inject(EmployeeRolesStore);
   private readonly dialogs = inject(AppDialogService);
   private readonly translate = inject(TranslateService);
@@ -93,6 +94,26 @@ export class AdminUsers implements OnInit {
       checked ? next.add(id) : next.delete(id);
       return next;
     });
+  }
+
+  protected openCreateDialog(): void {
+    this.dialogs
+      .component<UserDialogComponent, void, UserDialogData>(UserDialogComponent, {
+        label: this.translate.instant('admin.dashboard.users.dialogs.createTitle'),
+        size: 'l',
+        data: { user: null },
+      })
+      .subscribe();
+  }
+
+  protected openEditDialog(user: User): void {
+    this.dialogs
+      .component<UserDialogComponent, void, UserDialogData>(UserDialogComponent, {
+        label: this.translate.instant('admin.dashboard.users.dialogs.editTitle'),
+        size: 'l',
+        data: { user },
+      })
+      .subscribe();
   }
 
   protected confirmDelete(): void {

@@ -1,0 +1,96 @@
+<form tuiAppearance="floating"
+  tuiCardLarge
+  tuiForm="l"
+  class="w-full max-w py-5"
+  [formGroup]="form"
+>
+  <tui-textfield>
+    <label tuiLabel>{{ 'models.user.name' | translate }}</label>
+    <input tuiTextfield formControlName="name" autocomplete="off" />
+  </tui-textfield>
+  <tui-error formControlName="name" [error]="[] | tuiFieldError | async" />
+
+  <tui-textfield>
+    <label tuiLabel>{{ 'models.user.surname' | translate }}</label>
+    <input tuiTextfield formControlName="surname" autocomplete="off" />
+  </tui-textfield>
+  <tui-error formControlName="surname" [error]="[] | tuiFieldError | async" />
+
+  <tui-textfield>
+    <label tuiLabel>{{ 'models.user.email' | translate }}</label>
+    <input tuiTextfield type="email" formControlName="email" autocomplete="off" />
+  </tui-textfield>
+  <tui-error formControlName="email" [error]="[] | tuiFieldError | async" />
+
+  <tui-textfield>
+    <label tuiLabel>{{ 'models.user.username' | translate }}</label>
+    <input tuiTextfield formControlName="username" autocomplete="off" />
+  </tui-textfield>
+  <tui-error formControlName="username" [error]="[] | tuiFieldError | async" />
+
+  <tui-textfield>
+     <label tuiLabel>
+       {{ 'models.user.password' | translate }}
+       @if (isEdit) {
+         <span class="tui-text_body-xs tui-space_left-1" style="opacity: 0.6">
+           ({{ 'generic.validation.optional' | translate }})
+         </span>
+       }
+     </label>
+
+     <input tuiTextfield type="password" formControlName="password" autocomplete="new-password" />
+	</tui-textfield>
+	<tui-error formControlName="password" [error]="[] | tuiFieldError | async" />
+
+
+ 	<tui-textfield tuiChevron>
+    <label tuiLabel>{{ 'models.user.role' | translate }}</label>
+    <input tuiSelect formControlName="role" [placeholder]="'models.user.role' | translate"/>
+	  <tui-data-list-wrapper
+	    *tuiTextfieldDropdown
+	    new
+	    [items]="rolesStore.roleNames()"
+	  />
+  </tui-textfield>
+  <tui-error formControlName="role" [error]="[] | tuiFieldError | async" />
+
+  <tui-textfield tuiChevron>
+    <label tuiLabel>{{ 'models.user.permission' | translate }}</label>
+    <input tuiSelect formControlName="permission" [placeholder]="'models.user.permission' | translate" />
+    <tui-data-list-wrapper
+      *tuiTextfieldDropdown
+      new
+      [items]="store.assignablePermissions()"
+    />
+  </tui-textfield>
+  <tui-error formControlName="permission" [error]="[] | tuiFieldError | async" />
+
+  @if (isEdit) {
+    <label tuiLabel class="flex items-center gap-3 py-5">
+      <input tuiCheckbox type="checkbox" formControlName="disabled" />
+      {{ 'generic.statuses.disabled' | translate }}
+    </label>
+  }
+
+
+  <footer class="flex justify-end">
+    <button
+      tuiButton
+      appearance="flat"
+      type="button"
+      (click)="context.completeWith()"
+    >
+      {{ 'generic.actions.cancel' | translate }}
+    </button>
+    <button
+      tuiButton
+      class="btn-primary"
+      type="submit"
+      [disabled]="store.isLoading()"
+      (click)="submit()"
+    >
+      {{ (isEdit ? 'generic.actions.save' : 'generic.actions.add') | translate }}
+    </button>
+  </footer>
+
+</form>

@@ -1,26 +1,38 @@
 {
   "generic": {
     "validation": {
-      "required": "Это поле обязательно"
+      "required": "Это поле обязательно",
+      "optional": "Это поле необязательно",
+      "email": "Введите корректную почту",
+      "usernameMinLength": "Минимальная длина имени пользователя: {{ requiredLength }}",
+      "usernameMaxLength": "Максимальная длина имени пользователя: {{ requiredLength }}",
+      "passwordMinLength": "Минимальная длина пароля: {{requiredLength}}"
     },
     "actions": {
       "default": "Действия",
       "add": "Добавить",
       "delete": "Удалить",
       "cancel": "Отмена",
-      "create": "Создать"
+      "create": "Создать",
+      "save": "Сохранить"
     },
     "statuses": {
       "active": "Активен",
-      "disabled": "Не активен"
+      "disabled": "Не активен",
+      "notFound": "Ничего не найдено",
+      "notFoundDetails": "Пожалуйста попробуйте другие опции"
     },
     "filters": {
       "all": "Все"
     },
-    "roles": {
-      "owner": "Создатель",
+    "permissions": {
+      "owner": "Владелец",
       "admin": "Админ",
-      "user": "Пользоваель"
+      "user": "Пользователь"
+    },
+    "operations": {
+      "success": "Операция выполнена",
+      "fail": "Операция не выполнена"
     }
   },
   "auth": {
@@ -39,9 +51,6 @@
       "signIn": "Войти"
     },
     "errors": {
-      "usernameMinLength": "Минимальная длина имени пользователя: {{ requiredLength }}",
-      "usernameMaxLength": "Максимальная длина имени пользователя: {{ requiredLength }}",
-      "passwordMinLength": "Минимальная длина пароля: {{requiredLength}}",
       "signInFailed": "Ошибка авторизации"
     }
   },
@@ -51,11 +60,6 @@
     "teams": "Команды",
     "projects": "Проекты",
     "admin": "Админ-панель"
-  },
-  "user": {
-    "errors": {
-      "currentUserLoadFailed": "Не удалось получить текущего пользователя"
-    }
   },
   "employee_roles": {
     "owner": "Владелец",
@@ -73,7 +77,9 @@
       "surname": "Фамилия",
       "username": "Имя пользователя",
       "email": "Почта",
+      "password": "Пароль",
       "role": "Роль",
+      "permission": "Уровень доступа",
       "disabled": "Отключён",
       "status": "Статус",
       "createdAt": "Создан",
@@ -97,8 +103,26 @@
         },
         "dialogs": {
           "deleteTitle": "Удаление пользователей",
-          "deleteContent": "Вы уверены, что хотите удалить {{ count }} пользователя(ей)? Это действие необратимо."
+          "deleteContent": "Вы уверены, что хотите удалить {{ count }} пользователя(ей)? Это действие необратимо.",
+          "createTitle": "Создать нового пользователя",
+          "editTitle": "Обновить пользователя"
         }
+      }
+    }
+  },
+  "cmd": {
+    "user": {
+      "success": {
+        "created": "Пользователь успешно создан",
+        "updated": "Пользователь успешно обновлён",
+        "deleted": "Пользователь(и) успешно удалён(ы)"
+      },
+      "errors": {
+        "loadFailed": "Не удалось загрузить пользователей",
+        "createFailed": "Не удалось создать пользователя",
+        "updateFailed": "Не удалось обновить пользователя",
+        "deleteFailed": "Не удалось удалить пользователя(ей)",
+        "currentUserLoadFailed": "Не удалось получить текущего пользователя"
       }
     }
   }

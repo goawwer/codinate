@@ -23,6 +23,7 @@
       tuiHintAppearance="primary-tooltip"
       tuiHintDirection="bottom"
       [tuiHint]="'admin.dashboard.users.hints.add' | translate"
+      (click)="openCreateDialog()"
     >
       {{ 'generic.actions.add' | translate }}
     </button>
@@ -138,6 +139,7 @@
                   tuiHintDirection="bottom"
                   [tuiHint]="'admin.dashboard.users.hints.edit' | translate"
                   type="button"
+                  (click)="openEditDialog(user)"
                 ></button>
               </div>
             </td>
@@ -151,12 +153,12 @@
 @if (filteredUsers().length === 0) {
   <tui-block-status>
     <img
-      alt="not found"
+      alt="{{ 'generic.statuses.notFound' | translate }}"
       src="assets/images/not-found.svg"
       tuiSlot="top"
       class="image"
     />
-    <h4>Not found</h4>
-    Try to find by number
+    <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
+    <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
   </tui-block-status>
 }

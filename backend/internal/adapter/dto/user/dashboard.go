@@ -15,6 +15,7 @@ type CreateInput struct {
 	Name       string `json:"name"`
 	Surname    string `json:"surname"`
 	Email      string `json:"email"`
+	Username   string `json:"username"`
 	RoleId     int64  `json:"roleId"`
 	Permission string `json:"permission"`
 	Password   string `json:"password"`
@@ -25,7 +26,7 @@ type UpdateInput struct {
 	Surname        *string `json:"surname"`
 	Email          *string `json:"email"`
 	Password       *string `json:"password"`
-	RoleId         *string `json:"roleId"`
+	RoleId         *int64  `json:"roleId"`
 	Permission     *string `json:"permission"`
 	Username       *string `json:"username"`
 	ProfilePicture *string `json:"profilePicture"`
