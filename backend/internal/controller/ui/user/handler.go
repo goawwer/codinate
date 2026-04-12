@@ -13,6 +13,7 @@ func Register() {
 	ui.RegisterPost("/user/add", enum.AtLeastAdmin, reflect.TypeOf(service{}), create)
 	ui.RegisterPatch("/user/update/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), update)
 	ui.RegisterDelete("/user/delete/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), delete)
+	ui.RegisterDelete("/user/delete", enum.AtLeastAdmin, reflect.TypeOf(service{}), deleteMany)
 	ui.RegisterGet("/user/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUser)
 	ui.RegisterGet("/user/all", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUsers)
 }
@@ -65,11 +66,19 @@ func getUser(s ui.UIService) (any, error) {
 //	@Summary		Get all users
 //	@Description	Returns a list of all users
 //	@Produce		json
-//	@Success		200	{object}	[]user.Row
-//	@Failure		500	{object}	string	"Internal Server Error"
+//	@Param			orderBy		query		string	false	"filter column"
+//	@Param			order		query		string	false	"filter value"
+//	@Param			disabled	query		bool	false	"filter by user state"
+//	@Success		200			{object}	[]user.Row
+//	@Failure		500			{object}	string	"Internal Server Error"
 //	@Router			/api/user/all [get]
 func getUsers(s ui.UIService) (any, error) {
-	return s.GetService().(*service).getRows(s.GetRequest().Context())
+	f, err := parseFilterParams(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.GetService().(*service).getRows(s.GetRequest().Context(), f)
 }
 
 // update
@@ -118,4 +127,32 @@ func delete(s ui.UIService) (any, error) {
 	}
 
 	return nil, s.GetService().(*service).deleteUserById(s.GetRequest().Context(), uuid.MustParse(id))
+}
+
+// deleteMany
+//
+//	@Tags			user
+//	@Summary		Delete multiple users
+//	@Description	Deletes multiple users by their UUIDs
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body	user.DeleteMultiInput	true	"List of user UUIDs"
+//	@Success		200
+//	@Failure		400	{object}	string	"Bad Request"
+//	@Failure		500	{object}	string	"Internal Server Error"
+//	@Router			/api/user/delete [delete]
+func deleteMany(s ui.UIService) (any, error) {
+	var input user.DeleteMultiInput
+
+	if err := s.GetBodyAs(&input); err != nil {
+		return nil, err
+	}
+
+	return nil, s.GetService().(*service).deleteUsersByIds(s.GetRequest().Context(), input.IDs)
+}
+
+func parseFilterParams(s ui.UIService) (*user.Filters, error) {
+	var f ui.FilterService[user.DashBoardInput, user.Filters]
+
+	return f.GetResolvedFilters(s, (*user.DashBoardInput).ResolveFilters)
 }

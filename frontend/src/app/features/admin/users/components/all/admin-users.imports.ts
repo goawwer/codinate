@@ -1,6 +1,6 @@
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
-import { TuiTable, TuiTableControl } from '@taiga-ui/addon-table';
+import { TuiTable, TuiTableControl, TuiTableExpand } from '@taiga-ui/addon-table';
 import {
   TuiAutoColorPipe,
   TuiButton,
@@ -21,13 +21,16 @@ import {
   TuiItemsWithMore,
   TuiProgressBar,
   TuiRadioList,
+  TuiSelect,
   TuiStatus,
+  TuiDataListWrapper,
+  TuiChevron,
 } from '@taiga-ui/kit';
 import { TuiCell, TuiBlockStatus } from '@taiga-ui/layout';
 import { AppDatePipe } from '../../../../../common/pipes/app-date.pipe';
 import { UserStatus } from '../../../../../common/user-status/user-status';
 import { TranslatePipe } from '@ngx-translate/core';
-
+import { EmployeeRolePipe } from '../../../../../common/pipes/employee-role.pipe';
 import { TuiHintDirective } from '@taiga-ui/core';
 
 export const USERSDASHBOARDIMPORTS = [
@@ -49,9 +52,11 @@ export const USERSDASHBOARDIMPORTS = [
   TuiLink,
   TuiProgressBar,
   TuiRadioList,
+  TuiSelect,
   TuiStatus,
   TuiTable,
   TuiTableControl,
+  TuiTableExpand,
   TuiTextfield,
   TuiTitle,
   UserStatus,
@@ -59,4 +64,7 @@ export const USERSDASHBOARDIMPORTS = [
   TranslatePipe,
   TuiBlockStatus,
   TuiHintDirective,
+  EmployeeRolePipe,
+  TuiDataListWrapper,
+  TuiChevron,
 ];

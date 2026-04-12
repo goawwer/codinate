@@ -59,7 +59,7 @@ func addTaskStatus(s ui.UIService) (any, error) {
 //	@Description	Update task status name by id
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		int			true	"Status ID"
+//	@Param			id		path		int					true	"Status ID"
 //	@Param			request	body		shared.NameInput	true	"Body with new status name"
 //	@Success		200		{object}	nil
 //	@Failure		400		{object}	string	"Bad Request"

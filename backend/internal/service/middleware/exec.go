@@ -60,13 +60,13 @@ func generateRefreshTokenHash(secret, token []byte) []byte {
 	return mac.Sum(nil)
 }
 
-func generateAccessSignedToken(userID uuid.UUID, role string) (string, time.Time, error) {
+func generateAccessSignedToken(userID uuid.UUID, permission string) (string, time.Time, error) {
 	accessExp := time.Now().Add(auth.accessTokenExpiresDuration)
 
 	claims := CustomClaims{
-		UserID:    userID.String(),
-		Role:      role,
-		TokenType: "access",
+		UserID:     userID.String(),
+		Permission: permission,
+		TokenType:  "access",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(accessExp),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -88,10 +88,10 @@ func generateRefreshToken(input RefreshParams) (uuid.UUID, string, time.Time, er
 	refreshExp := time.Now().Add(auth.refreshTokeExpiresDuration)
 
 	claims := CustomClaims{
-		UserID:    input.UserID.String(),
-		TokenID:   uuid.NewString(),
-		Role:      input.Role,
-		TokenType: "refresh",
+		UserID:     input.UserID.String(),
+		TokenID:    uuid.NewString(),
+		Permission: input.Permission,
+		TokenType:  "refresh",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(refreshExp),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

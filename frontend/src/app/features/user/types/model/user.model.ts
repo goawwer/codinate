@@ -1,5 +1,5 @@
 import { ValueOf } from '../../../../core/declarations/types/value-of.type';
-import { EnumUserRole } from '../enum/role.enum';
+import { EnumPermissionRole } from '../enum/role.enum';
 
 export interface User {
   id: string;
@@ -7,7 +7,8 @@ export interface User {
   surname: string;
   username: string;
   email: string;
-  role: ValueOf<typeof EnumUserRole>;
+  role: string;
+  permission: ValueOf<typeof EnumPermissionRole>;
   picture: string;
   disabled: boolean;
   createdAt: string;

@@ -14,8 +14,8 @@ import (
 
 type service struct{}
 
-func (s *service) getRows(ctx context.Context) (*[]user.Row, error) {
-	return repository.GetUserRepo().GetAll(ctx)
+func (s *service) getRows(ctx context.Context, f *user.Filters) ([]user.Row, error) {
+	return repository.GetUserRepo().GetAll(ctx, f)
 }
 
 func (s *service) getRow(ctx context.Context, id string) (*user.Row, error) {
@@ -36,7 +36,8 @@ func (s *service) createNewUser(ctx context.Context, input user.CreateInput) err
 		Username:       username,
 		Email:          input.Email,
 		HashedPassword: hashedPassword,
-		Role:           dto.ResolveUserRole(input.Role),
+		RoleId:         input.RoleId,
+		Permission:     dto.ResolveUserRole(input.Permission),
 	})
 }
 
@@ -54,4 +55,8 @@ func (s *service) updateUserById(ctx context.Context, id string, newFields user.
 
 func (s *service) deleteUserById(ctx context.Context, id uuid.UUID) error {
 	return repository.GetUserRepo().DeleteById(ctx, id)
+}
+
+func (s *service) deleteUsersByIds(ctx context.Context, ids []uuid.UUID) error {
+	return repository.GetUserRepo().DeleteByIds(ctx, ids)
 }

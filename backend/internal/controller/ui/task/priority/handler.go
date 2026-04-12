@@ -59,7 +59,7 @@ func addTaskPriority(s ui.UIService) (any, error) {
 //	@Description	Update task priority name by id
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		int				true	"Priority ID"
+//	@Param			id		path		int					true	"Priority ID"
 //	@Param			request	body		shared.NameInput	true	"Body with new priority name"
 //	@Success		200		{object}	nil
 //	@Failure		400		{object}	string	"Bad Request"

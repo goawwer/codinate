@@ -29,7 +29,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, role, err := getUserAtLogin(r.Context(), input)
+	userID, permissionRole, err := getUserAtLogin(r.Context(), input)
 	if err != nil {
 		if _, ok := err.(InvalidCredentialsError); ok {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -43,9 +43,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tokenPair, err := middleware.GenerateTokenPair(r.Context(), middleware.RefreshParams{
-		UserID:  userID,
-		Role:    role,
-		TokenID: uuid.Nil,
+		UserID:     userID,
+		Permission: permissionRole,
+		TokenID:    uuid.Nil,
 	})
 	if err != nil {
 		logger.Errorf("failed to generate token pair at login: %v", err)

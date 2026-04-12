@@ -673,6 +673,26 @@ const docTemplate = `{
                     "user"
                 ],
                 "summary": "Get all users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "filter column",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter value",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "filter by user state",
+                        "name": "disabled",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -681,6 +701,49 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/user.Row"
                             }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/delete": {
+            "delete": {
+                "description": "Deletes multiple users by their UUIDs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Delete multiple users",
+                "parameters": [
+                    {
+                        "description": "List of user UUIDs",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.DeleteMultiInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "500": {
@@ -941,7 +1004,7 @@ const docTemplate = `{
                 }
             }
         },
-        "enum.Role": {
+        "enum.PermissionRole": {
             "type": "string",
             "enum": [
                 "owner",
@@ -950,10 +1013,10 @@ const docTemplate = `{
                 ""
             ],
             "x-enum-varnames": [
-                "OwnerRole",
-                "AdminRole",
-                "UserRole",
-                "NoRole"
+                "OwnerPermissionRole",
+                "AdminPermissionRole",
+                "UserPermissionRole",
+                "NoPermissionRole"
             ]
         },
         "shared.NameInput": {
@@ -976,11 +1039,25 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
-                "role": {
+                "permission": {
                     "type": "string"
+                },
+                "roleId": {
+                    "type": "integer"
                 },
                 "surname": {
                     "type": "string"
+                }
+            }
+        },
+        "user.DeleteMultiInput": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -1002,14 +1079,14 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "password": {
-                    "type": "string"
+                "permission": {
+                    "$ref": "#/definitions/enum.PermissionRole"
                 },
                 "picture": {
                     "type": "string"
                 },
                 "role": {
-                    "$ref": "#/definitions/enum.Role"
+                    "type": "string"
                 },
                 "surname": {
                     "type": "string"
@@ -1037,10 +1114,13 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
+                "permission": {
+                    "type": "string"
+                },
                 "profilePicture": {
                     "type": "string"
                 },
-                "role": {
+                "roleId": {
                     "type": "string"
                 },
                 "surname": {

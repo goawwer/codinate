@@ -54,6 +54,16 @@
       "currentUserLoadFailed": "Failed to retrieve the current user"
     }
   },
+  "employee_roles": {
+    "owner": "Owner",
+    "lead": "Lead",
+    "manager": "Manager",
+    "developer": "Developer",
+    "designer": "Designer",
+    "qa": "QA",
+    "analyst": "Analyst",
+    "devops": "DevOps"
+  },
   "models": {
     "user": {
       "name": "Name",

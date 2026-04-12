@@ -4,6 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { AppDialogService } from '../../../../../common/dialogs/dialog.service';
 import { User } from '../../../../user/types/model/user.model';
 import { AdminUsersStore } from '../../store/admin-users.store';
+import { EmployeeRolesStore } from '../../../../employee/store/employee-roles.store';
 import { USERSDASHBOARDIMPORTS } from './admin-users.imports';
 import { APP_SIZE, AppSize } from '../../../../../core/declarations/tokens/size.token';
 
@@ -12,8 +13,7 @@ type Column = {
   isDate?: boolean;
   isRole?: boolean;
   isStatus?: boolean;
-  isSortable?: boolean;
-  hasFilter?: boolean;
+  width?: string;
 };
 
 @Component({
@@ -25,107 +25,66 @@ type Column = {
 })
 export class AdminUsers implements OnInit {
   readonly store = inject(AdminUsersStore);
+  readonly rolesStore = inject(EmployeeRolesStore);
   private readonly dialogs = inject(AppDialogService);
   private readonly translate = inject(TranslateService);
   protected readonly tableSize = inject(APP_SIZE);
   protected readonly inputSize: AppSize = 'm';
 
   protected readonly columns: Column[] = [
-    { key: 'name' },
-    { key: 'surname' },
-    { key: 'username' },
-    { key: 'email' },
-    { key: 'role', isRole: true, hasFilter: true },
-    { key: 'disabled', isStatus: true, hasFilter: true },
-    { key: 'createdAt', isDate: true, isSortable: true },
-    { key: 'updatedAt', isDate: true, isSortable: true },
+    { key: 'name', width: '8rem' },
+    { key: 'surname', width: '8rem' },
+    { key: 'username', width: '8rem' },
+    { key: 'email', width: '8rem' },
+    { key: 'role', isRole: true, width: '8rem' },
+    { key: 'disabled', isStatus: true, width: '6rem' },
+    { key: 'createdAt', isDate: true, width: '10rem' },
+    { key: 'updatedAt', isDate: true, width: '10rem' },
   ];
 
-  protected readonly roleOptions = ['owner', 'admin', 'user'];
-
   protected readonly searchQuery = signal('');
-  protected readonly roleFilter = signal<string[]>([]);
-  protected readonly statusFilter = signal<boolean | null>(null);
-  protected readonly sortKey = signal<keyof User | null>(null);
-  protected readonly sortAsc = signal(true);
-
   protected readonly filteredUsers = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
-    const roles = this.roleFilter();
-    const status = this.statusFilter();
-    const key = this.sortKey();
-    const asc = this.sortAsc();
+    const users = this.store.users();
+    if (!q) return users;
 
-    let users = this.store.users();
+    return users.filter(
+      (u) =>
+        u.name.toLowerCase().includes(q) ||
+        u.surname.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q),
+    );
+  });
 
-    if (q) {
-      users = users.filter(
-        (u) =>
-          u.name.toLowerCase().includes(q) ||
-          u.surname.toLowerCase().includes(q) ||
-          u.username.toLowerCase().includes(q) ||
-          u.email.toLowerCase().includes(q),
-      );
-    }
+  protected readonly groupedUsers = computed(() => {
+    const roles = this.rolesStore.roles();
+    const users = this.filteredUsers();
 
-    if (roles.length > 0) {
-      users = users.filter((u) => roles.includes(u.role));
-    }
-
-    if (status !== null) {
-      users = users.filter((u) => u.disabled === status);
-    }
-
-    if (key) {
-      users = [...users].sort((a, b) => {
-        const aVal = String(a[key]);
-        const bVal = String(b[key]);
-        return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-      });
-    }
-
-    return users;
+    return roles
+      .map((role) => ({
+        role,
+        users: users.filter((u) => u.role === role.name),
+      }))
+      .filter((g) => g.users.length > 0);
   });
 
   protected readonly selectedIds = signal(new Set<string>());
   protected readonly hasSelection = computed(() => this.selectedIds().size > 0);
 
-  protected isRoleSelected(role: string): boolean {
-    return this.roleFilter().includes(role);
-  }
-
-  protected toggleRole(role: string): void {
-    const current = this.roleFilter();
-    this.roleFilter.set(
-      current.includes(role) ? current.filter((r) => r !== role) : [...current, role],
-    );
-  }
-
-  protected setStatusFilter(value: boolean | null): void {
-    this.statusFilter.set(this.statusFilter() === value ? null : value);
-  }
-
-  protected toggleSort(key: keyof User): void {
-    if (this.sortKey() === key) {
-      this.sortAsc.update((v) => !v);
-    } else {
-      this.sortKey.set(key);
-      this.sortAsc.set(true);
-    }
-  }
-
-  protected sortIcon(key: keyof User): string {
-    if (this.sortKey() !== key) return '@tui.chevrons-up-down';
-    return this.sortAsc() ? '@tui.arrow-up' : '@tui.arrow-down';
-  }
-
   protected isSelected(id: string): boolean {
     return this.selectedIds().has(id);
   }
 
-  protected allSelected(): boolean {
-    const users = this.filteredUsers();
+  protected allGroupSelected(users: User[]): boolean {
     return users.length > 0 && users.every((u) => this.selectedIds().has(u.id));
+  }
+
+  protected toggleGroupAll(users: User[], checked: boolean): void {
+    this.selectedIds.update((set) => {
+      const next = new Set(set);
+      users.forEach((u) => (checked ? next.add(u.id) : next.delete(u.id)));
+      return next;
+    });
   }
 
   protected toggleUser(id: string, checked: boolean): void {
@@ -134,10 +93,6 @@ export class AdminUsers implements OnInit {
       checked ? next.add(id) : next.delete(id);
       return next;
     });
-  }
-
-  protected toggleAll(checked: boolean): void {
-    this.selectedIds.set(checked ? new Set(this.filteredUsers().map((u) => u.id)) : new Set());
   }
 
   protected confirmDelete(): void {
@@ -157,6 +112,7 @@ export class AdminUsers implements OnInit {
   }
 
   ngOnInit(): void {
-    this.store.loadUsers();
+    this.rolesStore.load();
+    this.store.loadUsers({});
   }
 }

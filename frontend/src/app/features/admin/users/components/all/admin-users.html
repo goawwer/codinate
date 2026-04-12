@@ -10,11 +10,10 @@
       [placeholder]="'admin.dashboard.users.placeholders.search' | translate"
       [ngModel]="searchQuery()"
       (ngModelChange)="searchQuery.set($event)"
-      size="inputSize"
     />
   </tui-textfield>
 
-  <div class="flex justify-between gap-1">
+  <div class="flex gap-1">
     <button
       tuiButton
       class="btn-primary"
@@ -45,166 +44,119 @@
   </div>
 </div>
 
-<table tuiTable [size]="$any(tableSize)" class="w-full">
-  <thead>
-    <tr>
-      <th tuiTh>
-        <input
-          tuiCheckbox
-          type="checkbox"
-          [size]="$any(tableSize)"
-          [ngModel]="allSelected()"
-          (ngModelChange)="toggleAll($event)"
-        />
-      </th>
+<table
+  tuiTable
+  class="w-full"
+  style="table-layout: fixed"
+  [size]="$any(tableSize)"
+>
+  <thead tuiThead>
+    <tr tuiThGroup>
+      <th tuiTh [style.width.rem]="3"></th>
       @for (col of columns; track col.key) {
-        <th tuiTh>
-          <div class="flex items-center justify-between gap-1">
-            @if (col.key === 'disabled') {
-              {{ 'admin.dashboard.users.status.default' | translate }}
-            } @else {
-              {{ 'models.user.' + col.key | translate }}
-            }
-
-            @if (col.hasFilter && col.isRole) {
-              <button
-                tuiIconButton
-                [appearance]="roleFilter().length ? 'flat' : 'ghost'"
-                iconStart="@tui.list-filter"
-                size="xs"
-                type="button"
-                [tuiDropdown]="roleFilterTpl"
-              ></button>
-            }
-
-            @if (col.hasFilter && col.isStatus) {
-              <button
-                tuiIconButton
-                [appearance]="statusFilter() !== null ? 'flat' : 'ghost'"
-                iconStart="@tui.list-filter"
-                size="xs"
-                type="button"
-                [tuiDropdown]="statusFilterTpl"
-              ></button>
-            }
-
-            @if (col.isSortable) {
-              <button
-                tuiIconButton
-                [appearance]="sortKey() === col.key ? 'flat' : 'ghost'"
-                [iconStart]="sortIcon(col.key)"
-                size="xs"
-                type="button"
-                (click)="toggleSort(col.key)"
-              ></button>
-            }
-          </div>
+        <th tuiTh [style.width]="col.width">
+          @if (col.key === 'disabled') {
+            {{ 'admin.dashboard.users.status.default' | translate }}
+          } @else {
+            {{ 'models.user.' + col.key | translate }}
+          }
         </th>
       }
-      <th tuiTh>{{ 'generic.actions.default' | translate }}</th>
+      <th tuiTh [style.width.rem]="6">{{ 'generic.actions.default' | translate }}</th>
     </tr>
   </thead>
-  <tbody tuiTbody>
-    @for (user of filteredUsers(); track user.id) {
-      <tr>
-        <td tuiTd>
+
+  @for (group of groupedUsers(); track group.role.id) {
+    <tbody tuiTbody>
+      <tr tuiTr class="group-header-row" (click)="expand.toggle()">
+        <td tuiTd (click)="$event.stopPropagation()">
           <input
             tuiCheckbox
             type="checkbox"
             [size]="$any(tableSize)"
-            [ngModel]="isSelected(user.id)"
-            (ngModelChange)="toggleUser(user.id, $event)"
+            [ngModel]="allGroupSelected(group.users)"
+            (ngModelChange)="toggleGroupAll(group.users, $event)"
           />
         </td>
-        @for (col of columns; track col.key) {
-          <td tuiTd>
-            @if (col.isDate) {
-              {{ user[col.key].toString() | appDate }}
-            } @else if (col.isRole) {
-              <tui-badge
-                [style.background]="'var(--tui-chart-categorical-01)'"
-                size="m"
-              >
-                {{ 'generic.roles.' + user[col.key] | translate }}
-              </tui-badge>
-            } @else if (col.isStatus) {
-              <app-user-status [disabled]="!!user[col.key]" />
-            } @else {
-              {{ user[col.key] }}
-            }
-          </td>
-        }
-        <td tuiTd>
-          <div tuiStatus>
+        <td tuiTd [colSpan]="columns.length + 1">
+          <div class="group-header-cell">
             <button
-              appearance="action"
-              iconStart="@tui.user-round-pen"
-              size="m"
+              appearance="icon"
+              size="xs"
               tuiIconButton
-              tuiHintAppearance="primary-tooltip"
-              tuiHintDirection="bottom"
-              [tuiHint]="'admin.dashboard.users.hints.edit' | translate"
               type="button"
-            ></button>
+              [tuiChevron]="expand.expanded()"
+            >
+              Toggle
+            </button>
+            <tui-badge size="m">
+              {{ group.role.name | employeeRole }}
+            </tui-badge>
+            <span class="group-count">{{ group.users.length }}</span>
           </div>
         </td>
       </tr>
-    }
-  </tbody>
+
+      <tui-table-expand #expand [expanded]="true">
+        @for (user of group.users; track user.id) {
+          <tr tuiTr>
+            <td tuiTd>
+              <input
+                tuiCheckbox
+                type="checkbox"
+                [size]="$any(tableSize)"
+                [ngModel]="isSelected(user.id)"
+                (ngModelChange)="toggleUser(user.id, $event)"
+              />
+            </td>
+            @for (col of columns; track col.key) {
+              <td tuiTd>
+                @if (col.isDate) {
+                  {{ user[col.key].toString() | appDate }}
+                } @else if (col.isRole) {
+                  <tui-badge
+                    size="m"
+                    [style.background]="'var(--tui-chart-categorical-01)'"
+                  >
+                    {{ group.role.name | employeeRole }}
+                  </tui-badge>
+                } @else if (col.isStatus) {
+                  <app-user-status [disabled]="!!user[col.key]" />
+                } @else {
+                  {{ user[col.key] }}
+                }
+              </td>
+            }
+            <td tuiTd>
+              <div tuiStatus>
+                <button
+                  appearance="action"
+                  iconStart="@tui.user-round-pen"
+                  size="m"
+                  tuiIconButton
+                  tuiHintAppearance="primary-tooltip"
+                  tuiHintDirection="bottom"
+                  [tuiHint]="'admin.dashboard.users.hints.edit' | translate"
+                  type="button"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tui-table-expand>
+    </tbody>
+  }
 </table>
 
-<ng-template #roleFilterTpl>
-  <tui-data-list>
-    @for (role of roleOptions; track role) {
-      <button tuiOption type="button" (click)="toggleRole(role)">
-        <span class="flex items-center justify-between gap-4 w-full">
-          {{ 'generic.roles.' + role | translate }}
-          @if (isRoleSelected(role)) {
-            <tui-icon icon="@tui.check" class="text-xs" />
-          }
-        </span>
-      </button>
-    }
-  </tui-data-list>
-</ng-template>
-
-<ng-template #statusFilterTpl>
-  <tui-data-list>
-    <button tuiOption type="button" (click)="setStatusFilter(false)">
-      <span class="flex items-center justify-between gap-4 w-full">
-        {{ 'generic.statuses.active' | translate }}
-        @if (statusFilter() === false) {
-          <tui-icon icon="@tui.check" class="text-xs" />
-        }
-      </span>
-    </button>
-    <button tuiOption type="button" (click)="setStatusFilter(true)">
-      <span class="flex items-center justify-between gap-4 w-full">
-        {{ 'generic.statuses.disabled' | translate }}
-        @if (statusFilter() === true) {
-          <tui-icon icon="@tui.check" class="text-xs" />
-        }
-      </span>
-    </button>
-    @if (statusFilter() !== null) {
-      <button tuiOption type="button" (click)="setStatusFilter(null)">
-        {{ 'generic.filters.reset' | translate }}
-      </button>
-    }
-  </tui-data-list>
-</ng-template>
-
 @if (filteredUsers().length === 0) {
-<tui-block-status>
+  <tui-block-status>
     <img
-        alt="not found"
-        src="assets/images/not-found.svg"
-        tuiSlot="top"
-        class="image"
+      alt="not found"
+      src="assets/images/not-found.svg"
+      tuiSlot="top"
+      class="image"
     />
-
     <h4>Not found</h4>
-
     Try to find by number
-</tui-block-status>
+  </tui-block-status>
 }

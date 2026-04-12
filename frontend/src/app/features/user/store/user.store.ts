@@ -37,8 +37,8 @@ export const UserStore = signalStore(
       return status && [StoreStatus.Loading, StoreStatus.Saving].includes(status);
     }),
     isAtLeastAdmin: computed(() => {
-      const role = store.user()?.role;
-      return role != null && AT_LEAST_ADMIN.includes(role);
+      const permission = store.user()?.permission;
+      return permission != null && AT_LEAST_ADMIN.includes(permission);
     }),
   })),
   withMethods(

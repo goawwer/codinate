@@ -1,7 +1,7 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { catchError, EMPTY, exhaustMap, pipe, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, exhaustMap, pipe, switchMap, tap, distinctUntilChanged } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { User } from '../../../user/types/model/user.model';
 import { Nullable } from '../../../../core/declarations/types/nullable.type';
@@ -11,6 +11,7 @@ import {
   AdminUsersService,
   CreateUserInput,
   UpdateUserInput,
+  UserFilters,
 } from '../service/admin-users.service';
 
 type AdminUsersState = {
@@ -39,10 +40,10 @@ export const AdminUsersStore = signalStore(
       alertService = inject(AlertService),
       translate = inject(TranslateService),
     ) => ({
-      loadUsers: rxMethod<void>(
+      loadUsers: rxMethod<UserFilters>(
         pipe(
           tap(() => patchState(store, { status: StoreStatus.Loading })),
-          exhaustMap(() => usersService.getAll()),
+          switchMap((filters) => usersService.getAll(filters)),
           tap((users) => patchState(store, { users, status: StoreStatus.Loaded })),
           catchError(() => {
             patchState(store, { status: StoreStatus.LoadError });

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from '../../../user/types/model/user.model';
@@ -22,13 +22,21 @@ export interface UpdateUserInput {
   disabled?: boolean;
 }
 
+export interface UserFilters {
+  disabled?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminUsersService {
   private readonly baseURL = '/api/user';
   private readonly httpClient = inject(HttpClient);
 
-  getAll(): Observable<User[]> {
-    return this.httpClient.get<User[]>(`${this.baseURL}/all`);
+  getAll(filters: UserFilters = {}): Observable<User[]> {
+    let params = new HttpParams().set('sortBy', 'created_at').set('sort', 'desc');
+    if (filters.disabled !== undefined) {
+      params = params.set('disabled', String(filters.disabled));
+    }
+    return this.httpClient.get<User[]>(`${this.baseURL}/all`, { params });
   }
 
   create(body: CreateUserInput): Observable<void> {
