@@ -7,6 +7,7 @@ import (
 	"github.com/goawwer/codinate/config"
 	"github.com/goawwer/codinate/internal/adapter/database"
 	models "github.com/goawwer/codinate/internal/adapter/model"
+	"github.com/goawwer/codinate/internal/adapter/model/enum"
 	"github.com/goawwer/codinate/internal/adapter/repository"
 	"github.com/goawwer/codinate/pkg/logger"
 	"github.com/goawwer/codinate/pkg/util"
@@ -48,7 +49,8 @@ func createOwner(params ownerParams) {
 		Username:       params.username,
 		Email:          params.email,
 		HashedPassword: hashedPassword,
-		Role:           "owner",
+		Permission:     enum.OwnerPermissionRole,
+		RoleId:         1,
 	}); err != nil {
 		panic(fmt.Sprintf("failed to create owner: %v", err))
 	}

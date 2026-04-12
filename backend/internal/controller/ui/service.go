@@ -25,3 +25,15 @@ func (s *CoreUiService) GetCurrentUser() (*user.Row, error) {
 
 	return repository.GetUserRepo().GetById(s.Request.Context(), uuid.MustParse(claims.UserID))
 }
+
+type FilterService[IN any, OUT any] struct{}
+
+func (f *FilterService[IN, OUT]) GetResolvedFilters(s UIService, resolver func(*IN, controller.BasicQueryParams) *OUT) (*OUT, error) {
+	var input IN
+
+	if err := s.BindUrlParams(&input, ""); err != nil {
+		return nil, err
+	}
+
+	return resolver(&input, s.GetBasicSortingAndPagingParams()), nil
+}

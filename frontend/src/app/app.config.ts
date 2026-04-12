@@ -7,6 +7,7 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
+import { APP_SIZE } from './core/declarations/tokens/size.token';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -14,9 +15,9 @@ import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common
 import { routes } from './app.routes';
 import { provideApiConfig } from './core/declarations/providers/api-config.provider';
 import { apiConfigUrl } from './core/declarations/constants/url';
-import { apiRootUrlInterceptorFn } from './core/interceptor/api-root-url.interceptor';
 import { AppInitService } from './core/services/app-init.service';
 import { authInterceptor } from './core/interceptor/auth.interceptor';
+import { apiRootUrlInterceptorFn } from './core/interceptor/api-root-url.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -24,15 +25,12 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([apiRootUrlInterceptorFn])),
+    provideHttpClient(withInterceptors([apiRootUrlInterceptorFn, authInterceptor])),
     provideApiConfig({
       rootUrl: apiConfigUrl,
     }),
-    provideAppInitializer(() => {
-      inject(AppInitService).init();
-    }),
+    provideAppInitializer(() => inject(AppInitService).init()),
     provideTranslateService({
-      lang: 'ru',
       fallbackLang: 'ru',
       loader: provideTranslateHttpLoader({
         prefix: 'assets/i18n/',
@@ -40,5 +38,6 @@ export const appConfig: ApplicationConfig = {
       }),
     }),
     provideEventPlugins(),
+    { provide: APP_SIZE, useValue: 'm' },
   ],
 };

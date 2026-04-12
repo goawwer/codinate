@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { inject } from '@angular/core/primitives/di';
 import { TuiAlertService } from '@taiga-ui/core';
-import { first } from 'rxjs';
+import { take } from 'rxjs';
 import { PolymorpheusContent } from '@taiga-ui/polymorpheus';
 
 export interface IAlertOptions<T = null> {
@@ -26,7 +26,18 @@ export class AlertService {
         ...options,
         appearance: 'negative',
       })
-      .pipe(first())
+      .pipe(take(1))
+      .subscribe();
+  }
+
+  public success(content: PolymorpheusContent, options: Partial<IAlertOptions> = {}) {
+    return this.alertService
+      .open(content, {
+        ...this.defaultOptions,
+        ...options,
+        appearance: 'success',
+      })
+      .pipe(take(1))
       .subscribe();
   }
 }

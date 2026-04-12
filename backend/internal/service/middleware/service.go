@@ -17,7 +17,7 @@ import (
 )
 
 func GenerateTokenPair(ctx context.Context, input RefreshParams) (*TokenPair, error) {
-	accessToken, accessExp, err := generateAccessSignedToken(input.UserID, input.Role)
+	accessToken, accessExp, err := generateAccessSignedToken(input.UserID, input.Permission)
 	if err != nil {
 		logger.ErrorWithFields(map[string]any{
 			"token": accessToken,
@@ -145,7 +145,7 @@ func HandleRefreshToken(r *http.Request) (*TokenPair, error) {
 	return GenerateTokenPair(r.Context(), RefreshParams{
 		uuid.MustParse(claims.UserID),
 		uuid.MustParse(claims.TokenID),
-		claims.Role,
+		claims.Permission,
 		oldEncodedHash,
 	})
 }
@@ -171,19 +171,19 @@ func RoleValidator(next http.Handler) http.Handler {
 			return
 		}
 
-		allowedRoles, ok := r.Context().Value(RolesKey).([]enum.Role)
+		allowedRoles, ok := r.Context().Value(RolesKey).([]enum.PermissionRole)
 		if !ok || len(allowedRoles) == 0 {
 			logger.Debug("no role limits")
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		if slices.Contains(allowedRoles, dto.ResolveUserRole(claims.Role)) {
+		if slices.Contains(allowedRoles, dto.ResolveUserRole(claims.Permission)) {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		logger.Errorf("Error on request Role validation: Forbidden UserId: %v UserRole: %s Req_Roles: %v", claims.UserID, claims.Role, allowedRoles)
+		logger.Errorf("Error on request Role validation: Forbidden UserId: %v User PermissionRole: %s Req_Roles: %v", claims.UserID, claims.Permission, allowedRoles)
 		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 	})
 }

@@ -9,6 +9,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, exhaustMap, firstValueFrom, of, pipe, tap } from 'rxjs';
 import { inject } from '@angular/core';
 import { CurrentApiService } from '../../current/service/current.service';
+import { AuthStateService } from '../../../core/services/auth-state.service';
 
 interface IAuthState {
   loading: boolean;
@@ -28,11 +29,11 @@ export const AuthStore = signalStore(
       store,
       authApiService = inject(AuthApiService),
       currentApiService = inject(CurrentApiService),
-
       userStore = inject(UserStore),
       router = inject(Router),
       translate = inject(TranslateService),
       withErrorAlertOperator = inject(WithErrorAlertOperator),
+      authState = inject(AuthStateService),
     ) => ({
       login: rxMethod<LoginBody>(
         pipe(
@@ -40,10 +41,8 @@ export const AuthStore = signalStore(
           exhaustMap((params) =>
             authApiService.signIn(params).pipe(
               tap(() => {
-                patchState(store, {
-                  authenticated: true,
-                  loading: false,
-                });
+                patchState(store, { authenticated: true, loading: false });
+                authState.initialized.set(true);
               }),
               tap(() => userStore.loadUserData()),
               tap(() => router.navigate(['/'])),
@@ -61,14 +60,12 @@ export const AuthStore = signalStore(
           );
 
           if (user) {
-            patchState(store, {
-              authenticated: true,
-              loading: false,
-            });
-
+            patchState(store, { authenticated: true, loading: false });
+            authState.initialized.set(true);
             userStore.setUser(user);
           } else {
             patchState(store, { ...initialAuthState });
+            authState.initialized.set(false);
             userStore.clearUser();
           }
         } catch (err: any) {
@@ -82,7 +79,7 @@ export const AuthStore = signalStore(
 
       logout(): void {
         patchState(store, { ...initialAuthState });
-
+        authState.initialized.set(false);
         userStore.clearUser();
         router.navigate(['/auth/login']);
       },

@@ -1,0 +1,164 @@
+<div class="py-10 flex items-center justify-between gap-3">
+  <tui-textfield
+    class="w-87"
+    [tuiTextfieldSize]="$any(inputSize)"
+    iconStart="@tui.search"
+  >
+    <input
+      tuiTextfield
+      type="search"
+      [placeholder]="'admin.dashboard.users.placeholders.search' | translate"
+      [ngModel]="searchQuery()"
+      (ngModelChange)="searchQuery.set($event)"
+    />
+  </tui-textfield>
+
+  <div class="flex gap-1">
+    <button
+      tuiButton
+      class="btn-primary"
+      iconStart="@tui.plus"
+      size="s"
+      type="button"
+      tuiHintAppearance="primary-tooltip"
+      tuiHintDirection="bottom"
+      [tuiHint]="'admin.dashboard.users.hints.add' | translate"
+      (click)="openCreateDialog()"
+    >
+      {{ 'generic.actions.add' | translate }}
+    </button>
+
+    <button
+      tuiButton
+      class="btn-primary"
+      iconStart="@tui.trash"
+      size="s"
+      type="button"
+      tuiHintAppearance="primary-tooltip"
+      tuiHintDirection="bottom"
+      [tuiHint]="'admin.dashboard.users.hints.delete' | translate"
+      [disabled]="!hasSelection()"
+      (click)="confirmDelete()"
+    >
+      {{ 'generic.actions.delete' | translate }}
+    </button>
+  </div>
+</div>
+
+<table
+  tuiTable
+  class="w-full"
+  style="table-layout: fixed"
+  [size]="$any(tableSize)"
+>
+  <thead tuiThead>
+    <tr tuiThGroup>
+      <th tuiTh [style.width.rem]="3"></th>
+      @for (col of columns; track col.key) {
+        <th tuiTh [style.width]="col.width">
+          @if (col.key === 'disabled') {
+            {{ 'admin.dashboard.users.status.default' | translate }}
+          } @else {
+            {{ 'models.user.' + col.key | translate }}
+          }
+        </th>
+      }
+      <th tuiTh [style.width.rem]="6">{{ 'generic.actions.default' | translate }}</th>
+    </tr>
+  </thead>
+
+  @for (group of groupedUsers(); track group.role.id) {
+    <tbody tuiTbody>
+      <tr tuiTr class="group-header-row" (click)="expand.toggle()">
+        <td tuiTd (click)="$event.stopPropagation()">
+          <input
+            tuiCheckbox
+            type="checkbox"
+            [size]="$any(tableSize)"
+            [ngModel]="allGroupSelected(group.users)"
+            (ngModelChange)="toggleGroupAll(group.users, $event)"
+          />
+        </td>
+        <td tuiTd [colSpan]="columns.length + 1">
+          <div class="group-header-cell">
+            <button
+              appearance="icon"
+              size="xs"
+              tuiIconButton
+              type="button"
+              [tuiChevron]="expand.expanded()"
+            >
+              Toggle
+            </button>
+            <tui-badge size="m">
+              {{ group.role.name | employeeRole }}
+            </tui-badge>
+            <span class="group-count">{{ group.users.length }}</span>
+          </div>
+        </td>
+      </tr>
+
+      <tui-table-expand #expand [expanded]="true">
+        @for (user of group.users; track user.id) {
+          <tr tuiTr>
+            <td tuiTd>
+              <input
+                tuiCheckbox
+                type="checkbox"
+                [size]="$any(tableSize)"
+                [ngModel]="isSelected(user.id)"
+                (ngModelChange)="toggleUser(user.id, $event)"
+              />
+            </td>
+            @for (col of columns; track col.key) {
+              <td tuiTd>
+                @if (col.isDate) {
+                  {{ user[col.key].toString() | appDate }}
+                } @else if (col.isRole) {
+                  <tui-badge
+                    size="m"
+                    [style.background]="'var(--tui-chart-categorical-01)'"
+                  >
+                    {{ group.role.name | employeeRole }}
+                  </tui-badge>
+                } @else if (col.isStatus) {
+                  <app-user-status [disabled]="!!user[col.key]" />
+                } @else {
+                  {{ user[col.key] }}
+                }
+              </td>
+            }
+            <td tuiTd>
+              <div tuiStatus>
+                <button
+                  appearance="action"
+                  iconStart="@tui.user-round-pen"
+                  size="m"
+                  tuiIconButton
+                  tuiHintAppearance="primary-tooltip"
+                  tuiHintDirection="bottom"
+                  [tuiHint]="'admin.dashboard.users.hints.edit' | translate"
+                  type="button"
+                  (click)="openEditDialog(user)"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tui-table-expand>
+    </tbody>
+  }
+</table>
+
+@if (filteredUsers().length === 0) {
+  <tui-block-status>
+    <img
+      alt="{{ 'generic.statuses.notFound' | translate }}"
+      src="assets/images/not-found.svg"
+      tuiSlot="top"
+      class="image"
+    />
+    <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
+    <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
+  </tui-block-status>
+}

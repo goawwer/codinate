@@ -1,4 +1,4 @@
-CREATE TYPE user_role AS ENUM('owner', 'user', 'admin');
+CREATE TYPE permissions AS ENUM('owner', 'user', 'admin');
 
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
     ),
     email VARCHAR(200) NOT NULL UNIQUE CHECK (POSITION('@' IN email) > 1),
     hashed_password TEXT NOT NULL,
-    role user_role NOT NULL,
+    role_id BIGINT NOT NULL REFERENCES employee_roles(id),
+    permission_role permissions NOT NULL,
     picture_name TEXT,
     disabled BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT current_timestamp,

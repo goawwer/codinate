@@ -5,14 +5,16 @@ export function loginValidationErrorsFactory(translate: TranslateService) {
   return {
     required: translate.stream('generic.validation.required'),
 
+    email: translate.stream('generic.validation.email'),
+
     usernameMinLength: ({ requiredLength }: { requiredLength: number }) =>
-      translate.stream('auth.errors.usernameMinLength', { requiredLength }),
+      translate.stream('generic.validation.usernameMinLength', { requiredLength }),
 
     usernameMaxLength: ({ requiredLength }: { requiredLength: number }) =>
-      translate.stream('auth.errors.usernameMaxLength', { requiredLength }),
+      translate.stream('generic.validation.usernameMaxLength', { requiredLength }),
 
     passwordMinLength: ({ requiredLength }: { requiredLength: number }) =>
-      translate.stream('auth.errors.passwordMinLength', { requiredLength }),
+      translate.stream('generic.validation.passwordMinLength', { requiredLength }),
   };
 }
 

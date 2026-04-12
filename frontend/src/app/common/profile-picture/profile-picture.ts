@@ -21,7 +21,7 @@ export class ProfilePicture {
   readonly user = this.userStore.user;
 
   readonly profilePictureSrc = computed(() => {
-    const profilePicture = this.user()?.profilePicture;
+    const profilePicture = this.user()?.picture;
     return profilePicture ? `/apipublic/profile-picture?filename=${profilePicture}` : '';
   });
 

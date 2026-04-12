@@ -83,7 +83,7 @@ func (r *authRepoImpl) GetLoginInfoByUsername(ctx context.Context, name string) 
 	var password, role string
 
 	err := r.QueryRowContext(ctx, `
-		SELECT id, role, hashed_password FROM users WHERE username = $1
+		SELECT id, permission_role, hashed_password FROM users WHERE username = $1
 	`, name).Scan(&userID, &password, &role)
 
 	return userID, password, role, err

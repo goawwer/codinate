@@ -7,17 +7,30 @@
   --tui-duration: 10ms !important;
 
   --tui-background-base: var(--app-bg);
-  --tui-background-elevation-1: var(--app-surface);
+  --tui-background-accent-1: var(--app-brand-300) !important;
   --tui-background-elevation-2: var(--app-grey-100) !important;
 
-  --tui-text-primary: var(--app-fg);
+  --tui-radius-m: 1rem !important;
+  --tui-radius-s: 3rem !important;
+  --tui-radius-l: 3rem !important;
+  --tui-radius-xl: 3rem !important;
+
+  --tui-text-primary: var(--app-fg) !important;
   --tui-text-secondary: var(--app-grey-600);
   --tui-text-negative: var(--app-error-400) !important;
 
-  --tui-border-normal: var(--app-border);
-  --tui-border-focus: var(--app-brand-500);
+  --tui-text-action: var(--app-brand-500) !important;
+  --tui-text-action-hover: var(--app-brand-300) !important;
 
-  --tui-status-positive: var(--app-success-500);
-  --tui-status-warning: var(--app-warning-500);
+  --tui-border-normal: var(--app-border);
+  --tui-border-focus: var(--app-brand-500) !important;
+
+  --tui-status-positive: var(--app-success-500) !important;
+  --tui-status-positive-pale: var(--app-success-pale) !important;
+
+  --tui-chart-categorical-01: var(--app-badge-color) !important;
+
+  --tui-status-warning: var(--app-warning-500) !important;
   --tui-status-negative: var(--app-error-500) !important;
+  --tui-status-negative-pale: var(--app-error-pale) !important;
 }

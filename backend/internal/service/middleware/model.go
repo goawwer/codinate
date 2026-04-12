@@ -51,16 +51,16 @@ type TokenPair struct {
 }
 
 type RefreshParams struct {
-	UserID  uuid.UUID
-	TokenID uuid.UUID
-	Role    string
-	OldHash string
+	UserID     uuid.UUID
+	TokenID    uuid.UUID
+	Permission string
+	OldHash    string
 }
 
 type CustomClaims struct {
-	UserID    string
-	TokenID   string
-	Role      string
-	TokenType string
+	UserID     string
+	TokenID    string
+	Permission string
+	TokenType  string
 	jwt.RegisteredClaims
 }

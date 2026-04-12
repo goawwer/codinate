@@ -118,7 +118,7 @@ func (qb *QueryFiltersBuilder) Order(column, dir string, def ...string) *QueryFi
 	if column != "" {
 		qb.orderCondition = fmt.Sprintf("ORDER BY %s %s\n", column, dir)
 	} else {
-		qb.orderCondition = fmt.Sprintf("ORDER BY %s %s\n", def[0], dir)
+		qb.orderCondition = fmt.Sprintf("ORDER BY %s %s\n", def[0], def[1])
 	}
 
 	return qb
@@ -143,7 +143,13 @@ func (qb *QueryFiltersBuilder) Add(column string, f Filter) {
 
 		f.Arg = v.Format(util.SQL_TIMESTAMP)
 	default:
-		if reflect.ValueOf(f.Arg).IsZero() {
+		rv := reflect.ValueOf(f.Arg)
+		if rv.Kind() == reflect.Ptr {
+			if rv.IsNil() {
+				return
+			}
+			f.Arg = rv.Elem().Interface()
+		} else if rv.IsZero() {
 			return
 		}
 	}

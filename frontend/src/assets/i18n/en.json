@@ -1,7 +1,35 @@
 {
   "generic": {
     "validation": {
-      "required": "This field is required"
+      "required": "This field is required",
+      "optional": "This field is optional",
+      "email": "Enter valid email",
+      "usernameMinLength": "Minimum username length: {{ requiredLength }}",
+      "usernameMaxLength": "Maximum username length: {{ requiredLength }}",
+      "passwordMinLength": "Minimum password length: {{ requiredLength }}"
+    },
+    "actions": {
+      "default": "Actions",
+      "add": "Add",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "create": "Create",
+      "save": "Save"
+    },
+    "statuses": {
+      "active": "Active",
+      "disabled": "Disabled",
+      "notFound": "Not found",
+      "notFoundDetails": "Please try another options"
+    },
+    "permissions": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "user": "User"
+    },
+    "operations": {
+      "success": "Operation completed",
+      "fail": "Operation failed"
     }
   },
   "auth": {
@@ -20,9 +48,6 @@
       "signIn": "Sign in"
     },
     "errors": {
-      "usernameMinLength": "Minimum username length: {{ requiredLength }}",
-      "usernameMaxLength": "Maximum username length: {{ requiredLength }}",
-      "passwordMinLength": "Minimum password length: {{ requiredLength }}",
       "signInFailed": "Authorization error"
     }
   },
@@ -33,9 +58,68 @@
     "projects": "Projects",
     "admin": "Admin-dashboard"
   },
-  "user": {
-    "errors": {
-      "currentUserLoadFailed": "Failed to retrieve the current user"
+  "employee_roles": {
+    "owner": "Owner",
+    "lead": "Lead",
+    "manager": "Manager",
+    "developer": "Developer",
+    "designer": "Designer",
+    "qa": "QA",
+    "analyst": "Analyst",
+    "devops": "DevOps"
+  },
+  "models": {
+    "user": {
+      "name": "Name",
+      "surname": "Surname",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "role": "Role",
+      "permission": "Access level",
+      "disabled": "Disabled",
+      "status": "Status",
+      "createdAt": "Created at",
+      "updatedAt": "Update at"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "users": {
+        "status": {
+          "default": "Status"
+        },
+        "hints": {
+          "add": "Create a new user account",
+          "delete": "Delete selected users",
+          "edit": "Edit user profile"
+        },
+        "placeholders": {
+          "search": "Search by name, username or email"
+        },
+        "dialogs": {
+          "deleteTitle": "Delete users",
+          "deleteContent": "Are you sure you want to delete {{ count }} user(s)? This action cannot be undone.",
+          "createTitle": "Create user",
+          "editTitle": "Update user"
+        }
+      }
+    }
+  },
+  "cmd": {
+    "users": {
+      "success": {
+        "created": "User created successfully",
+        "updated": "User updated successfully",
+        "deleted": "User(s) deleted successfully"
+      },
+      "errors": {
+        "loadFailed": "Failed to load users",
+        "createFailed": "Failed to create user",
+        "updateFailed": "Failed to update user",
+        "deleteFailed": "Failed to delete user(s)",
+        "currentUserLoadFailed": "Failed to retrieve the current user"
+      }
     }
   }
 }

@@ -1,0 +1,29 @@
+:host {
+  td[tuiTd] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.group-header-row {
+  cursor: pointer;
+
+  td {
+    background-color: var(--tui-background-neutral-1);
+  }
+
+  &:hover td {
+    background-color: var(--tui-background-neutral-1-hover);
+  }
+}
+
+.group-header-cell {
+  display: flex;
+  align-items: center;
+}
+
+.group-count {
+  font-size: 0.75rem;
+  color: var(--tui-text-secondary);
+}

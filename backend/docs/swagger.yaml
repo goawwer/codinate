@@ -6,7 +6,7 @@ definitions:
       username:
         type: string
     type: object
-  enum.Role:
+  enum.PermissionRole:
     enum:
     - owner
     - admin
@@ -14,10 +14,10 @@ definitions:
     - ""
     type: string
     x-enum-varnames:
-    - OwnerRole
-    - AdminRole
-    - UserRole
-    - NoRole
+    - OwnerPermissionRole
+    - AdminPermissionRole
+    - UserPermissionRole
+    - NoPermissionRole
   shared.NameInput:
     properties:
       name:
@@ -31,10 +31,19 @@ definitions:
         type: string
       password:
         type: string
-      role:
+      permission:
         type: string
+      roleId:
+        type: integer
       surname:
         type: string
+    type: object
+  user.DeleteMultiInput:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
     type: object
   user.Row:
     properties:
@@ -48,12 +57,12 @@ definitions:
         type: string
       name:
         type: string
-      password:
-        type: string
+      permission:
+        $ref: '#/definitions/enum.PermissionRole'
       picture:
         type: string
       role:
-        $ref: '#/definitions/enum.Role'
+        type: string
       surname:
         type: string
       updatedAt:
@@ -71,9 +80,11 @@ definitions:
         type: string
       password:
         type: string
+      permission:
+        type: string
       profilePicture:
         type: string
-      role:
+      roleId:
         type: string
       surname:
         type: string
@@ -538,6 +549,19 @@ paths:
   /api/user/all:
     get:
       description: Returns a list of all users
+      parameters:
+      - description: filter column
+        in: query
+        name: orderBy
+        type: string
+      - description: filter value
+        in: query
+        name: order
+        type: string
+      - description: filter by user state
+        in: query
+        name: disabled
+        type: boolean
       produces:
       - application/json
       responses:
@@ -552,6 +576,34 @@ paths:
           schema:
             type: string
       summary: Get all users
+      tags:
+      - user
+  /api/user/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes multiple users by their UUIDs
+      parameters:
+      - description: List of user UUIDs
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.DeleteMultiInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete multiple users
       tags:
       - user
   /api/user/delete/{id}:

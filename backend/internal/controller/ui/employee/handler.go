@@ -45,9 +45,9 @@ func addEmployeeRole(s ui.UIService) (any, error) {
 //	@Description	Get all roles for employees
 //	@Accept			json
 //	@Produce		json
-//	@Success		200		{object}	nil
-//	@Failure		400		{object}	string	"Bad Request"
-//	@Failure		500		{object}	string	"Internal Server Error"
+//	@Success		200	{object}	nil
+//	@Failure		400	{object}	string	"Bad Request"
+//	@Failure		500	{object}	string	"Internal Server Error"
 //	@Router			/api/employee/roles  [get]
 func getEmployeesRoles(s ui.UIService) (any, error) {
 	return s.GetService().(*service).getRoles(s.GetRequest().Context())
@@ -60,7 +60,7 @@ func getEmployeesRoles(s ui.UIService) (any, error) {
 //	@Description	Update role by id and new name
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		int			true	"Role ID"
+//	@Param			id		path		int					true	"Role ID"
 //	@Param			request	body		shared.NameInput	true	"Body with new role name"
 //	@Success		200		{object}	nil
 //	@Failure		400		{object}	string	"Bad Request"
@@ -89,9 +89,9 @@ func updateEmployeeRoleById(s ui.UIService) (any, error) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		int	true	"Role ID"
-//	@Success		200		{object}	nil
-//	@Failure		400		{object}	string	"Bad Request"
-//	@Failure		500		{object}	string	"Internal Server Error"
+//	@Success		200	{object}	nil
+//	@Failure		400	{object}	string	"Bad Request"
+//	@Failure		500	{object}	string	"Internal Server Error"
 //	@Router			/api/employee/roles/delete/{id}  [delete]
 func delEmployeeRoleById(s ui.UIService) (any, error) {
 	id, err := s.GetPathParamAsInt("id")
@@ -109,9 +109,9 @@ func delEmployeeRoleById(s ui.UIService) (any, error) {
 //	@Description	Delete role all employee roles
 //	@Accept			json
 //	@Produce		json
-//	@Success		200		{object}	nil
-//	@Failure		400		{object}	string	"Bad Request"
-//	@Failure		500		{object}	string	"Internal Server Error"
+//	@Success		200	{object}	nil
+//	@Failure		400	{object}	string	"Bad Request"
+//	@Failure		500	{object}	string	"Internal Server Error"
 //	@Router			/api/employee/roles/delete/all  [delete]
 func deleteEmployeeRoles(s ui.UIService) (any, error) {
 	return nil, s.GetService().(*service).deleteAllRoles(s.GetRequest().Context())

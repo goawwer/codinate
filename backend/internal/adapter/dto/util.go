@@ -2,15 +2,15 @@ package dto
 
 import "github.com/goawwer/codinate/internal/adapter/model/enum"
 
-func ResolveUserRole(role string) enum.Role {
+func ResolveUserRole(role string) enum.PermissionRole {
 	switch role {
 	case "owner":
-		return enum.OwnerRole
+		return enum.OwnerPermissionRole
 	case "admin":
-		return enum.AdminRole
+		return enum.AdminPermissionRole
 	case "user":
-		return enum.UserRole
+		return enum.UserPermissionRole
 	default:
-		return enum.NoRole
+		return enum.NoPermissionRole
 	}
 }
