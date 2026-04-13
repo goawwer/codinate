@@ -16,10 +16,35 @@
       {{ 'navbar.projects' | translate }}
     </a>
 
-    @if (userStore.isAtLeastAdmin()){
-    <a class="cursor-pointer" routerLink="/admin" routerLinkActive="font-bold">
-      {{ 'navbar.admin' | translate }}
-    </a>
+    @if (userStore.isAtLeastAdmin()) {
+      <div class="relative">
+        <button
+          tuiChevron
+          tuiDropdownAlign="right"
+          tuiLink
+          type="button"
+          class="dashboard-btn"
+          [class.font-bold]="isAdminActive()"
+          [(tuiDropdownOpen)]="adminOpen"
+          [tuiDropdown]="adminDropdown"
+          tuiDropdownAlign="left"
+        >
+          {{ 'navbar.admin' | translate }}
+        </button>
+        <ng-template #adminDropdown>
+          <tui-data-list>
+            @for (item of adminItems; track item.route) {
+              <button
+                tuiOption
+                type="button"
+                (click)="navigateTo(item.route)"
+              >
+                {{ item.label | translate }}
+              </button>
+            }
+          </tui-data-list>
+        </ng-template>
+      </div>
     }
   </div>
 

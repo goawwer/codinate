@@ -7,6 +7,7 @@ import (
 	"github.com/goawwer/codinate/internal/adapter/database"
 	"github.com/goawwer/codinate/internal/service/middleware"
 	"github.com/goawwer/codinate/internal/service/server"
+	"github.com/goawwer/codinate/internal/service/uploads"
 	"github.com/goawwer/codinate/internal/service/worker"
 	"github.com/goawwer/codinate/pkg/logger"
 )
@@ -33,5 +34,6 @@ func serve(configPath string) {
 	}
 
 	worker.InitRefreshTokensWorker(ctx)
+	uploads.InitializeUploadsDir(ctx)
 	srv.Start(ctx)
 }

@@ -6,9 +6,10 @@
 [tuiTheme='dark'] {
   --tui-duration: 10ms !important;
 
-  --tui-background-base: var(--app-bg);
+  --tui-background-base: var(--app-bg) !important;
   --tui-background-accent-1: var(--app-brand-300) !important;
   --tui-background-elevation-2: var(--app-grey-100) !important;
+  --tui-background-elevation-3: var(--app-grey-100) !important;
 
   --tui-radius-m: 1rem !important;
   --tui-radius-s: 3rem !important;

@@ -56,7 +56,12 @@
     "mine": "My tasks",
     "teams": "Teams",
     "projects": "Projects",
-    "admin": "Admin-dashboard"
+    "admin": "Admin-dashboard",
+    "adminItems": {
+      "users": "Users",
+      "teams": "Teams",
+      "projects": "Projects"
+    }
   },
   "employee_roles": {
     "owner": "Owner",
@@ -69,6 +74,26 @@
     "devops": "DevOps"
   },
   "models": {
+    "team": {
+      "name": "Name",
+      "description": "Description",
+      "pictureName": "Picture",
+      "members": "Members",
+      "createdAt": "Created at",
+      "updatedAt": "Updated at",
+      "changePicture": "Change picture"
+    },
+    "project": {
+      "projectName": "Name",
+      "projectDescription": "Description",
+      "projectPictureName": "Picture",
+      "authorName": "Author",
+      "members": "Members",
+      "archivedAt": "Archived at",
+      "createdAt": "Created at",
+      "updatedAt": "Updated at",
+      "changePicture": "Change picture"
+    },
     "user": {
       "name": "Name",
       "surname": "Surname",
@@ -85,6 +110,38 @@
   },
   "admin": {
     "dashboard": {
+      "teams": {
+        "hints": {
+          "add": "Create a new team",
+          "delete": "Delete selected teams",
+          "edit": "Edit team"
+        },
+        "placeholders": {
+          "search": "Search by name or description"
+        },
+        "dialogs": {
+          "deleteTitle": "Delete teams",
+          "deleteContent": "Are you sure you want to delete {{ count }} team(s)? This action cannot be undone.",
+          "createTitle": "Create team",
+          "editTitle": "Update team"
+        }
+      },
+      "projects": {
+        "hints": {
+          "add": "Create a new project",
+          "delete": "Delete selected projects",
+          "edit": "Edit project"
+        },
+        "placeholders": {
+          "search": "Search by name, description or author"
+        },
+        "dialogs": {
+          "deleteTitle": "Delete projects",
+          "deleteContent": "Are you sure you want to delete {{ count }} project(s)? This action cannot be undone.",
+          "createTitle": "Create project",
+          "editTitle": "Update project"
+        }
+      },
       "users": {
         "status": {
           "default": "Status"
@@ -107,6 +164,32 @@
     }
   },
   "cmd": {
+    "teams": {
+      "success": {
+        "created": "Team created successfully",
+        "updated": "Team updated successfully",
+        "deleted": "Team(s) deleted successfully"
+      },
+      "errors": {
+        "loadFailed": "Failed to load teams",
+        "createFailed": "Failed to create team",
+        "updateFailed": "Failed to update team",
+        "deleteFailed": "Failed to delete team(s)"
+      }
+    },
+    "projects": {
+      "success": {
+        "created": "Project created successfully",
+        "updated": "Project updated successfully",
+        "deleted": "Project(s) deleted successfully"
+      },
+      "errors": {
+        "loadFailed": "Failed to load projects",
+        "createFailed": "Failed to create project",
+        "updateFailed": "Failed to update project",
+        "deleteFailed": "Failed to delete project(s)"
+      }
+    },
     "users": {
       "success": {
         "created": "User created successfully",

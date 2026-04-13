@@ -1,0 +1,97 @@
+<form
+  tuiAppearance="floating"
+  tuiCardLarge
+  tuiForm="l"
+  class="w-full max-w py-5"
+  [formGroup]="form"
+>
+  <div class="avatar-section flex flex-col items-center gap-3 pb-4">
+    <div class="avatar-preview w-24 h-24 rounded-xl overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
+      @if (previewUrl(); as url) {
+        <img [src]="url" alt="Preview" class="w-full h-full object-cover" />
+      } @else if (isEdit && team?.pictureName) {
+        <img [src]="team!.pictureName" alt="Current picture" class="w-full h-full object-cover" />
+      } @else {
+        <tui-icon icon="@tui.image" class="text-(--tui-text-tertiary)" style="font-size: 2.5rem" />
+      }
+    </div>
+
+    <button
+      tuiButton
+      appearance="flat"
+      size="s"
+      type="button"
+      iconStart="@tui.camera"
+      (click)="fileInput.click()"
+    >
+      {{ 'models.team.changePicture' | translate }}
+    </button>
+
+    <input
+      #fileInput
+      type="file"
+      hidden
+      accept="image/*"
+      (change)="onFileSelected($event)"
+    />
+  </div>
+
+  <tui-textfield>
+    <label tuiLabel>{{ 'models.team.name' | translate }}</label>
+    <input tuiTextfield formControlName="name" autocomplete="off" />
+  </tui-textfield>
+  <tui-error formControlName="name" [error]="[] | tuiFieldError | async" />
+
+  <tui-textfield>
+    <label tuiLabel>
+      {{ 'models.team.description' | translate }}
+      <span class="tui-text_body-xs tui-space_left-1" style="opacity: 0.6">
+        ({{ 'generic.validation.optional' | translate }})
+      </span>
+    </label>
+    <input tuiTextfield formControlName="description" autocomplete="off" />
+  </tui-textfield>
+  <tui-error formControlName="description" [error]="[] | tuiFieldError | async" />
+
+  @if (isEdit && members().length > 0) {
+    <div class="members-section pt-2">
+      <label tuiLabel class="pb-2">{{ 'models.team.members' | translate }}</label>
+      @for (member of members(); track $index) {
+        <div class="flex items-center justify-between py-2 border-b border-(--tui-border-normal)">
+          <span class="text-sm">{{ member.name }} {{ member.surname }}</span>
+          @if (member.userId) {
+            <button
+              appearance="destructive"
+              iconStart="@tui.user-minus"
+              size="xs"
+              tuiIconButton
+              type="button"
+              [disabled]="removingId() === member.userId"
+              (click)="removeMember(member)"
+            ></button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <footer class="flex justify-end pt-4">
+    <button
+      tuiButton
+      appearance="flat"
+      type="button"
+      (click)="context.completeWith()"
+    >
+      {{ 'generic.actions.cancel' | translate }}
+    </button>
+    <button
+      tuiButton
+      class="btn-primary"
+      type="submit"
+      [disabled]="store.isLoading()"
+      (click)="submit()"
+    >
+      {{ (isEdit ? 'generic.actions.save' : 'generic.actions.add') | translate }}
+    </button>
+  </footer>
+</form>
