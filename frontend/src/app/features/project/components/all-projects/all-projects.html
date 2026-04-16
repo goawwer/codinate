@@ -1,0 +1,30 @@
+@if (store.projects().length === 0 && !store.isLoading()) {
+  <div class="empty-state">
+    <p>No projects yet.</p>
+  </div>
+} @else {
+  <div class="projects-grid">
+    @for (project of store.projects(); track project.id) {
+      <div
+        tuiCardLarge
+        tuiHeader
+        class="project-card"
+        [class.has-image]="!!project.projectPictureName"
+        [style.background-color]="cardColor(project)"
+      >
+        <h2 tuiTitle>
+          {{ project.projectName }}
+          @if (project.projectDescription) {
+            <span tuiSubtitle>{{ project.projectDescription }}</span>
+          }
+        </h2>
+
+        <aside tuiAccessories>
+          <tui-badge size="m" [style.background]="'var(--app-fg)'">
+            {{ project.members.length }}
+          </tui-badge>
+        </aside>
+      </div>
+    }
+  </div>
+}

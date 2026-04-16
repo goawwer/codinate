@@ -45,6 +45,7 @@ export const AuthStore = signalStore(
                 authState.initialized.set(true);
               }),
               tap(() => userStore.loadUserData()),
+              tap(() => userStore.loadUsers({})),
               tap(() => router.navigate(['/'])),
               withErrorAlertOperator.call(translate.instant('auth.errors.signInFailed')),
             ),
@@ -63,6 +64,7 @@ export const AuthStore = signalStore(
             patchState(store, { authenticated: true, loading: false });
             authState.initialized.set(true);
             userStore.setUser(user);
+            userStore.loadUsers({});
           } else {
             patchState(store, { ...initialAuthState });
             authState.initialized.set(false);

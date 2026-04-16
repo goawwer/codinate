@@ -36,6 +36,17 @@ func handleResult(w http.ResponseWriter, result any) {
 }
 
 func handleError(w http.ResponseWriter, err error) {
-	logger.Errorf("Error on API request: %v", err)
+	logger.Errorf("Error on API request - %v", err)
+
+	if httpCodeError, ok := err.(HttpCodeError); ok {
+		http.Error(w, httpCodeError.Message, httpCodeError.Code)
+		return
+	}
+
+	if notyError, ok := err.(FrontendNotificationError); ok {
+		http.Error(w, string(notyError.ToJson()), FrontendNotificationErrorHttpCode)
+		return
+	}
+
 	http.Error(w, err.Error(), http.StatusInternalServerError)
 }

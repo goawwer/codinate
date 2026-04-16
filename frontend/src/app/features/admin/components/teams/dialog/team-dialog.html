@@ -1,0 +1,198 @@
+<form
+  tuiAppearance="floating"
+  tuiCardLarge
+  tuiForm="l"
+  class="w-full max-w py-5"
+  [formGroup]="form"
+>
+  @if (isEdit) {
+  <div class="avatar-section flex flex-col items-center gap-3 pb-4">
+    <div class="avatar-preview m-auto w-70 h-60 rounded-xl overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
+      @if (previewUrl(); as url) {
+        <img [src]="url" alt="Preview" class="w-full h-full object-cover" />
+      } @else {
+      <app-picture
+        [name]="this.team!.name"
+        entityType="projects"
+        [pictureName]="this.team!.pictureName"
+      ></app-picture>
+      }
+    </div>
+
+    <div class="flex items-center justify-between gap-0.5">
+      <button
+        tuiButton
+        appearance="flat"
+        size="s"
+        type="button"
+        iconStart="@tui.camera"
+        (click)="fileInput.click()"
+        tuiHintAppearance="primary-tooltip"
+        tuiHintDirection="bottom"
+        [tuiHint]="'generic.hints.changePicture' | translate"
+      >
+      </button>
+
+      <button
+        tuiButton
+        appearance="flat"
+        size="s"
+        type="button"
+        iconStart="@tui.trash-2"
+        (click)="deletePicture()"
+        tuiHintAppearance="primary-tooltip"
+        tuiHintDirection="bottom"
+        [tuiHint]="'generic.hints.deletePicture' | translate"
+      >
+      </button>
+    </div>
+
+    <input
+      #fileInput
+      type="file"
+      hidden
+      accept="image/*"
+      (change)="onFileSelected($event)"
+    />
+  </div>
+  }
+
+  @if (!isEdit) {
+  <div class="flex flex-col items-center gap-3 pb-4">
+    <div class="w-70 h-60 rounded-xl overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
+      @if (previewUrl(); as url) {
+        <img [src]="url" alt="Preview" class="w-full h-full object-cover" />
+      } @else {
+        <tui-icon icon="@tui.image" class="text-(--tui-text-tertiary)" style="font-size: 17rem" />
+      }
+    </div>
+    <button
+      tuiButton
+      appearance="flat"
+      size="s"
+      type="button"
+      iconStart="@tui.camera"
+      (click)="fileInput.click()"
+      tuiHintAppearance="primary-tooltip"
+      tuiHintDirection="bottom"
+      [tuiHint]="'generic.hints.changePicture' | translate"
+    >
+    </button>
+    <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelected($event)" />
+  </div>
+  }
+
+  <tui-textfield>
+    <label tuiLabel>{{ 'models.team.name' | translate }}</label>
+    <input tuiTextfield formControlName="name" autocomplete="off" />
+  </tui-textfield>
+  <tui-error formControlName="name" [error]="[] | tuiFieldError | async" />
+
+  <tui-textfield>
+    <label tuiLabel>
+      {{ 'models.team.description' | translate }}
+      <span class="tui-text_body-xs tui-space_left-1" style="opacity: 0.6">
+        ({{ 'generic.validation.optional' | translate }})
+      </span>
+    </label>
+    <input tuiTextfield formControlName="description" autocomplete="off" />
+  </tui-textfield>
+  <tui-error formControlName="description" [error]="[] | tuiFieldError | async" />
+
+  @if (!isEdit) {
+    <label tuiLabel>
+      {{ 'models.team.members' | translate }}
+      <tui-textfield multi tuiChevron [stringify]="stringify">
+        <input
+          tuiInputChip
+          formControlName="memberIds"
+          [placeholder]="form.getRawValue().memberIds.length ? '' : ('models.team.members' | translate)"
+        />
+        <tui-input-chip *tuiItem />
+        <tui-data-list *tuiTextfieldDropdown>
+          @for (group of userGroups(); track group.role) {
+            <tui-opt-group [label]="group.role | employeeRole" tuiMultiSelectGroup>
+              @for (user of group.users | tuiFilterByInput; track user.id) {
+                <button
+                  new
+                  tuiOption
+                  [value]="user"
+                >
+                  {{ user.name }} {{ user.surname }}
+                </button>
+              }
+            </tui-opt-group>
+          }
+        </tui-data-list>
+      </tui-textfield>
+    </label>
+  }
+
+  @if (isEdit) {
+    <div class="pt-2">
+      <div class="flex items-center justify-between gap-2 pb-2">
+        <label tuiLabel>{{ 'models.team.members' | translate }}</label>
+        <div class="flex flex-1 items-center justify-end">
+          <tui-textfield class="w-4/6" tuiChevron [stringify]="stringify">
+            <input tuiTextfield [formControl]="memberToAdd" [placeholder]="'generic.actions.add' | translate" />
+            <tui-data-list *tuiTextfieldDropdown [emptyContent]="'models.team.noAvailableMembers' | translate">
+              @for (group of availableUserGroups(); track group.role) {
+                <tui-opt-group [label]="group.role | employeeRole">
+                  @for (user of group.users; track user.id) {
+                    <button tuiOption [value]="user" (click)="selectedMember.set(user)">
+                      {{ user.name }} {{ user.surname }}
+                    </button>
+                  }
+                </tui-opt-group>
+              }
+            </tui-data-list>
+          </tui-textfield>
+          <button
+            appearance="action"
+            iconStart="@tui.user-plus"
+            size="m"
+            tuiIconButton
+            type="button"
+            [disabled]="!selectedMember() || !!addingId()"
+            (click)="addMember()"
+          ></button>
+        </div>
+      </div>
+
+      @for (member of members(); track $index) {
+        <div class="flex items-center justify-between py-2 border-b border-(--tui-border-normal)">
+          <span class="text-sm">{{ member.name }} {{ member.surname }}</span>
+          <button
+            appearance="action"
+            iconStart="@tui.user-minus"
+            size="m"
+            tuiIconButton
+            type="button"
+            [disabled]="removingId() === member.id"
+            (click)="removeMember(member)"
+          ></button>
+        </div>
+      }
+    </div>
+  }
+
+  <footer class="flex justify-end pt-4">
+    <button
+      tuiButton
+      appearance="flat"
+      type="button"
+      (click)="context.completeWith()"
+    >
+      {{ 'generic.actions.cancel' | translate }}
+    </button>
+    <button
+      tuiButton
+      class="btn-primary"
+      type="submit"
+      [disabled]="store.isLoading()"
+      (click)="submit()"
+    >
+      {{ (isEdit ? 'generic.actions.save' : 'generic.actions.add') | translate }}
+    </button>
+  </footer>
+</form>

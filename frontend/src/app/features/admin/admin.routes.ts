@@ -1,6 +1,8 @@
 import { Route } from '@angular/router';
 import { adminGuardFn } from '../../core/guards/admin.guard';
-import { AdminUsers } from './users/components/all/admin-users';
+import { AdminUsers } from './components/users/all/admin-users';
+import { AdminProjects } from './components/projects/all/admin-projects';
+import { AdminTeams } from './components/teams/all/admin-teams';
 
 export const ADMIN_ROUTES: Route[] = [
   {
@@ -15,6 +17,14 @@ export const ADMIN_ROUTES: Route[] = [
       {
         path: 'users',
         component: AdminUsers,
+      },
+      {
+        path: 'teams',
+        component: AdminTeams,
+      },
+      {
+        path: 'projects',
+        component: AdminProjects,
       },
     ],
   },

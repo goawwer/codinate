@@ -33,7 +33,7 @@ export class AlertService {
   public success(content: PolymorpheusContent, options: Partial<IAlertOptions> = {}) {
     return this.alertService
       .open(content, {
-        ...this.defaultOptions,
+        autoClose: 3000,
         ...options,
         appearance: 'success',
       })
