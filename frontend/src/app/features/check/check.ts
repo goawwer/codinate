@@ -9,8 +9,4 @@ import { UserStore } from '../user/store/user.store';
 })
 export class Check {
   private readonly userStore = inject(UserStore);
-
-  constructor() {
-    console.log(this.userStore.user());
-  }
 }

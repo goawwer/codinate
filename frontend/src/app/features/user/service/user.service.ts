@@ -18,7 +18,6 @@ export class UserApiService {
   }
 
   create(body: CreateUserInput): Observable<void> {
-    console.log(body);
     return this.httpClient.post<void>(`${this.baseURL}/add`, body);
   }
 

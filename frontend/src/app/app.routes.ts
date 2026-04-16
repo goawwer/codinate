@@ -13,12 +13,12 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'check',
+        redirectTo: 'main',
       },
       {
-        path: 'check',
+        path: 'main',
         loadChildren: () =>
-          import('./features/check/check.routes').then((m) => m.CHECK_PAGE_ROUTES),
+          import('./features/main/main.routes').then((m) => m.MAIN_ROUTES),
       },
       {
         path: 'admin',
@@ -46,6 +46,6 @@ export const routes: Routes = [
 
   {
     path: '**',
-    redirectTo: 'check',
+    redirectTo: 'main',
   },
 ];

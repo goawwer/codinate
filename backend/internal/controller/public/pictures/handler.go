@@ -1,7 +1,6 @@
 package pictures
 
 import (
-	"fmt"
 	"net/http"
 	"path"
 	"reflect"
@@ -36,7 +35,6 @@ func getEntityPicture(s public.PublicService) (any, error) {
 
 	filename, _ := s.GetUrlParamAsString("filename")
 	file := path.Join(viper.GetString("UPLOADS_DIR"), "pictures", entityType, filename)
-	fmt.Println(file)
 
 	http.ServeFile(s.GetResponse(), s.GetRequest(), file)
 

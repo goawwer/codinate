@@ -6,6 +6,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { UserStore } from '../../../features/user/store/user.store';
 import { TuiChevron } from '@taiga-ui/kit';
+import { TuiNavigation } from '@taiga-ui/layout';
 
 @Component({
   selector: 'app-navbar',
@@ -19,6 +20,7 @@ import { TuiChevron } from '@taiga-ui/kit';
     TuiDataList,
     TuiChevron,
     TuiLink,
+    TuiNavigation,
   ],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',

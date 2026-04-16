@@ -1,5 +1,6 @@
 import { Route } from '@angular/router';
 import { AllTeamsComponent } from './components/all-teams/all-teams';
+import { TeamDetailComponent } from './components/team-detail/team-detail';
 
 export const TEAMS_ROUTES: Route[] = [
   {
@@ -13,6 +14,10 @@ export const TEAMS_ROUTES: Route[] = [
       {
         path: 'teams',
         component: AllTeamsComponent,
+      },
+      {
+        path: ':id',
+        component: TeamDetailComponent,
       },
     ],
   },
