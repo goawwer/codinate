@@ -9,8 +9,10 @@ import (
 )
 
 type config struct {
-	FilesDir     string `mapstructure:"UPLOADS_DIR"`
-	FilesMaxSize int    `mapstructure:"UPLOADS_MAX_SIZE_MB"`
+	FilesDir       string `mapstructure:"UPLOADS_DIR"`
+	FilesMaxSize   int    `mapstructure:"UPLOADS_MAX_SIZE_MB"`
+	FilesMaxWidth  int    `mapstructure:"UPLOADS_PICTURE_MAX_WIDTH"`
+	FilesMaxHeight int    `mapstructure:"UPLOADS_PICTURE_MAX_HEIGHT"`
 }
 
 func InitializeUploadsDir(ctx context.Context) {
@@ -27,5 +29,13 @@ func loadFilesConfig() (*config, error) {
 		return nil, err
 	}
 
+	setupDefaults()
+
 	return &cfg, nil
+}
+
+func setupDefaults() {
+	viper.SetDefault("UPLOADS_MAX_SIZE_MB", 10)
+	viper.SetDefault("UPLOADS_PICTURE_MAX_WIDTH", 500)
+	viper.SetDefault("UPLOADS_PICTURE_MAX_HEIGHT", 500)
 }

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { TeamStore } from '../../store/team.store';
 import { Team } from '../../types/model/team.model';
-import { avatarColor, avatarLetters } from '../../../../common/avatar/avatar-color.util';
+import { avatarColor, avatarLetters } from '../../../../common/picture/picture-color.util';
 import { TEAMSCARDSIMPORT } from './all-teams.imports';
 
 @Component({

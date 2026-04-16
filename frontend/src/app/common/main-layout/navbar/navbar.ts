@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { ProfilePicture } from '../../profile-picture/profile-picture';
+import { AppPicture } from '../../picture/app-picture';
 import { TuiIcon, TuiDropdown, TuiDataList, TuiLink } from '@taiga-ui/core';
 import { ThemeService } from '../../../core/services/theme.service';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -10,7 +10,7 @@ import { TuiChevron } from '@taiga-ui/kit';
 @Component({
   selector: 'app-navbar',
   imports: [
-    ProfilePicture,
+    AppPicture,
     TuiIcon,
     TranslatePipe,
     RouterLink,
@@ -26,7 +26,7 @@ import { TuiChevron } from '@taiga-ui/kit';
 export class NavbarComponent {
   public readonly theme = inject(ThemeService);
   public readonly userStore = inject(UserStore);
-  private readonly router = inject(Router);
+  protected readonly router = inject(Router);
 
   protected adminOpen = false;
 

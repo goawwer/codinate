@@ -22,10 +22,18 @@ func (s *service) updateProject(ctx context.Context, input project.UpdateProject
 	return repository.GetProjectRepo().Update(ctx, input, id)
 }
 
+func (s *service) addProjectMember(ctx context.Context, projectId int, memberId uuid.UUID) error {
+	return repository.GetProjectRepo().AddMember(ctx, projectId, memberId)
+}
+
 func (s *service) deleteProjectMember(ctx context.Context, projectId int, memberId uuid.UUID) error {
 	return repository.GetProjectRepo().RemoveMember(ctx, projectId, memberId)
 }
 
 func (s *service) deleteProject(ctx context.Context, projectId int) error {
 	return repository.GetProjectRepo().DeleteBy(ctx, projectId)
+}
+
+func (s *service) deletePicture(ctx context.Context, projectId int) error {
+	return repository.GetProjectRepo().DeletePictureBy(ctx, projectId)
 }

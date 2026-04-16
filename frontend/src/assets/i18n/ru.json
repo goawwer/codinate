@@ -14,7 +14,9 @@
       "delete": "Удалить",
       "cancel": "Отмена",
       "create": "Создать",
-      "save": "Сохранить"
+      "save": "Сохранить",
+      "selectAll": "Select All",
+      "selectNone": "Select None"
     },
     "statuses": {
       "active": "Активен",
@@ -33,6 +35,10 @@
     "operations": {
       "success": "Операция выполнена",
       "fail": "Операция не выполнена"
+    },
+    "hints": {
+      "changePicture": "Изменить изображение",
+      "deletePicture": "Удалить изображение"
     }
   },
   "auth": {
@@ -82,6 +88,7 @@
       "description": "Описание",
       "pictureName": "Изображение",
       "members": "Участники",
+      "noAvailableMembers": "Все пользователи уже являются участниками",
       "createdAt": "Создана",
       "updatedAt": "Обновлена",
       "changePicture": "Изменить изображение"
@@ -92,10 +99,10 @@
       "projectPictureName": "Изображение",
       "authorName": "Автор",
       "members": "Участники",
+      "noAvailableMembers": "Все пользователи уже являются участниками",
       "archivedAt": "Архивирован",
       "createdAt": "Создан",
-      "updatedAt": "Обновлён",
-      "changePicture": "Изменить изображение"
+      "updatedAt": "Обновлён"
     },
     "user": {
       "name": "Имя",
@@ -172,26 +179,30 @@
       "success": {
         "created": "Команда успешно создана",
         "updated": "Команда успешно обновлена",
-        "deleted": "Команда(ы) успешно удалена(ы)"
+        "deleted": "Команда(ы) успешно удалена(ы)",
+        "pictureDeleted": "Фото команды успешно удалено"
       },
       "errors": {
         "loadFailed": "Не удалось загрузить команды",
         "createFailed": "Не удалось создать команду",
         "updateFailed": "Не удалось обновить команду",
-        "deleteFailed": "Не удалось удалить команду(ы)"
+        "deleteFailed": "Не удалось удалить команду(ы)",
+        "pictureDeleteFailed": "Не удалось удалить фото команды"
       }
     },
     "projects": {
       "success": {
         "created": "Проект успешно создан",
         "updated": "Проект успешно обновлён",
-        "deleted": "Проект(ы) успешно удалён(ы)"
+        "deleted": "Проект(ы) успешно удалён(ы)",
+        "pictureDeleted": "Фото проекта успешно удалено"
       },
       "errors": {
         "loadFailed": "Не удалось загрузить проекты",
         "createFailed": "Не удалось создать проект",
         "updateFailed": "Не удалось обновить проект",
-        "deleteFailed": "Не удалось удалить проект(ы)"
+        "deleteFailed": "Не удалось удалить проект(ы)",
+        "pictureDeleteFailed": "Не удалось удалить фото проекта"
       }
     },
     "user": {

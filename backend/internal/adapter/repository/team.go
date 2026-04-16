@@ -19,7 +19,9 @@ type TeamRepo interface {
 	GetTeamMembersBy(ctx context.Context, id uuid.UUID) ([]user.TeamMember, error)
 	Update(ctx context.Context, input team.UpdateTeamInput, id int) error
 	RemoveMember(ctx context.Context, teamId int, userId uuid.UUID) error
+	AddMember(ctx context.Context, teamId int, userId uuid.UUID) error
 	DeleteBy(ctx context.Context, teamId int) error
+	DeletePictureBy(ctx context.Context, teamId int) error
 }
 
 type teamRepoImpl struct {
@@ -40,6 +42,7 @@ func (r *teamRepoImpl) GetAllTeamsWithMembersShort(ctx context.Context) ([]team.
 			COALESCE(
 				json_agg(
 					json_build_object(
+						'id',      u.id,
 						'name',    u.name,
 						'surname', u.surname
 					)
@@ -108,6 +111,16 @@ func (r *teamRepoImpl) Update(ctx context.Context, input team.UpdateTeamInput, i
 	return err
 }
 
+func (r *teamRepoImpl) AddMember(ctx context.Context, teamId int, userId uuid.UUID) error {
+	_, err := r.ExecContext(ctx, `
+		INSERT INTO team_members (team_id, user_id)
+		VALUES ($1, $2)
+		`,
+		teamId, userId,
+	)
+	return err
+}
+
 func (r *teamRepoImpl) RemoveMember(ctx context.Context, teamId int, userId uuid.UUID) error {
 	_, err := r.ExecContext(ctx,
 		`DELETE FROM team_members WHERE team_id = $1 AND user_id = $2`,
@@ -132,4 +145,13 @@ func (r *teamRepoImpl) DeleteBy(ctx context.Context, teamId int) error {
 
 		return err
 	})
+}
+
+func (r *teamRepoImpl) DeletePictureBy(ctx context.Context, teamId int) error {
+	_, err := r.QueryContext(ctx, `
+		UPDATE teams SET picture_name = NULL
+		WHERE id = $1
+	`, teamId)
+
+	return err
 }

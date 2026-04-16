@@ -64,11 +64,18 @@ func ParseMultipartPayload[T any](s UIService, fileField, entityType string) (T,
 	fileId := uuid.New()
 	file, header, err := s.GetRequest().FormFile(fileField)
 	if file != nil {
-		pictureName, saveErr := uploads.SaveImageFileOnServer(file, header, entityType, fileId)
+		mime := header.Header.Get("Content-Type")
+		var fileName string
+		var saveErr error
+		if mime == "image/jpeg" || mime == "image/png" || mime == "image/gif" {
+			fileName, saveErr = uploads.SaveImageFileOnServer(file, header, entityType, fileId)
+		} else {
+			fileName, saveErr = uploads.SaveFileOnServer(file, header, entityType, fileId)
+		}
 		if saveErr != nil {
 			return input, "", saveErr
 		}
-		return input, pictureName, nil
+		return input, fileName, nil
 	}
 
 	if err != nil && !errors.Is(err, http.ErrMissingFile) {

@@ -8,8 +8,6 @@
 .project-card {
   min-height: 20vh;
   cursor: pointer;
-  background-size: cover;
-  background-position: center;
   position: relative;
   transition: transform 0.5s ease-in-out;
 
@@ -23,7 +21,6 @@
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.1) 60%);
       pointer-events: none;
     }
 

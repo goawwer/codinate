@@ -40,6 +40,9 @@
                 (click)="navigateTo(item.route)"
               >
                 {{ item.label | translate }}
+                @if (router.url.startsWith(item.route)) {
+                  <tui-icon icon="@tui.check" class="ml-auto" />
+                }
               </button>
             }
           </tui-data-list>
@@ -54,7 +57,12 @@
     </button>
 
     <a>
-      <app-profile-picture></app-profile-picture>
+      <app-picture
+        [name]="this.userStore.user()?.name ?? ''"
+        size="s"
+        [pictureName]="this.userStore.user()?.picture ?? ''"
+        entityType="users"
+      ></app-picture>
     </a>
   </div>
 </nav>

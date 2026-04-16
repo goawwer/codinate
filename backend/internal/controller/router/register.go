@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/goawwer/codinate/internal/controller/public/pictures"
 	"github.com/goawwer/codinate/internal/controller/ui/current"
 	"github.com/goawwer/codinate/internal/controller/ui/employee"
 	"github.com/goawwer/codinate/internal/controller/ui/project"
@@ -18,4 +19,7 @@ func init() {
 	user.Register()
 	team.Register()
 	project.Register()
+
+	// public
+	pictures.Register()
 }

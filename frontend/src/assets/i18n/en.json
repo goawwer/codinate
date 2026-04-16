@@ -14,7 +14,9 @@
       "delete": "Delete",
       "cancel": "Cancel",
       "create": "Create",
-      "save": "Save"
+      "save": "Save",
+      "selectAll": "Select All",
+      "selectNone": "Select None"
     },
     "statuses": {
       "active": "Active",
@@ -30,6 +32,10 @@
     "operations": {
       "success": "Operation completed",
       "fail": "Operation failed"
+    },
+    "hints": {
+      "changePicture": "Change picture",
+      "deletePicture": "Delete picture"
     }
   },
   "auth": {
@@ -79,6 +85,7 @@
       "description": "Description",
       "pictureName": "Picture",
       "members": "Members",
+      "noAvailableMembers": "All users are already members",
       "createdAt": "Created at",
       "updatedAt": "Updated at",
       "changePicture": "Change picture"
@@ -89,10 +96,10 @@
       "projectPictureName": "Picture",
       "authorName": "Author",
       "members": "Members",
+      "noAvailableMembers": "All users are already members",
       "archivedAt": "Archived at",
       "createdAt": "Created at",
-      "updatedAt": "Updated at",
-      "changePicture": "Change picture"
+      "updatedAt": "Updated at"
     },
     "user": {
       "name": "Name",
@@ -168,26 +175,30 @@
       "success": {
         "created": "Team created successfully",
         "updated": "Team updated successfully",
-        "deleted": "Team(s) deleted successfully"
+        "deleted": "Team(s) deleted successfully",
+        "pictureDeleted": "Team picture deleted successfully"
       },
       "errors": {
         "loadFailed": "Failed to load teams",
         "createFailed": "Failed to create team",
         "updateFailed": "Failed to update team",
-        "deleteFailed": "Failed to delete team(s)"
+        "deleteFailed": "Failed to delete team(s)",
+        "pictureDeleteFailed": "Failed to delete team picture"
       }
     },
     "projects": {
       "success": {
         "created": "Project created successfully",
         "updated": "Project updated successfully",
-        "deleted": "Project(s) deleted successfully"
+        "deleted": "Project(s) deleted successfully",
+        "pictureDeleted": "Project picture deleted successfully"
       },
       "errors": {
         "loadFailed": "Failed to load projects",
         "createFailed": "Failed to create project",
         "updateFailed": "Failed to update project",
-        "deleteFailed": "Failed to delete project(s)"
+        "deleteFailed": "Failed to delete project(s)",
+        "pictureDeleteFailed": "Failed to delete project picture"
       }
     },
     "users": {

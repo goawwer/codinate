@@ -3,6 +3,7 @@ package shared
 import "encoding/json"
 
 type MemberShort struct {
+	Id      string `json:"id"`
 	Name    string `json:"name"`
 	Surname string `json:"surname"`
 }

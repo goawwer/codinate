@@ -7,6 +7,7 @@ import (
 )
 
 type Row struct {
+	Id            int    `db:"id" json:"id"`
 	AutorName     string `db:"author_name" json:"authorName"`
 	AuthorSurname string `db:"author_surname" json:"authorSurname"`
 	Core
@@ -17,7 +18,7 @@ type Row struct {
 }
 
 type Core struct {
-	Name        string `db:"name" json:"projectName"`
-	Description string `db:"description" json:"projectDescription"`
-	PictureName string `db:"picture_name" json:"projectPictureName"`
+	Name        string  `db:"name" json:"projectName"`
+	Description *string `db:"description" json:"projectDescription"`
+	PictureName *string `db:"picture_name" json:"projectPictureName"`
 }

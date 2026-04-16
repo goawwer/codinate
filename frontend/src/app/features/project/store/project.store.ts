@@ -52,11 +52,11 @@ export const ProjectStore = signalStore(
         ),
       ),
 
-      createProject: rxMethod<CreateProjectInput>(
+      createProject: rxMethod<{ input: CreateProjectInput; file?: File }>(
         pipe(
           tap(() => patchState(store, { status: StoreStatus.Saving })),
-          exhaustMap((input) =>
-            projectsService.create(input).pipe(
+          exhaustMap(({ input, file }) =>
+            projectsService.create(input, file).pipe(
               switchMap(() => projectsService.getAll()),
               tap((projects) => {
                 patchState(store, { projects, status: StoreStatus.Saved });
@@ -72,11 +72,11 @@ export const ProjectStore = signalStore(
         ),
       ),
 
-      updateProject: rxMethod<{ id: number; input: UpdateProjectInput }>(
+      updateProject: rxMethod<{ id: number; input: UpdateProjectInput; file?: File }>(
         pipe(
           tap(() => patchState(store, { status: StoreStatus.Saving })),
-          exhaustMap(({ id, input }) =>
-            projectsService.update(id, input).pipe(
+          exhaustMap(({ id, input, file }) =>
+            projectsService.update(id, input, file).pipe(
               switchMap(() => projectsService.getAll()),
               tap((projects) => {
                 patchState(store, { projects, status: StoreStatus.Saved });
@@ -111,6 +111,8 @@ export const ProjectStore = signalStore(
           ),
         ),
       ),
+
+
     }),
   ),
 );

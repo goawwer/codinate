@@ -5,27 +5,47 @@
   class="w-full max-w py-5"
   [formGroup]="form"
 >
+  @if (isEdit) {
   <div class="avatar-section flex flex-col items-center gap-3 pb-4">
-    <div class="avatar-preview w-24 h-24 rounded-xl overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
+    <div class="avatar-preview w-70 h-60 rounded-xl overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
       @if (previewUrl(); as url) {
         <img [src]="url" alt="Preview" class="w-full h-full object-cover" />
-      } @else if (isEdit && project?.projectPictureName) {
-        <img [src]="project!.projectPictureName" alt="Current picture" class="w-full h-full object-cover" />
       } @else {
-        <tui-icon icon="@tui.image" class="text-(--tui-text-tertiary)" style="font-size: 2.5rem" />
+      <app-picture
+        [name]="this.project!.projectName"
+        entityType="projects"
+        [pictureName]="this.project!.projectPictureName"
+      ></app-picture>
       }
     </div>
 
-    <button
-      tuiButton
-      appearance="flat"
-      size="s"
-      type="button"
-      iconStart="@tui.camera"
-      (click)="fileInput.click()"
-    >
-      {{ 'models.project.changePicture' | translate }}
-    </button>
+    <div class="flex items-center justify-between gap-0.5">
+      <button
+        tuiButton
+        appearance="flat"
+        size="s"
+        type="button"
+        iconStart="@tui.camera"
+        (click)="fileInput.click()"
+        tuiHintAppearance="primary-tooltip"
+        tuiHintDirection="bottom"
+        [tuiHint]="'generic.hints.changePicture' | translate"
+      >
+      </button>
+
+      <button
+        tuiButton
+        appearance="flat"
+        size="s"
+        type="button"
+        iconStart="@tui.trash-2"
+        (click)="deletePicture()"
+        tuiHintAppearance="primary-tooltip"
+        tuiHintDirection="bottom"
+        [tuiHint]="'generic.hints.deletePicture' | translate"
+      >
+      </button>
+    </div>
 
     <input
       #fileInput
@@ -35,6 +55,32 @@
       (change)="onFileSelected($event)"
     />
   </div>
+  }
+
+  @if (!isEdit) {
+  <div class="flex flex-col items-center gap-3 pb-4">
+    <div class="w-70 h-60 rounded-xl overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
+      @if (previewUrl(); as url) {
+        <img [src]="url" alt="Preview" class="w-full h-full object-cover" />
+      } @else {
+        <tui-icon icon="@tui.image" class="text-(--tui-text-tertiary)" style="font-size: 17rem" />
+      }
+    </div>
+    <button
+      tuiButton
+      appearance="flat"
+      size="s"
+      type="button"
+      iconStart="@tui.camera"
+      (click)="fileInput.click()"
+      tuiHintAppearance="primary-tooltip"
+      tuiHintDirection="bottom"
+      [tuiHint]="'generic.hints.changePicture' | translate"
+    >
+    </button>
+    <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelected($event)" />
+  </div>
+  }
 
   <tui-textfield>
     <label tuiLabel>{{ 'models.project.projectName' | translate }}</label>
@@ -53,23 +99,77 @@
   </tui-textfield>
   <tui-error formControlName="projectDescription" [error]="[] | tuiFieldError | async" />
 
-  @if (isEdit && members().length > 0) {
-    <div class="members-section pt-2">
-      <label tuiLabel class="pb-2">{{ 'models.project.members' | translate }}</label>
-      @for (member of members(); track $index) {
+  @if (!isEdit) {
+    <label tuiLabel>
+      {{ 'models.project.members' | translate }}
+      <tui-textfield multi tuiChevron [stringify]="stringify">
+        <input
+          tuiInputChip
+          formControlName="memberIds"
+          [placeholder]="form.getRawValue().memberIds.length ? '' : ('models.project.members' | translate)"
+        />
+        <tui-input-chip *tuiItem />
+        <tui-data-list *tuiTextfieldDropdown>
+          @for (group of userGroups(); track group.role) {
+            <tui-opt-group [label]="group.role | employeeRole" tuiMultiSelectGroup>
+              @for (user of group.users | tuiFilterByInput; track user.id) {
+                <button
+                  new
+                  tuiOption
+                  [value]="user"
+                >
+                  {{ user.name }} {{ user.surname }}
+                </button>
+              }
+            </tui-opt-group>
+          }
+        </tui-data-list>
+      </tui-textfield>
+    </label>
+  }
+
+  @if (isEdit) {
+    <div class="pt-2">
+      <div class="flex items-center justify-between gap-2 pb-2">
+        <label tuiLabel>{{ 'models.project.members' | translate }}</label>
+        <div class="flex flex-1 items-center justify-end">
+          <tui-textfield class="w-4/6" tuiChevron [stringify]="stringify">
+            <input tuiTextfield [formControl]="memberToAdd" [placeholder]="'generic.actions.add' | translate" />
+            <tui-data-list *tuiTextfieldDropdown [emptyContent]="'models.project.noAvailableMembers' | translate">
+              @for (group of availableUserGroups(); track group.role) {
+                <tui-opt-group [label]="group.role | employeeRole">
+                  @for (user of group.users | tuiFilterByInput; track user.id) {
+                    <button tuiOption [value]="user" (click)="selectedMember.set(user)">
+                      {{ user.name }} {{ user.surname }}
+                    </button>
+                  }
+                </tui-opt-group>
+              }
+            </tui-data-list>
+          </tui-textfield>
+          <button
+            appearance="action"
+            iconStart="@tui.user-plus"
+            size="m"
+            tuiIconButton
+            type="button"
+            [disabled]="!selectedMember() || !!addingId()"
+            (click)="addMember()"
+          ></button>
+        </div>
+      </div>
+      @for (member of members(); track member.id) {
         <div class="flex items-center justify-between py-2 border-b border-(--tui-border-normal)">
           <span class="text-sm">{{ member.name }} {{ member.surname }}</span>
-          @if (member.userId) {
-            <button
-              appearance="destructive"
-              iconStart="@tui.user-minus"
-              size="xs"
-              tuiIconButton
-              type="button"
-              [disabled]="removingId() === member.userId"
-              (click)="removeMember(member)"
-            ></button>
-          }
+          <button
+            appearance="action"
+            iconStart="@tui.user-minus"
+            size="m"
+            tuiIconButton
+            type="button"
+            [disabled]="removingId() === member.id"
+            (click)="removeMember(member)"
+          ></button>
         </div>
       }
     </div>

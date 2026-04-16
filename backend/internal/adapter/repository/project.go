@@ -17,7 +17,9 @@ type ProjectRepo interface {
 	GetAll(ctx context.Context) ([]project.Row, error)
 	Update(ctx context.Context, input project.UpdateProjectInput, id int) error
 	RemoveMember(ctx context.Context, projectId int, userId uuid.UUID) error
+	AddMember(ctx context.Context, projectId int, userId uuid.UUID) error
 	DeleteBy(ctx context.Context, projectId int) error
+	DeletePictureBy(ctx context.Context, projectId int) error
 }
 
 type projectRepoImpl struct {
@@ -34,12 +36,14 @@ func (r *projectRepoImpl) GetAll(ctx context.Context) ([]project.Row, error) {
 
 	err := r.SelectContext(ctx, &res, `
 		SELECT
+			p.id,
 			author.name AS author_name,
 			author.surname AS author_surname,
 			p.name, p.description, p.picture_name, p.archived_at, p.created_at, p.updated_at,
 			COALESCE(
 				json_agg(
 					json_build_object(
+						'id', 	   mu.id,
 						'name',    mu.name,
 						'surname', mu.surname
 					)
@@ -51,7 +55,7 @@ func (r *projectRepoImpl) GetAll(ctx context.Context) ([]project.Row, error) {
 		LEFT JOIN project_members pm ON pm.project_id = p.id
 		LEFT JOIN users mu ON mu.id = pm.user_id
 		GROUP BY
-			author.name, author.surname, p.name,
+			p.id, author.name, author.surname, p.name,
 			p.description, p.picture_name,
 			p.archived_at, p.created_at, p.updated_at
 	`)
@@ -96,6 +100,15 @@ func (r *projectRepoImpl) Update(ctx context.Context, input project.UpdateProjec
 	return err
 }
 
+func (r *projectRepoImpl) AddMember(ctx context.Context, projectId int, userId uuid.UUID) error {
+	_, err := r.ExecContext(ctx,
+		`INSERT INTO project_members (project_id, user_id)
+		VALUES ($1, $2)`,
+		projectId, userId,
+	)
+	return err
+}
+
 func (r *projectRepoImpl) RemoveMember(ctx context.Context, projectId int, userId uuid.UUID) error {
 	_, err := r.ExecContext(ctx,
 		`DELETE FROM project_members WHERE project_id = $1 AND user_id = $2`,
@@ -114,10 +127,19 @@ func (r *projectRepoImpl) DeleteBy(ctx context.Context, projectId int) error {
 		}
 
 		_, err := r.QueryContext(ctx, `
-			DELETE FROM proejcts
+			DELETE FROM projects
 			WHERE id = $1
 		`, projectId)
 
 		return err
 	})
+}
+
+func (r *projectRepoImpl) DeletePictureBy(ctx context.Context, projectId int) error {
+	_, err := r.QueryContext(ctx, `
+		UPDATE projects SET picture_name = NULL
+		WHERE id = $1
+	`, projectId)
+
+	return err
 }

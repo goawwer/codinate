@@ -27,10 +27,18 @@ func (s *service) update(ctx context.Context, input team.UpdateTeamInput, id int
 	return repository.GetTeamRepo().Update(ctx, input, id)
 }
 
+func (s *service) addMember(ctx context.Context, teamId int, memberId uuid.UUID) error {
+	return repository.GetTeamRepo().AddMember(ctx, teamId, memberId)
+}
+
 func (s *service) remMember(ctx context.Context, teamId int, memberId uuid.UUID) error {
 	return repository.GetTeamRepo().RemoveMember(ctx, teamId, memberId)
 }
 
 func (s *service) delete(ctx context.Context, teamId int) error {
 	return repository.GetTeamRepo().DeleteBy(ctx, teamId)
+}
+
+func (s *service) deletePicture(ctx context.Context, projectId int) error {
+	return repository.GetTeamRepo().DeletePictureBy(ctx, projectId)
 }

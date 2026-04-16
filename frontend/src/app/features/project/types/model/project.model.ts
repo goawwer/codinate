@@ -1,7 +1,7 @@
 export interface ProjectMember {
+  id: string;
   name: string;
   surname: string;
-  userId?: string;
 }
 
 export interface Project {

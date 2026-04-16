@@ -1,15 +1,23 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TuiDialogContext } from '@taiga-ui/core';
 import { TUI_VALIDATION_ERRORS } from '@taiga-ui/kit';
+import { TUI_MULTI_SELECT_TEXTS } from '@taiga-ui/kit/tokens';
+import { of } from 'rxjs';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import { TranslateService } from '@ngx-translate/core';
 import { Team, TeamMember } from '../../../../team/types/model/team.model';
 import { TeamStore } from '../../../../team/store/team.store';
 import { TeamApiService } from '../../../../team/service/team.service';
-import { CreateTeamInput, UpdateTeamInput } from '../../../../team/types/model/team-dashboard.model';
+import { AlertService } from '../../../../../core/declarations/services/alert.service';
+import {
+  CreateTeamInput,
+  UpdateTeamInput,
+} from '../../../../team/types/model/team-dashboard.model';
 import { TEAM_DIALOG_IMPORTS } from './team-dialog.imports';
 import { loginValidationErrorsFactory } from '../../../../auth/model/auth.validation';
+import { UserStore } from '../../../../user/store/user.store';
+import { User } from '../../../../user/types/model/user.model';
 
 export interface TeamDialogData {
   team: Team | null;
@@ -27,12 +35,19 @@ export interface TeamDialogData {
       useFactory: loginValidationErrorsFactory,
       deps: [TranslateService],
     },
+    {
+      provide: TUI_MULTI_SELECT_TEXTS,
+      useValue: of({ all: 'Выбрать всё', none: 'Отменить выбор' }),
+    },
   ],
 })
 export class TeamDialogComponent {
   protected readonly store = inject(TeamStore);
   protected readonly service = inject(TeamApiService);
+  protected readonly userStore = inject(UserStore);
   protected readonly context = injectContext<TuiDialogContext<void, TeamDialogData>>();
+  private readonly alert = inject(AlertService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly team = this.context.data.team;
   protected readonly isEdit = this.team !== null;
@@ -41,7 +56,30 @@ export class TeamDialogComponent {
   protected selectedFile: File | null = null;
 
   protected readonly members = signal<TeamMember[]>([...(this.team?.members ?? [])]);
+  protected readonly memberToAdd = new FormControl<string>('', { nonNullable: true });
+  protected readonly selectedMember = signal<User | null>(null);
   protected readonly removingId = signal<string | null>(null);
+  protected readonly addingId = signal<string | null>(null);
+
+  protected readonly stringify = (user: User | null) =>
+    user ? `${user.name} ${user.surname}` : '';
+
+  protected readonly userGroups = computed(() => {
+    const roleMap = new Map<string, User[]>();
+    for (const user of this.userStore.users()) {
+      const list = roleMap.get(user.role) ?? [];
+      list.push(user);
+      roleMap.set(user.role, list);
+    }
+    return Array.from(roleMap.entries()).map(([role, users]) => ({ role, users }));
+  });
+
+  protected readonly availableUserGroups = computed(() => {
+    const memberIds = new Set(this.members().map((m) => m.id));
+    return this.userGroups()
+      .map(({ role, users }) => ({ role, users: users.filter((u) => !memberIds.has(u.id)) }))
+      .filter(({ users }) => users.length > 0);
+  });
 
   protected readonly form = new FormGroup({
     name: new FormControl(this.team?.name ?? '', {
@@ -51,6 +89,7 @@ export class TeamDialogComponent {
     description: new FormControl(this.team?.description ?? '', {
       nonNullable: true,
     }),
+    memberIds: new FormControl<User[]>([], { nonNullable: true }),
   });
 
   protected onFileSelected(event: Event): void {
@@ -63,15 +102,52 @@ export class TeamDialogComponent {
   }
 
   protected removeMember(member: TeamMember): void {
-    if (!member.userId) return;
-    this.removingId.set(member.userId);
-    this.service.removeMember(this.team!.id, member.userId).subscribe({
+    this.removingId.set(member.id!);
+    this.service.removeMember(this.team!.id, member.id).subscribe({
       next: () => {
-        this.members.update((list) => list.filter((m) => m.userId !== member.userId));
+        this.members.update((list) => list.filter((m) => m.id !== member.id));
         this.removingId.set(null);
       },
       error: () => this.removingId.set(null),
     });
+  }
+
+  protected addMember(): void {
+    const member = this.selectedMember();
+    if (!member) return;
+    this.addingId.set(member.id);
+    this.service.addMember(this.team!.id, member.id).subscribe({
+      next: () => {
+        this.members.update((list) => [
+          ...list,
+          { id: member.id, name: member.name, surname: member.surname },
+        ]);
+        this.memberToAdd.reset();
+        this.selectedMember.set(null);
+        this.addingId.set(null);
+      },
+      error: () => this.addingId.set(null),
+    });
+  }
+
+  protected deletePicture(): void {
+    if (this.previewUrl()) {
+      this.previewUrl.set(null);
+      this.selectedFile = null;
+      return;
+    }
+    if (this.team?.pictureName) {
+      this.service.deletePicture(this.team.id).subscribe({
+        next: () => {
+          this.store.loadTeams();
+          this.alert.success(this.translate.instant('cmd.teams.success.pictureDeleted'));
+          this.context.completeWith();
+        },
+        error: () => {
+          this.alert.error(this.translate.instant('cmd.teams.errors.pictureDeleteFailed'));
+        },
+      });
+    }
   }
 
   protected submit(): void {
@@ -87,14 +163,15 @@ export class TeamDialogComponent {
         name: value.name,
         description: value.description,
       };
-      this.store.updateTeam({ id: this.team!.id, input });
+      this.store.updateTeam({ id: this.team!.id, input, file: this.selectedFile! });
     } else {
       const input: CreateTeamInput = {
         name: value.name,
         description: value.description,
         pictureName: '',
+        memberIds: value.memberIds.map((u) => u.id),
       };
-      this.store.createTeam(input);
+      this.store.createTeam({ input, file: this.selectedFile ?? undefined });
     }
 
     this.context.completeWith();

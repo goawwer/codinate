@@ -1,7 +1,7 @@
 export interface TeamMember {
   name: string;
   surname: string;
-  userId?: string;
+  id: string;
 }
 
 export interface Team {

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/cor
 import { PROJECTSCARDSIMPORT } from './all-projects.imports';
 import { ProjectStore } from '../../store/project.store';
 import { Project } from '../../types/model/project.model';
-import { avatarColor, avatarLetters } from '../../../../common/avatar/avatar-color.util';
+import { avatarColor, avatarLetters } from '../../../../common/picture/picture-color.util';
 
 @Component({
   selector: 'app-all-projects',
@@ -14,15 +14,7 @@ import { avatarColor, avatarLetters } from '../../../../common/avatar/avatar-col
 export class AllProjectsComponent implements OnInit {
   protected readonly store = inject(ProjectStore);
 
-  protected cardBackground(project: Project): string {
-    if (project.projectPictureName) {
-      return `url(/apipublic/project-picture?filename=${project.projectPictureName})`;
-    }
-    return '';
-  }
-
   protected cardColor(project: Project): string {
-    if (project.projectPictureName) return 'transparent';
     return avatarColor(avatarLetters(project.projectName, ''));
   }
 

@@ -52,11 +52,11 @@ export const TeamStore = signalStore(
         ),
       ),
 
-      createTeam: rxMethod<CreateTeamInput>(
+      createTeam: rxMethod<{ input: CreateTeamInput; file?: File }>(
         pipe(
           tap(() => patchState(store, { status: StoreStatus.Saving })),
-          exhaustMap((input) =>
-            teamsService.create(input).pipe(
+          exhaustMap(({ input, file }) =>
+            teamsService.create(input, file).pipe(
               switchMap(() => teamsService.getAll()),
               tap((teams) => {
                 patchState(store, { teams, status: StoreStatus.Saved });
@@ -72,11 +72,11 @@ export const TeamStore = signalStore(
         ),
       ),
 
-      updateTeam: rxMethod<{ id: number; input: UpdateTeamInput }>(
+      updateTeam: rxMethod<{ id: number; input: UpdateTeamInput; file?: File }>(
         pipe(
           tap(() => patchState(store, { status: StoreStatus.Saving })),
-          exhaustMap(({ id, input }) =>
-            teamsService.update(id, input).pipe(
+          exhaustMap(({ id, input, file }) =>
+            teamsService.update(id, input, file).pipe(
               switchMap(() => teamsService.getAll()),
               tap((teams) => {
                 patchState(store, { teams, status: StoreStatus.Saved });

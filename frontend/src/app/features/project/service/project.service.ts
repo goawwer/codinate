@@ -13,19 +13,33 @@ export class ProjectApiService {
     return this.httpClient.get<Project[]>(`${this.baseURL}`);
   }
 
-  create(body: CreateProjectInput): Observable<void> {
-    return this.httpClient.post<void>(`${this.baseURL}/add`, body);
+  create(body: CreateProjectInput, file?: File): Observable<void> {
+    const formData = new FormData();
+    if (file) formData.append('picture', file);
+    formData.append('payload', JSON.stringify(body));
+    return this.httpClient.post<void>(`${this.baseURL}/create`, formData);
   }
 
-  update(id: number, body: UpdateProjectInput): Observable<void> {
-    return this.httpClient.patch<void>(`${this.baseURL}/update/${id}`, body);
+  update(id: number, body: UpdateProjectInput, file?: File): Observable<void> {
+    const formData = new FormData();
+    if (file) formData.append('picture', file);
+    formData.append('payload', JSON.stringify(body));
+    return this.httpClient.patch<void>(`${this.baseURL}/${id}/update`, formData);
   }
 
   deleteMany(ids: number[]): Observable<void> {
     return this.httpClient.delete<void>(`${this.baseURL}/delete`, { body: { ids } });
   }
 
-  removeMember(projectId: number, userId: string): Observable<void> {
-    return this.httpClient.delete<void>(`${this.baseURL}/${projectId}/members/${userId}`);
+  deletePicture(projectId: number): Observable<void> {
+    return this.httpClient.delete<void>(`${this.baseURL}/${projectId}/delete/picture`);
+  }
+
+  addMember(projectId: number, memberId: string): Observable<void> {
+    return this.httpClient.post<void>(`${this.baseURL}/${projectId}/add/${memberId}`, {});
+  }
+
+  removeMember(projectId: number, memberId: string): Observable<void> {
+    return this.httpClient.delete<void>(`${this.baseURL}/${projectId}/delete/${memberId}`);
   }
 }
