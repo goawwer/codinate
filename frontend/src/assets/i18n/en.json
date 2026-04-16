@@ -57,8 +57,15 @@
       "signInFailed": "Authorization error"
     }
   },
+  "main": {
+    "subnav": {
+      "activity": "Activity",
+      "teams": "Teams",
+      "projects": "Projects"
+    }
+  },
   "navbar": {
-    "all": "All",
+    "main": "Main",
     "mine": "My tasks",
     "teams": "Teams",
     "projects": "Projects",

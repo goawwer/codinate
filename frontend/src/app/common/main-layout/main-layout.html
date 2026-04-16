@@ -1,11 +1,72 @@
 <div class="min-h-screen bg-app-bg">
   <header class="sticky py-4 bg-app-bg">
     <div class="mx-auto w-full max-w-362.5 px-4 sm:px-6 lg:px-8">
-      <app-navbar></app-navbar>
+      <div class="rounded-3xl bg-(--app-grey-100) overflow-hidden">
+        <app-navbar></app-navbar>
+        @if (isMainSection()) {
+          <div tuiAnimated class="bg-(--app-grey-600)/20 px-4">
+            <tui-tabs-with-more
+              class="custom"
+              [underline]="false"
+              [activeItemIndex]="activeItemIndex"
+            >
+              <a tuiTab routerLink="/main/activity" routerLinkActive>{{ 'main.subnav.activity' | translate }}</a>
+
+              <button
+                tuiChevron
+                tuiTab
+                type="button"
+                [tuiDropdown]="teamsDropdown"
+                [(tuiDropdownOpen)]="teamsOpen"
+                (tui-tab-activate)="stop($event)"
+              >
+                {{ 'main.subnav.teams' | translate }}
+              </button>
+
+              <button
+                tuiChevron
+                tuiTab
+                type="button"
+                [tuiDropdown]="projectsDropdown"
+                [(tuiDropdownOpen)]="projectsOpen"
+                (tui-tab-activate)="stop($event)"
+              >
+                {{ 'main.subnav.projects' | translate }}
+              </button>
+            </tui-tabs-with-more>
+          </div>
+        }
+      </div>
     </div>
   </header>
 
-  <main class="mx-auto w-full max-w-362.5 px-4 sm:px-6 lg:px-8">
+  <main tuiNavigationMain class="mx-auto w-full max-w-362.5 px-4 sm:px-6 lg:px-8">
     <router-outlet></router-outlet>
   </main>
 </div>
+
+<ng-template #teamsDropdown>
+  <tui-data-list>
+    @for (team of teamStore.teams(); track team.id) {
+      <button tuiOption type="button" (click)="navigateToTeam(team.id)">
+        {{ team.name }}
+      </button>
+    }
+    @if (!teamStore.teams().length) {
+      <button tuiOption type="button">No teams</button>
+    }
+  </tui-data-list>
+</ng-template>
+
+<ng-template #projectsDropdown>
+  <tui-data-list>
+    @for (project of projectStore.projects(); track project.id) {
+      <button tuiOption type="button" (click)="navigateToProject(project.id)">
+        {{ project.projectName }}
+      </button>
+    }
+    @if (!projectStore.projects().length) {
+      <button tuiOption type="button">No projects</button>
+    }
+  </tui-data-list>
+</ng-template>

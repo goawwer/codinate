@@ -60,8 +60,15 @@
       "signInFailed": "Ошибка авторизации"
     }
   },
+  "main": {
+    "subnav": {
+      "activity": "Активность",
+      "teams": "Команды",
+      "projects": "Проекты"
+    }
+  },
   "navbar": {
-    "all": "Все",
+    "main": "Главная",
     "mine": "Мои задачи",
     "teams": "Команды",
     "projects": "Проекты",
