@@ -18,9 +18,64 @@ definitions:
     - AdminPermissionRole
     - UserPermissionRole
     - NoPermissionRole
+  project.Row:
+    properties:
+      archivedAt:
+        type: string
+      authorName:
+        type: string
+      authorSurname:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      members:
+        items:
+          $ref: '#/definitions/shared.MemberShort'
+        type: array
+      projectDescription:
+        type: string
+      projectName:
+        type: string
+      projectPictureName:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  shared.MemberShort:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      surname:
+        type: string
+    type: object
   shared.NameInput:
     properties:
       name:
+        type: string
+    type: object
+  team.Row:
+    properties:
+      authorId:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      members:
+        items:
+          $ref: '#/definitions/shared.MemberShort'
+        type: array
+      name:
+        type: string
+      pictureName:
+        type: string
+      updatedAt:
         type: string
     type: object
   user.CreateInput:
@@ -36,6 +91,8 @@ definitions:
       roleId:
         type: integer
       surname:
+        type: string
+      username:
         type: string
     type: object
   user.DeleteMultiInput:
@@ -85,7 +142,7 @@ definitions:
       profilePicture:
         type: string
       roleId:
-        type: string
+        type: integer
       surname:
         type: string
       username:
@@ -247,6 +304,258 @@ paths:
       summary: Update role
       tags:
       - roles
+  /api/files/tasks/{entityType}/{entityId}/{id}:
+    get:
+      description: Serves a file attachment for a task entity
+      parameters:
+      - description: Entity type (e.g. tasks)
+        in: path
+        name: entityType
+        required: true
+        type: string
+      - description: Entity UUID
+        in: path
+        name: entityId
+        required: true
+        type: string
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get task file
+      tags:
+      - files
+  /api/projects:
+    get:
+      description: Returns a list of all projects with their members
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/project.Row'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all projects
+      tags:
+      - projects
+  /api/projects/{id}/delete:
+    delete:
+      description: Deletes a project by ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete project
+      tags:
+      - projects
+  /api/projects/{id}/update:
+    patch:
+      consumes:
+      - multipart/form-data
+      description: Updates a project's name, description, or picture
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Project picture
+        in: formData
+        name: picture
+        type: file
+      - in: formData
+        name: description
+        type: string
+      - in: formData
+        name: name
+        type: string
+      - in: formData
+        name: pictureName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update project
+      tags:
+      - projects
+  /api/projects/{project_id}/add/{member_id}:
+    post:
+      description: Adds a user to a project by their UUIDs
+      parameters:
+      - description: Project ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      - description: User UUID
+        in: path
+        name: member_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add member to project
+      tags:
+      - projects
+  /api/projects/{project_id}/delete/{member_id}:
+    delete:
+      description: Removes a user from a project by their UUIDs
+      parameters:
+      - description: Project ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      - description: User UUID
+        in: path
+        name: member_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Remove member from project
+      tags:
+      - projects
+  /api/projects/{project_id}/delete/picture:
+    delete:
+      description: Deletes the picture of a project
+      parameters:
+      - description: Project ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Remove project picture
+      tags:
+      - projects
+  /api/projects/create:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Creates a new project with optional picture and initial members
+      parameters:
+      - description: Project picture
+        in: formData
+        name: picture
+        type: file
+      - in: formData
+        name: authorId
+        type: string
+      - in: formData
+        name: projectDescription
+        type: string
+      - collectionFormat: csv
+        in: formData
+        items:
+          type: string
+        name: projectMembers
+        type: array
+      - in: formData
+        name: projectName
+        type: string
+      - in: formData
+        name: projectPictureName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create project
+      tags:
+      - projects
   /api/task/priorities:
     get:
       consumes:
@@ -491,6 +800,254 @@ paths:
       summary: Update status
       tags:
       - task/status
+  /api/teams:
+    get:
+      description: Returns a list of all teams with their members
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/team.Row'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all teams
+      tags:
+      - teams
+  /api/teams/{id}/delete:
+    delete:
+      description: Deletes a team by ID
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete team
+      tags:
+      - teams
+  /api/teams/{id}/members:
+    get:
+      description: Returns the list of members for a given team
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/team.Row'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get team members
+      tags:
+      - teams
+  /api/teams/{id}/update:
+    patch:
+      consumes:
+      - multipart/form-data
+      description: Updates a team's name, description, or picture
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Team picture
+        in: formData
+        name: picture
+        type: file
+      - in: formData
+        name: authorId
+        type: string
+      - in: formData
+        name: description
+        type: string
+      - in: formData
+        name: id
+        type: integer
+      - in: formData
+        name: name
+        type: string
+      - in: formData
+        name: pictureName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update team
+      tags:
+      - teams
+  /api/teams/{team_id}/add/{member_id}:
+    post:
+      description: Adds a user to a team by their IDs
+      parameters:
+      - description: Team ID
+        in: path
+        name: team_id
+        required: true
+        type: integer
+      - description: User UUID
+        in: path
+        name: member_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add member to team
+      tags:
+      - teams
+  /api/teams/{team_id}/delete/{member_id}:
+    delete:
+      description: Removes a user from a team by their IDs
+      parameters:
+      - description: Team ID
+        in: path
+        name: team_id
+        required: true
+        type: integer
+      - description: User UUID
+        in: path
+        name: member_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Remove member from team
+      tags:
+      - teams
+  /api/teams/{team_id}/delete/picture:
+    delete:
+      description: Deletes the picture of a team
+      parameters:
+      - description: Team ID
+        in: path
+        name: team_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Remove team picture
+      tags:
+      - teams
+  /api/teams/create:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Creates a new team with optional picture and initial members
+      parameters:
+      - description: Team picture
+        in: formData
+        name: picture
+        type: file
+      - in: formData
+        name: authorId
+        type: string
+      - in: formData
+        name: description
+        type: string
+      - collectionFormat: csv
+        in: formData
+        items:
+          type: string
+        name: members
+        type: array
+      - in: formData
+        name: name
+        type: string
+      - in: formData
+        name: pictureName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create team
+      tags:
+      - teams
   /api/user/{id}:
     get:
       description: Returns a single user by their UUID
@@ -735,4 +1292,34 @@ paths:
       summary: Refresh
       tags:
       - auth
+  /pictures/{entity_type}:
+    get:
+      description: Serves a picture file for a given entity type (e.g. teams, projects)
+      parameters:
+      - description: Entity type (e.g. teams, projects)
+        in: path
+        name: entity_type
+        required: true
+        type: string
+      - description: Picture filename
+        in: query
+        name: filename
+        required: true
+        type: string
+      produces:
+      - image/*
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get entity picture
+      tags:
+      - pictures
 swagger: "2.0"
