@@ -14,3 +14,18 @@ func ResolveUserRole(role string) enum.PermissionRole {
 		return enum.NoPermissionRole
 	}
 }
+
+func ResolveReleaseStatus(status string) enum.ReleaseStatus {
+	switch status {
+	case "active":
+		return enum.ReleaseStatusActive
+	case "finished":
+		return enum.ReleaseStatusFinished
+	case "closed":
+		return enum.ReleaseStatusClosed
+	case "archived":
+		return enum.ReleaseStatusArchived
+	}
+
+	return ""
+}

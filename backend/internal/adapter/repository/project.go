@@ -20,6 +20,12 @@ type ProjectRepo interface {
 	AddMember(ctx context.Context, projectId int, userId uuid.UUID) error
 	DeleteBy(ctx context.Context, projectId int) error
 	DeletePictureBy(ctx context.Context, projectId int) error
+
+	// releases
+	GetReleases(ctx context.Context, projectId int) ([]model.Release, error)
+	AddNewRelease(ctx context.Context, release *model.Release) error
+	UpdateRelease(ctx context.Context, input project.UpdateReleaseInput, id int) error
+	DeleteRelease(ctx context.Context, releaseId int) error
 }
 
 type projectRepoImpl struct {
@@ -140,6 +146,50 @@ func (r *projectRepoImpl) DeletePictureBy(ctx context.Context, projectId int) er
 		UPDATE projects SET picture_name = NULL
 		WHERE id = $1
 	`, projectId)
+
+	return err
+}
+
+func (r *projectRepoImpl) GetReleases(ctx context.Context, projectId int) ([]model.Release, error) {
+	var res []model.Release
+
+	err := r.SelectContext(ctx, &res, `
+		SELECT * FROM project_releases
+		WHERE project_id = $1
+	`, projectId)
+
+	return res, err
+}
+
+func (r *projectRepoImpl) AddNewRelease(ctx context.Context, release *model.Release) error {
+	_, err := r.NamedQueryContext(ctx, `
+		INSERT INTO project_releases (
+			project_id, title, decription, status, start_at, end_at
+		)
+		VALUES (
+			:project_id, :title, :description, :status, :start_at, :end_at
+		)
+	`, release)
+
+	return err
+}
+
+func (r *projectRepoImpl) UpdateRelease(ctx context.Context, input project.UpdateReleaseInput, id int) error {
+	var qb QueryFiltersBuilder
+
+	clause := qb.Update(util.GetDBColumnsFiltersValuesMap(nil, model.Release{}, &input)).
+		Eq("id", id).
+		Build()
+
+	_, err := r.ExecContext(ctx, "UPDATE projects "+clause)
+	return err
+}
+
+func (r *projectRepoImpl) DeleteRelease(ctx context.Context, releaseId int) error {
+	_, err := r.Query(`
+		DELETE FROM project_releases
+		WHERE id = $1
+	`, releaseId)
 
 	return err
 }

@@ -14,14 +14,18 @@ type TaskRepo interface {
 	AddTaskPriority(ctx context.Context, name string) error
 	UpdateTaskPriority(ctx context.Context, id int, newName string) error
 	DeleteTaskPriorityById(ctx context.Context, id int) error
-	DeleteAllTaskPriorities(ctx context.Context) error
 
 	// Statuses
 	GetTaskStatuses(ctx context.Context) ([]shared.IdWithName, error)
 	AddTaskStatus(ctx context.Context, name string) error
 	UpdateTaskStatus(ctx context.Context, id int, newName string) error
 	DeleteTaskStatusById(ctx context.Context, id int) error
-	DeleteAllTaskStatuses(ctx context.Context) error
+
+	// categories
+	GetAllCategoriesBy(ctx context.Context, proejctId int) ([]shared.IdWithName, error)
+	AddNewCategory(ctx context.Context, name shared.NameInput, projectId int) error
+	UpdateCategory(ctx context.Context, name shared.NameInput, id int) error
+	DeleteCategorty(ctx context.Context, id int) error
 }
 
 type taskRepoImpl struct {
@@ -68,12 +72,6 @@ func (r *taskRepoImpl) DeleteTaskPriorityById(ctx context.Context, id int) error
 	return err
 }
 
-func (r *taskRepoImpl) DeleteAllTaskPriorities(ctx context.Context) error {
-	_, err := r.QueryContext(ctx, `DELETE FROM task_priorities`)
-
-	return err
-}
-
 func (r *taskRepoImpl) GetTaskStatuses(ctx context.Context) ([]shared.IdWithName, error) {
 	var res []shared.IdWithName
 
@@ -109,8 +107,40 @@ func (r *taskRepoImpl) DeleteTaskStatusById(ctx context.Context, id int) error {
 	return err
 }
 
-func (r *taskRepoImpl) DeleteAllTaskStatuses(ctx context.Context) error {
-	_, err := r.QueryContext(ctx, `DELETE FROM task_statuses`)
+func (r *taskRepoImpl) GetAllCategoriesBy(ctx context.Context, proejctId int) ([]shared.IdWithName, error) {
+	var res []shared.IdWithName
+
+	err := r.SelectContext(ctx, &res, `
+		SELECT id, name FROM task_categories
+		WHERE project_id = $1
+	`, proejctId)
+
+	return res, err
+}
+
+func (r *taskRepoImpl) AddNewCategory(ctx context.Context, name shared.NameInput, projectId int) error {
+	_, err := r.QueryContext(ctx, `
+		INSERT INTO task_categories (name, project_id)
+		VALUES ($1, $2)
+	`, name, projectId)
+
+	return err
+}
+
+func (r *taskRepoImpl) UpdateCategory(ctx context.Context, name shared.NameInput, id int) error {
+	_, err := r.QueryContext(ctx, `
+		UPDATE task_categories SET name = $1
+		WHERE id = $2
+	`, name, id)
+
+	return err
+}
+
+func (r *taskRepoImpl) DeleteCategorty(ctx context.Context, id int) error {
+	_, err := r.QueryContext(ctx, `
+		DELETE FROM task_categories
+		WHERE id = $1
+	`, id)
 
 	return err
 }

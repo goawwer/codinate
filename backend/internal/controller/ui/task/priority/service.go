@@ -24,7 +24,3 @@ func (s *service) updatePriority(ctx context.Context, id int, newName string) er
 func (s *service) deletePriorityById(ctx context.Context, id int) error {
 	return repository.GetTaskRepo().DeleteTaskPriorityById(ctx, id)
 }
-
-func (s *service) deleteAllTaskPriorities(ctx context.Context) error {
-	return repository.GetTaskRepo().DeleteAllTaskPriorities(ctx)
-}

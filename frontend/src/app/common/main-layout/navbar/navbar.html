@@ -9,37 +9,9 @@
     </a>
 
     @if (userStore.isAtLeastAdmin()) {
-      <div class="relative">
-        <button
-          tuiChevron
-          tuiDropdownAlign="right"
-          tuiLink
-          type="button"
-          class="dashboard-btn"
-          [class.font-bold]="isAdminActive()"
-          [(tuiDropdownOpen)]="adminOpen"
-          [tuiDropdown]="adminDropdown"
-          tuiDropdownAlign="left"
-        >
-          {{ 'navbar.admin' | translate }}
-        </button>
-        <ng-template #adminDropdown>
-          <tui-data-list>
-            @for (item of adminItems; track item.route) {
-              <button
-                tuiOption
-                type="button"
-                (click)="navigateTo(item.route)"
-              >
-                {{ item.label | translate }}
-                @if (router.url.startsWith(item.route)) {
-                  <tui-icon icon="@tui.check" class="ml-auto" />
-                }
-              </button>
-            }
-          </tui-data-list>
-        </ng-template>
-      </div>
+      <a class="cursor-pointer" routerLink="/admin" routerLinkActive="font-bold" [routerLinkActiveOptions]="{exact: false}">
+        {{ 'navbar.admin' | translate }}
+      </a>
     }
   </div>
 

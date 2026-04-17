@@ -30,8 +30,8 @@
       "user": "User"
     },
     "operations": {
-      "success": "Operation completed",
-      "fail": "Operation failed"
+      "success": "Completed",
+      "fail": "Failed"
     },
     "hints": {
       "changePicture": "Change picture",
@@ -67,14 +67,7 @@
   "navbar": {
     "main": "Main",
     "mine": "My tasks",
-    "teams": "Teams",
-    "projects": "Projects",
-    "admin": "Admin-dashboard",
-    "adminItems": {
-      "users": "Users",
-      "teams": "Teams",
-      "projects": "Projects"
-    }
+    "admin": "Admin-dashboard"
   },
   "employee_roles": {
     "owner": "Owner",
@@ -123,6 +116,21 @@
     }
   },
   "admin": {
+    "subnav": {
+      "users": "Users",
+      "teams": "Teams",
+      "projects": "Projects",
+      "settings": "Settings"
+    },
+    "settings": {
+      "title": "Settings",
+      "saved": "Changes saved",
+      "sections": {
+        "roles": "Roles",
+        "taskStatuses": "Task Statuses",
+        "taskPriorities": "Task Priorities"
+      }
+    },
     "dashboard": {
       "teams": {
         "hints": {

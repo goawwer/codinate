@@ -6,7 +6,7 @@ import { CreateUserInput, UpdateUserInput, UserFilters } from '../types/model/da
 
 @Injectable({ providedIn: 'root' })
 export class UserApiService {
-  private readonly baseURL = '/api/user';
+  private readonly baseURL = '/api/users';
   private readonly httpClient = inject(HttpClient);
 
   getAll(filters: UserFilters = {}): Observable<User[]> {

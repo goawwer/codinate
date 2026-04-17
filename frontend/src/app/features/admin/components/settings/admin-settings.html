@@ -1,0 +1,45 @@
+<div class="settings-page">
+  <div class="settings-header">
+    <button
+      tuiButton
+      class="btn-primary"
+      size="m"
+      [disabled]="saving || !hasChanges"
+      (click)="save()"
+    >
+      {{ 'generic.actions.save' | translate }}
+    </button>
+  </div>
+
+  <div class="settings-grid">
+    <div class="settings-card">
+      <p tuiTitle="s" class="settings-card__title">
+        {{ 'admin.settings.sections.roles' | translate }}
+      </p>
+      <tui-textfield multi [tuiTextfieldSize]="$any(inputSize)" [tuiTextfieldCleaner]="true">
+        <input tuiInputChip [formControl]="rolesControl" />
+        <tui-input-chip *tuiItem [editable]="true" />
+      </tui-textfield>
+    </div>
+
+    <div class="settings-card">
+      <p tuiTitle="s" class="settings-card__title">
+        {{ 'admin.settings.sections.taskStatuses' | translate }}
+      </p>
+      <tui-textfield multi [tuiTextfieldSize]="$any(inputSize)" [tuiTextfieldCleaner]="true">
+        <input tuiInputChip [formControl]="statusesControl" />
+        <tui-input-chip *tuiItem [editable]="true" />
+      </tui-textfield>
+    </div>
+
+    <div class="settings-card">
+      <p tuiTitle="s" class="settings-card__title">
+        {{ 'admin.settings.sections.taskPriorities' | translate }}
+      </p>
+      <tui-textfield multi [tuiTextfieldSize]="$any(inputSize)" [tuiTextfieldCleaner]="true">
+        <input tuiInputChip [formControl]="prioritiesControl" />
+        <tui-input-chip *tuiItem [editable]="true" />
+      </tui-textfield>
+    </div>
+  </div>
+</div>

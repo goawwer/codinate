@@ -9,11 +9,10 @@ import (
 )
 
 func Register() {
-	ui.RegisterGet("/task/statuses", enum.AnyUser, reflect.TypeOf(service{}), getTaskStatuses)
-	ui.RegisterPost("/task/statuses/add", enum.AtLeastAdmin, reflect.TypeOf(service{}), addTaskStatus)
-	ui.RegisterPatch("/task/statuses/update/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), updateStatusById)
-	ui.RegisterDelete("/task/statuses/delete/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), deleteStatusById)
-	ui.RegisterDelete("/task/statuses/delete/all", enum.AtLeastOwner, reflect.TypeOf(service{}), deleteAllStatuses)
+	ui.RegisterGet("/tasks/statuses", enum.AnyUser, reflect.TypeOf(service{}), getTaskStatuses)
+	ui.RegisterPost("/tasks/statuses/add", enum.AtLeastAdmin, reflect.TypeOf(service{}), addTaskStatus)
+	ui.RegisterPatch("/tasks/statuses/update/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), updateStatusById)
+	ui.RegisterDelete("/tasks/statuses/delete/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), deleteStatusById)
 }
 
 // getTaskStatuses
@@ -99,18 +98,4 @@ func deleteStatusById(s ui.UIService) (any, error) {
 	}
 
 	return nil, s.GetService().(*service).deleteStatusById(s.GetRequest().Context(), id)
-}
-
-// deleteAllStatuses
-//
-//	@Tags			task/status
-//	@Summary		Delete all statuses
-//	@Description	Delete all task statuses
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	nil
-//	@Failure		500	{object}	string	"Internal Server Error"
-//	@Router			/api/task/statuses/delete/all  [delete]
-func deleteAllStatuses(s ui.UIService) (any, error) {
-	return nil, s.GetService().(*service).deleteAllTaskStatuses(s.GetRequest().Context())
 }

@@ -24,7 +24,3 @@ func (s *service) updateStatus(ctx context.Context, id int, newName string) erro
 func (s *service) deleteStatusById(ctx context.Context, id int) error {
 	return repository.GetTaskRepo().DeleteTaskStatusById(ctx, id)
 }
-
-func (s *service) deleteAllTaskStatuses(ctx context.Context) error {
-	return repository.GetTaskRepo().DeleteAllTaskStatuses(ctx)
-}
