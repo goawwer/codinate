@@ -29,7 +29,7 @@ export type AvatarSize = TuiSizeXS | TuiSizeXXL;
       <tui-icon
         icon="@tui.image"
         class="text-(--tui-text-tertiary) m-auto"
-        style="font-size: min(100cqw, 100cqh); padding: 0"
+        style="font-size: {{ this.fontSize }}; padding: 0"
       />
     }
   `,
@@ -39,6 +39,7 @@ export class AppPicture {
   @Input() surname = '';
   @Input() pictureName = '';
   @Input() size: AvatarSize = 'm';
+  @Input() fontSize = '';
   @Input() entityType = '';
   @Input() isAvatar = false;
 
