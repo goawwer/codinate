@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Project } from '../types/model/project.model';
 import { CreateProjectInput, UpdateProjectInput } from '../types/model/project-dashboard.model';
 
@@ -13,11 +13,13 @@ export class ProjectApiService {
     return this.httpClient.get<Project[]>(`${this.baseURL}`);
   }
 
-  create(body: CreateProjectInput, file?: File): Observable<void> {
+  create(body: CreateProjectInput, file?: File): Observable<number> {
     const formData = new FormData();
     if (file) formData.append('picture', file);
     formData.append('payload', JSON.stringify(body));
-    return this.httpClient.post<void>(`${this.baseURL}/create`, formData);
+    return this.httpClient.post<{ id: number }>(`${this.baseURL}/create`, formData).pipe(
+      map((res) => res.id),
+    );
   }
 
   update(id: number, body: UpdateProjectInput, file?: File): Observable<void> {

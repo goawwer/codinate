@@ -10,12 +10,12 @@ import (
 )
 
 func Register() {
-	ui.RegisterPost("/user/add", enum.AtLeastAdmin, reflect.TypeOf(service{}), create)
-	ui.RegisterPatch("/user/update/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), update)
-	ui.RegisterDelete("/user/delete/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), delete)
-	ui.RegisterDelete("/user/delete", enum.AtLeastAdmin, reflect.TypeOf(service{}), deleteMany)
-	ui.RegisterGet("/user/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUser)
-	ui.RegisterGet("/user/all", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUsers)
+	ui.RegisterPost("/users/add", enum.AtLeastAdmin, reflect.TypeOf(service{}), create)
+	ui.RegisterPatch("/users/update/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), update)
+	ui.RegisterDelete("/users/delete/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), delete)
+	ui.RegisterDelete("/users/delete", enum.AtLeastAdmin, reflect.TypeOf(service{}), deleteMany)
+	ui.RegisterGet("/users/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUser)
+	ui.RegisterGet("/users/all", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUsers)
 }
 
 // create

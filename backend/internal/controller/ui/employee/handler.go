@@ -9,11 +9,10 @@ import (
 )
 
 func Register() {
-	ui.RegisterGet("/employee/roles", enum.AnyUser, reflect.TypeOf(service{}), getEmployeesRoles)
-	ui.RegisterPost("/employee/roles/add", enum.AtLeastAdmin, reflect.TypeOf(service{}), addEmployeeRole)
-	ui.RegisterPatch("/employee/roles/update/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), updateEmployeeRoleById)
-	ui.RegisterDelete("/employee/roles/delete/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), delEmployeeRoleById)
-	ui.RegisterDelete("/employee/roles/delete/all", enum.AtLeastOwner, reflect.TypeOf(service{}), deleteEmployeeRoles)
+	ui.RegisterGet("/employees/roles", enum.AnyUser, reflect.TypeOf(service{}), getEmployeesRoles)
+	ui.RegisterPost("/employees/roles/add", enum.AtLeastAdmin, reflect.TypeOf(service{}), addEmployeeRole)
+	ui.RegisterPatch("/employees/roles/update/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), updateEmployeeRoleById)
+	ui.RegisterDelete("/employees/roles/delete/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), delEmployeeRoleById)
 }
 
 // addEmployeeRole
@@ -100,19 +99,4 @@ func delEmployeeRoleById(s ui.UIService) (any, error) {
 	}
 
 	return nil, s.GetService().(*service).deleteRoleById(s.GetRequest().Context(), id)
-}
-
-// deleteRoles
-//
-//	@Tags			roles
-//	@Summary		Delete roles
-//	@Description	Delete role all employee roles
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	nil
-//	@Failure		400	{object}	string	"Bad Request"
-//	@Failure		500	{object}	string	"Internal Server Error"
-//	@Router			/api/employee/roles/delete/all  [delete]
-func deleteEmployeeRoles(s ui.UIService) (any, error) {
-	return nil, s.GetService().(*service).deleteAllRoles(s.GetRequest().Context())
 }

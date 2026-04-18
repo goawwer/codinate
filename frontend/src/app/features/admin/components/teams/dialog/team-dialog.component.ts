@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TuiDialogContext } from '@taiga-ui/core';
 import { TUI_VALIDATION_ERRORS } from '@taiga-ui/kit';
 import { TUI_MULTI_SELECT_TEXTS } from '@taiga-ui/kit/tokens';
-import { of } from 'rxjs';
+import { of, startWith } from 'rxjs';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import { TranslateService } from '@ngx-translate/core';
 import { Team, TeamMember } from '../../../../team/types/model/team.model';
@@ -18,6 +18,7 @@ import { TEAM_DIALOG_IMPORTS } from './team-dialog.imports';
 import { loginValidationErrorsFactory } from '../../../../auth/model/auth.validation';
 import { UserStore } from '../../../../user/store/user.store';
 import { User } from '../../../../user/types/model/user.model';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 export interface TeamDialogData {
   team: Team | null;
@@ -52,8 +53,9 @@ export class TeamDialogComponent {
   protected readonly team = this.context.data.team;
   protected readonly isEdit = this.team !== null;
 
+  protected readonly activeTab = signal(0);
   protected readonly previewUrl = signal<string | null>(null);
-  protected selectedFile: File | null = null;
+  protected readonly selectedFile = signal<File | null>(null);
 
   protected readonly members = signal<TeamMember[]>([...(this.team?.members ?? [])]);
   protected readonly memberToAdd = new FormControl<string>('', { nonNullable: true });
@@ -63,6 +65,31 @@ export class TeamDialogComponent {
 
   protected readonly stringify = (user: User | null) =>
     user ? `${user.name} ${user.surname}` : '';
+
+  protected readonly form = new FormGroup({
+    name: new FormControl(this.team?.name ?? '', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    description: new FormControl(this.team?.description ?? '', {
+      nonNullable: true,
+    }),
+    memberIds: new FormControl<User[]>([], { nonNullable: true }),
+  });
+
+  private readonly formValue = toSignal(this.form.valueChanges.pipe(startWith(this.form.value)), {
+    initialValue: this.form.value,
+  });
+
+  protected readonly hasChanges = computed(() => {
+    if (!this.isEdit) return true;
+    const val = this.formValue();
+    return (
+      val.name !== (this.team?.name ?? '') ||
+      val.description !== (this.team?.description ?? '') ||
+      this.selectedFile() !== null
+    );
+  });
 
   protected readonly userGroups = computed(() => {
     const roleMap = new Map<string, User[]>();
@@ -81,21 +108,10 @@ export class TeamDialogComponent {
       .filter(({ users }) => users.length > 0);
   });
 
-  protected readonly form = new FormGroup({
-    name: new FormControl(this.team?.name ?? '', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    description: new FormControl(this.team?.description ?? '', {
-      nonNullable: true,
-    }),
-    memberIds: new FormControl<User[]>([], { nonNullable: true }),
-  });
-
   protected onFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    this.selectedFile = file;
+    this.selectedFile.set(file);
     const reader = new FileReader();
     reader.onload = () => this.previewUrl.set(reader.result as string);
     reader.readAsDataURL(file);
@@ -133,7 +149,7 @@ export class TeamDialogComponent {
   protected deletePicture(): void {
     if (this.previewUrl()) {
       this.previewUrl.set(null);
-      this.selectedFile = null;
+      this.selectedFile.set(null);
       return;
     }
     if (this.team?.pictureName) {
@@ -159,11 +175,20 @@ export class TeamDialogComponent {
     const value = this.form.getRawValue();
 
     if (this.isEdit) {
-      const input: UpdateTeamInput = {
-        name: value.name,
-        description: value.description,
-      };
-      this.store.updateTeam({ id: this.team!.id, input, file: this.selectedFile! });
+      const file = this.selectedFile();
+      const input: UpdateTeamInput = {};
+
+      if (value.name !== (this.team?.name ?? '')) {
+        input.name = value.name;
+      }
+      if (value.description !== (this.team?.description ?? '')) {
+        input.description = value.description;
+      }
+      if (file) {
+        input.pictureName = file.name;
+      }
+
+      this.store.updateTeam({ id: this.team!.id, input, file: file ?? undefined });
     } else {
       const input: CreateTeamInput = {
         name: value.name,
@@ -171,7 +196,7 @@ export class TeamDialogComponent {
         pictureName: '',
         memberIds: value.memberIds.map((u) => u.id),
       };
-      this.store.createTeam({ input, file: this.selectedFile ?? undefined });
+      this.store.createTeam({ input, file: this.selectedFile() ?? undefined });
     }
 
     this.context.completeWith();

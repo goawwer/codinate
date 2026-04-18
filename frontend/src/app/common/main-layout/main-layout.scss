@@ -1,10 +1,14 @@
-.tui-enter,
-.tui-leave {
-  animation-name: tuiFade, tuiSlide;
-}
-
 .custom {
   box-shadow: none;
   height: 2rem;
   font-size: 14px;
+  margin-left: 2.5rem;
+
+  &::ng-deep tui-tabs[data-size='l']:not([data-vertical]) {
+    block-size: var(--tui-height-s);
+  }
+
+  &::ng-deep [tuiTab]._active {
+    font-weight: 500;
+  }
 }

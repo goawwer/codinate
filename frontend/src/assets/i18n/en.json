@@ -30,8 +30,8 @@
       "user": "User"
     },
     "operations": {
-      "success": "Operation completed",
-      "fail": "Operation failed"
+      "success": "Completed",
+      "fail": "Failed"
     },
     "hints": {
       "changePicture": "Change picture",
@@ -67,14 +67,7 @@
   "navbar": {
     "main": "Main",
     "mine": "My tasks",
-    "teams": "Teams",
-    "projects": "Projects",
-    "admin": "Admin-dashboard",
-    "adminItems": {
-      "users": "Users",
-      "teams": "Teams",
-      "projects": "Projects"
-    }
+    "admin": "Admin-dashboard"
   },
   "employee_roles": {
     "owner": "Owner",
@@ -120,9 +113,31 @@
       "status": "Status",
       "createdAt": "Created at",
       "updatedAt": "Update at"
+    },
+    "task": {
+      "categories": {
+        "title": "Task categories",
+        "subtitle": "Categories help organize tasks within this project. Each task can be assigned one category — use them to group work by feature, module, or any other logical area.",
+        "empty": "No categories provided"
+      }
     }
   },
   "admin": {
+    "subnav": {
+      "users": "Users",
+      "teams": "Teams",
+      "projects": "Projects",
+      "settings": "Settings"
+    },
+    "settings": {
+      "title": "Settings",
+      "saved": "Changes saved",
+      "sections": {
+        "roles": "Roles",
+        "taskStatuses": "Task Statuses",
+        "taskPriorities": "Task Priorities"
+      }
+    },
     "dashboard": {
       "teams": {
         "hints": {
@@ -137,7 +152,11 @@
           "deleteTitle": "Delete teams",
           "deleteContent": "Are you sure you want to delete {{ count }} team(s)? This action cannot be undone.",
           "createTitle": "Create team",
-          "editTitle": "Update team"
+          "editTitle": "Update team",
+          "tabs": {
+            "general": "General",
+            "members": "Members"
+          }
         }
       },
       "projects": {
@@ -153,7 +172,12 @@
           "deleteTitle": "Delete projects",
           "deleteContent": "Are you sure you want to delete {{ count }} project(s)? This action cannot be undone.",
           "createTitle": "Create project",
-          "editTitle": "Update project"
+          "editTitle": "Update project",
+          "tabs": {
+            "general": "General",
+            "members": "Members",
+            "additional": "Additional"
+          }
         }
       },
       "users": {

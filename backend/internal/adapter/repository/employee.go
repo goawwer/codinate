@@ -12,7 +12,6 @@ type EmployeeRepo interface {
 	GetEmployeesRoles(ctx context.Context) ([]shared.IdWithName, error)
 	UpdateEmployeeRoleById(ctx context.Context, id int, newName string) error
 	DeleteEmployeeRoleById(ctx context.Context, id int) error
-	DeleteAllEmployeeRoles(ctx context.Context) error
 }
 
 type emplRepoImpl struct {
@@ -55,12 +54,6 @@ func (r *emplRepoImpl) DeleteEmployeeRoleById(ctx context.Context, id int) error
 		DELETE FROM employee_roles
 		WHERE id = $1
 	`, id)
-
-	return err
-}
-
-func (r *emplRepoImpl) DeleteAllEmployeeRoles(ctx context.Context) error {
-	_, err := r.QueryContext(ctx, `DELETE FROM employee_roles`)
 
 	return err
 }

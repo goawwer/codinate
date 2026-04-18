@@ -6,7 +6,7 @@ export interface CreateProjectInput {
 }
 
 export interface UpdateProjectInput {
-  projectName?: string;
-  projectDescription?: string;
-  projectPictureName?: string;
+  name?: string;
+  description?: string;
+  pictureName?: string;
 }

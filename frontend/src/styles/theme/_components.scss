@@ -11,10 +11,11 @@
 
 [data-appearance='primary-tooltip'] {
   background: var(--app-grey-100) !important;
-  max-width: 20rem !important;
+  max-width: 25rem !important;
   padding: 0.8rem !important;
   color: var(--app-fg) !important;
-  --tui-duration: 0ms !important;
+  --tui-duration: 20ms !important;
+  border-radius: 0.8rem !important;
 
   &::before,
   &::after {

@@ -17,6 +17,12 @@ func Register() {
 	ui.RegisterDelete("/projects/{project_id}/delete/{member_id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), removeMember)
 	ui.RegisterDelete("/projects/{project_id}/delete/picture", enum.AtLeastAdmin, reflect.TypeOf(service{}), removePicture)
 	ui.RegisterPost("/projects/{project_id}/add/{member_id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), addMember)
+
+	// releases
+	ui.RegisterGet("/projects/releases/{project_id}", enum.AnyUser, reflect.TypeOf(service{}), releases)
+	ui.RegisterPost("/projects/releases/{project_id}/add", enum.AtLeastAdmin, reflect.TypeOf(service{}), addRelease)
+	ui.RegisterPatch("/projects/releases/{id}/update", enum.AtLeastAdmin, reflect.TypeOf(service{}), updateRelease)
+	ui.RegisterDelete("/projects/releases/{id}/delete", enum.AtLeastAdmin, reflect.TypeOf(service{}), deleteRelease)
 }
 
 // getAll
@@ -52,7 +58,12 @@ func create(s ui.UIService) (any, error) {
 	}
 	input.Core.PictureName = &pictureName
 
-	return nil, s.GetService().(*service).addNewProject(s.GetRequest().Context(), input)
+	id, err := s.GetService().(*service).addNewProject(s.GetRequest().Context(), input)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]int{"id": id}, nil
 }
 
 // update
@@ -79,7 +90,9 @@ func update(s ui.UIService) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	input.PictureName = &pictureName
+	if pictureName != "" {
+		input.PictureName = &pictureName
+	}
 
 	return nil, s.GetService().(*service).updateProject(s.GetRequest().Context(), input, id)
 }
@@ -174,4 +187,100 @@ func removePicture(s ui.UIService) (any, error) {
 	}
 
 	return nil, s.GetService().(*service).deletePicture(s.GetRequest().Context(), projectId)
+}
+
+// releases
+//
+//	@Tags		projects
+//	@Summary	Get project releases
+//	@Description	Returns all releases for a given project
+//	@Produce	json
+//	@Param		project_id	path		int	true	"Project ID"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/projects/releases/{project_id} [get]
+func releases(s ui.UIService) (any, error) {
+	projectId, err := s.GetPathParamAsInt("project_id")
+	if err != nil {
+		return nil, err
+	}
+
+	return s.GetService().(*service).getProjectReleases(s.GetRequest().Context(), projectId)
+}
+
+// addRelease
+//
+//	@Tags		projects
+//	@Summary	Add release to project
+//	@Description	Creates a new release for a given project
+//	@Accept		json
+//	@Produce	json
+//	@Param		project_id	path		int							true	"Project ID"
+//	@Param		payload		body		project.CreateReleaseInput	true	"Release data"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/projects/releases/{project_id}/add [post]
+func addRelease(s ui.UIService) (any, error) {
+	var input project.CreateReleaseInput
+
+	projectId, err := s.GetPathParamAsInt("project_id")
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.GetBodyAs(&input); err != nil {
+		return nil, err
+	}
+
+	return nil, s.GetService().(*service).addProjectRelease(s.GetRequest().Context(), input, projectId)
+}
+
+// updateRelease
+//
+//	@Tags		projects
+//	@Summary	Update release
+//	@Description	Updates fields of an existing release
+//	@Accept		json
+//	@Produce	json
+//	@Param		id		path		int							true	"Release ID"
+//	@Param		payload	body		project.UpdateReleaseInput	true	"Fields to update"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/projects/releases/{id}/update [patch]
+func updateRelease(s ui.UIService) (any, error) {
+	var input project.UpdateReleaseInput
+
+	id, err := s.GetPathParamAsInt("id")
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.GetBodyAs(&input); err != nil {
+		return nil, err
+	}
+
+	return nil, s.GetService().(*service).updateProjectRelease(s.GetRequest().Context(), input, id)
+}
+
+// deleteRelease
+//
+//	@Tags		projects
+//	@Summary	Delete release
+//	@Description	Deletes a release by ID
+//	@Produce	json
+//	@Param		id	path	int	true	"Release ID"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/projects/releases/{id}/delete [delete]
+func deleteRelease(s ui.UIService) (any, error) {
+	id, err := s.GetPathParamAsInt("id")
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, s.GetService().(*service).deleteProjectRelease(s.GetRequest().Context(), id)
 }

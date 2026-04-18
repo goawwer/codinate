@@ -18,6 +18,17 @@ definitions:
     - AdminPermissionRole
     - UserPermissionRole
     - NoPermissionRole
+  project.CreateReleaseInput:
+    properties:
+      description:
+        type: string
+      endAt:
+        type: string
+      startAt:
+        type: string
+      title:
+        type: string
+    type: object
   project.Row:
     properties:
       archivedAt:
@@ -41,6 +52,19 @@ definitions:
       projectPictureName:
         type: string
       updatedAt:
+        type: string
+    type: object
+  project.UpdateReleaseInput:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      startAt:
+        type: string
+      status:
+        type: string
+      updateAt:
         type: string
     type: object
   shared.MemberShort:
@@ -248,27 +272,6 @@ paths:
           schema:
             type: string
       summary: Delete role
-      tags:
-      - roles
-  /api/employee/roles/delete/all:
-    delete:
-      consumes:
-      - application/json
-      description: Delete role all employee roles
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Delete roles
       tags:
       - roles
   /api/employee/roles/update/{id}:
@@ -556,6 +559,122 @@ paths:
       summary: Create project
       tags:
       - projects
+  /api/projects/releases/{id}/delete:
+    delete:
+      description: Deletes a release by ID
+      parameters:
+      - description: Release ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete release
+      tags:
+      - projects
+  /api/projects/releases/{id}/update:
+    patch:
+      consumes:
+      - application/json
+      description: Updates fields of an existing release
+      parameters:
+      - description: Release ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fields to update
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/project.UpdateReleaseInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update release
+      tags:
+      - projects
+  /api/projects/releases/{project_id}:
+    get:
+      description: Returns all releases for a given project
+      parameters:
+      - description: Project ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get project releases
+      tags:
+      - projects
+  /api/projects/releases/{project_id}/add:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new release for a given project
+      parameters:
+      - description: Project ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      - description: Release data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/project.CreateReleaseInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add release to project
+      tags:
+      - projects
   /api/task/priorities:
     get:
       consumes:
@@ -626,23 +745,6 @@ paths:
           schema:
             type: string
       summary: Delete priority
-      tags:
-      - task/priority
-  /api/task/priorities/delete/all:
-    delete:
-      consumes:
-      - application/json
-      description: Delete all task priorities
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Delete all priorities
       tags:
       - task/priority
   /api/task/priorities/update/{id}:
@@ -750,23 +852,6 @@ paths:
       summary: Delete status
       tags:
       - task/status
-  /api/task/statuses/delete/all:
-    delete:
-      consumes:
-      - application/json
-      description: Delete all task statuses
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Delete all statuses
-      tags:
-      - task/status
   /api/task/statuses/update/{id}:
     patch:
       consumes:
@@ -800,6 +885,122 @@ paths:
       summary: Update status
       tags:
       - task/status
+  /api/tasks/{project_id}/categories:
+    get:
+      description: Returns all task categories for a given project
+      parameters:
+      - description: Project ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get task categories
+      tags:
+      - categories
+  /api/tasks/{project_id}/categories/add:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new task category for a given project
+      parameters:
+      - description: Project ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      - description: Category name
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/shared.NameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add task category
+      tags:
+      - categories
+  /api/tasks/categories/{id}/delete:
+    delete:
+      description: Deletes a task category by ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete task category
+      tags:
+      - categories
+  /api/tasks/categories/{id}/update:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the name of an existing task category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New category name
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/shared.NameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update task category
+      tags:
+      - categories
   /api/teams:
     get:
       description: Returns a list of all teams with their members

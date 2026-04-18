@@ -3,14 +3,28 @@
     <div class="mx-auto w-full max-w-362.5 px-4 sm:px-6 lg:px-8">
       <div class="rounded-3xl bg-(--app-grey-100) overflow-hidden">
         <app-navbar></app-navbar>
-        @if (isMainSection()) {
-          <div tuiAnimated class="bg-(--app-grey-600)/20 px-4">
+        @if (isAdminSection()) {
+          <div class="bg-(--app-grey-600)/20">
             <tui-tabs-with-more
               class="custom"
               [underline]="false"
-              [activeItemIndex]="activeItemIndex"
+              [activeItemIndex]="activeItemIndex()"
             >
-              <a tuiTab routerLink="/main/activity" routerLinkActive>{{ 'main.subnav.activity' | translate }}</a>
+              <a tuiTab *tuiItem routerLink="/admin/users" routerLinkActive>{{ 'admin.subnav.users' | translate }}</a>
+              <a tuiTab *tuiItem routerLink="/admin/teams" routerLinkActive>{{ 'admin.subnav.teams' | translate }}</a>
+              <a tuiTab *tuiItem routerLink="/admin/projects" routerLinkActive>{{ 'admin.subnav.projects' | translate }}</a>
+              <a tuiTab *tuiItem routerLink="/admin/settings" routerLinkActive>{{ 'admin.subnav.settings' | translate }}</a>
+            </tui-tabs-with-more>
+          </div>
+        }
+        @if (isMainSection()) {
+          <div class="bg-(--app-grey-600)/20">
+            <tui-tabs-with-more
+              class="custom"
+              [underline]="false"
+              [activeItemIndex]="activeItemIndex()"
+            >
+              <a tuiTab *tuiItem routerLink="/main/activity" routerLinkActive>{{ 'main.subnav.activity' | translate }}</a>
 
               <button
                 tuiChevron
@@ -40,7 +54,7 @@
     </div>
   </header>
 
-  <main tuiNavigationMain class="mx-auto w-full max-w-362.5 px-4 sm:px-6 lg:px-8">
+  <main tuiNavigationMain class="mx-auto w-full max-w-362.5 sm:px-6 lg:px-8">
     <router-outlet></router-outlet>
   </main>
 </div>

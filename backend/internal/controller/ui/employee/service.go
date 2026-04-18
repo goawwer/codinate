@@ -24,7 +24,3 @@ func (s *service) updateEmployeeRoleById(ctx context.Context, id int, newName st
 func (s *service) deleteRoleById(ctx context.Context, id int) error {
 	return repository.GetEmplRepo().DeleteEmployeeRoleById(ctx, id)
 }
-
-func (s *service) deleteAllRoles(ctx context.Context) error {
-	return repository.GetEmplRepo().DeleteAllEmployeeRoles(ctx)
-}

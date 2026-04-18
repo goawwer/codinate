@@ -3,7 +3,10 @@ package project
 import (
 	"context"
 
+	"github.com/goawwer/codinate/internal/adapter/dto/filters"
 	"github.com/goawwer/codinate/internal/adapter/dto/project"
+	"github.com/goawwer/codinate/internal/adapter/model"
+	"github.com/goawwer/codinate/internal/adapter/model/enum"
 	"github.com/goawwer/codinate/internal/adapter/repository"
 	"github.com/google/uuid"
 )
@@ -14,7 +17,7 @@ func (s *service) all(ctx context.Context) ([]project.Row, error) {
 	return repository.GetProjectRepo().GetAll(ctx)
 }
 
-func (s *service) addNewProject(ctx context.Context, input project.CreateProjectInput) error {
+func (s *service) addNewProject(ctx context.Context, input project.CreateProjectInput) (int, error) {
 	return repository.GetProjectRepo().Create(ctx, input)
 }
 
@@ -36,4 +39,29 @@ func (s *service) deleteProject(ctx context.Context, projectId int) error {
 
 func (s *service) deletePicture(ctx context.Context, projectId int) error {
 	return repository.GetProjectRepo().DeletePictureBy(ctx, projectId)
+}
+
+func (s *service) getProjectReleases(ctx context.Context, projectId int) ([]model.Release, error) {
+	return repository.GetProjectRepo().GetReleases(ctx, projectId)
+}
+
+func (s *service) addProjectRelease(ctx context.Context, input project.CreateReleaseInput, projectId int) error {
+	dateRange := filters.NewDateRange(input.StartAt, input.EndAt)
+
+	return repository.GetProjectRepo().AddNewRelease(ctx, &model.Release{
+		ProjectId:  projectId,
+		Title:      input.Title,
+		Decription: input.Description,
+		Status:     enum.ReleaseStatusActive,
+		StartAt:    dateRange.From,
+		EndAt:      dateRange.To,
+	})
+}
+
+func (s *service) updateProjectRelease(ctx context.Context, input project.UpdateReleaseInput, id int) error {
+	return repository.GetProjectRepo().UpdateRelease(ctx, input, id)
+}
+
+func (s *service) deleteProjectRelease(ctx context.Context, id int) error {
+	return repository.GetProjectRepo().DeleteRelease(ctx, id)
 }

@@ -9,11 +9,10 @@ import (
 )
 
 func Register() {
-	ui.RegisterGet("/task/priorities", enum.AnyUser, reflect.TypeOf(service{}), getTaskPriorities)
-	ui.RegisterPost("/task/priorities/add", enum.AtLeastAdmin, reflect.TypeOf(service{}), addTaskPriority)
-	ui.RegisterPatch("/task/priorities/update/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), updatePriorityById)
-	ui.RegisterDelete("/task/priorities/delete/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), delPriotiryById)
-	ui.RegisterDelete("/task/priorities/delete/all", enum.AtLeastOwner, reflect.TypeOf(service{}), deletePriorities)
+	ui.RegisterGet("/tasks/priorities", enum.AnyUser, reflect.TypeOf(service{}), getTaskPriorities)
+	ui.RegisterPost("/tasks/priorities/add", enum.AtLeastAdmin, reflect.TypeOf(service{}), addTaskPriority)
+	ui.RegisterPatch("/tasks/priorities/update/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), updatePriorityById)
+	ui.RegisterDelete("/tasks/priorities/delete/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), delPriotiryById)
 }
 
 // getTaskPriorities
@@ -99,18 +98,4 @@ func delPriotiryById(s ui.UIService) (any, error) {
 	}
 
 	return nil, s.GetService().(*service).deletePriorityById(s.GetRequest().Context(), id)
-}
-
-// deleteEmployeeRoles
-//
-//	@Tags			task/priority
-//	@Summary		Delete all priorities
-//	@Description	Delete all task priorities
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	nil
-//	@Failure		500	{object}	string	"Internal Server Error"
-//	@Router			/api/task/priorities/delete/all  [delete]
-func deletePriorities(s ui.UIService) (any, error) {
-	return nil, s.GetService().(*service).deleteAllTaskPriorities(s.GetRequest().Context())
 }
