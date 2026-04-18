@@ -6,7 +6,7 @@ import { AlertService } from '../../../core/declarations/services/alert.service'
 import { Nullable } from '../../../core/declarations/types/nullable.type';
 import { StoreStatus } from '../../../core/declarations/types/store-statuses.type';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { catchError, EMPTY, exhaustMap, pipe, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, exhaustMap, map, pipe, switchMap, tap } from 'rxjs';
 import { ProjectApiService } from '../service/project.service';
 import { CreateProjectInput, UpdateProjectInput } from '../types/model/project-dashboard.model';
 
@@ -52,15 +52,16 @@ export const ProjectStore = signalStore(
         ),
       ),
 
-      createProject: rxMethod<{ input: CreateProjectInput; file?: File }>(
+      createProject: rxMethod<{ input: CreateProjectInput; file?: File; onSuccess?: (id: number) => void }>(
         pipe(
           tap(() => patchState(store, { status: StoreStatus.Saving })),
-          exhaustMap(({ input, file }) =>
+          exhaustMap(({ input, file, onSuccess }) =>
             projectsService.create(input, file).pipe(
-              switchMap(() => projectsService.getAll()),
-              tap((projects) => {
+              switchMap((id) => projectsService.getAll().pipe(map((projects) => ({ projects, id })))),
+              tap(({ projects, id }) => {
                 patchState(store, { projects, status: StoreStatus.Saved });
                 alertService.success(translate.instant('cmd.projects.success.created'));
+                onSuccess?.(id);
               }),
               catchError(() => {
                 patchState(store, { status: StoreStatus.SaveError });

@@ -17,7 +17,7 @@ func (s *service) all(ctx context.Context) ([]project.Row, error) {
 	return repository.GetProjectRepo().GetAll(ctx)
 }
 
-func (s *service) addNewProject(ctx context.Context, input project.CreateProjectInput) error {
+func (s *service) addNewProject(ctx context.Context, input project.CreateProjectInput) (int, error) {
 	return repository.GetProjectRepo().Create(ctx, input)
 }
 

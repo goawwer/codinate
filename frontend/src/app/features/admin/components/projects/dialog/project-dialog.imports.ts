@@ -8,6 +8,7 @@ import {
   TuiError,
   TuiIcon,
   TuiLabel,
+  TuiTitle,
   TuiOptGroup,
   TuiOption,
   TuiTextfield,
@@ -20,8 +21,9 @@ import {
   TuiInputChip,
   TuiMultiSelectGroupComponent,
   TuiMultiSelectGroupDirective,
+  TuiTab,
+  TuiTabs,
 } from '@taiga-ui/kit';
-import { TuiForm } from '@taiga-ui/layout';
 import { EmployeeRolePipe } from '../../../../../common/pipes/employee-role.pipe';
 
 export const PROJECT_DIALOG_IMPORTS = [
@@ -36,7 +38,6 @@ export const PROJECT_DIALOG_IMPORTS = [
   TuiError,
   TuiFieldErrorPipe,
   TuiFilterByInputPipe,
-  TuiForm,
   TuiIcon,
   TuiInputChip,
   TuiLabel,
@@ -45,6 +46,9 @@ export const PROJECT_DIALOG_IMPORTS = [
   TuiMultiSelectGroupDirective,
   TuiOptGroup,
   TuiOption,
+  TuiTab,
+  TuiTabs,
   TuiTextfield,
   TuiHint,
+  TuiTitle,
 ];

@@ -22,9 +22,10 @@ import {
   TuiMultiSelectGroupDirective,
   TuiCheckbox,
   TuiSelect,
+  TuiTab,
+  TuiTabs,
 } from '@taiga-ui/kit';
 import { EmployeeRolePipe } from '../../../../../common/pipes/employee-role.pipe';
-import { TuiForm } from '@taiga-ui/layout';
 
 export const TEAM_DIALOG_IMPORTS = [
   AppPicture,
@@ -38,7 +39,6 @@ export const TEAM_DIALOG_IMPORTS = [
   TuiError,
   TuiFieldErrorPipe,
   TuiFilterByInputPipe,
-  TuiForm,
   TuiIcon,
   TuiInputChip,
   TuiLabel,
@@ -47,6 +47,8 @@ export const TEAM_DIALOG_IMPORTS = [
   TuiMultiSelectGroupDirective,
   TuiOptGroup,
   TuiOption,
+  TuiTab,
+  TuiTabs,
   TuiTextfield,
   TuiCheckbox,
   TuiHint,

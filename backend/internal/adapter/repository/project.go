@@ -13,7 +13,7 @@ import (
 )
 
 type ProjectRepo interface {
-	Create(ctx context.Context, input project.CreateProjectInput) error
+	Create(ctx context.Context, input project.CreateProjectInput) (int, error)
 	GetAll(ctx context.Context) ([]project.Row, error)
 	Update(ctx context.Context, input project.UpdateProjectInput, id int) error
 	RemoveMember(ctx context.Context, projectId int, userId uuid.UUID) error
@@ -69,10 +69,10 @@ func (r *projectRepoImpl) GetAll(ctx context.Context) ([]project.Row, error) {
 	return res, err
 }
 
-func (r *projectRepoImpl) Create(ctx context.Context, input project.CreateProjectInput) error {
-	return r.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
-		var projectId int64
+func (r *projectRepoImpl) Create(ctx context.Context, input project.CreateProjectInput) (int, error) {
+	var projectId int64
 
+	err := r.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
 		if err := tx.QueryRowContext(ctx, `
             INSERT INTO projects (author_id, name, description, picture_name)
             VALUES ($1, $2, $3, $4)
@@ -93,6 +93,8 @@ func (r *projectRepoImpl) Create(ctx context.Context, input project.CreateProjec
 
 		return nil
 	})
+
+	return int(projectId), err
 }
 
 func (r *projectRepoImpl) Update(ctx context.Context, input project.UpdateProjectInput, id int) error {

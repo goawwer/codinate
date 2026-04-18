@@ -58,7 +58,12 @@ func create(s ui.UIService) (any, error) {
 	}
 	input.Core.PictureName = &pictureName
 
-	return nil, s.GetService().(*service).addNewProject(s.GetRequest().Context(), input)
+	id, err := s.GetService().(*service).addNewProject(s.GetRequest().Context(), input)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]int{"id": id}, nil
 }
 
 // update
@@ -85,7 +90,9 @@ func update(s ui.UIService) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	input.PictureName = &pictureName
+	if pictureName != "" {
+		input.PictureName = &pictureName
+	}
 
 	return nil, s.GetService().(*service).updateProject(s.GetRequest().Context(), input, id)
 }

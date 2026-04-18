@@ -118,20 +118,20 @@ func (r *taskRepoImpl) GetAllCategoriesBy(ctx context.Context, proejctId int) ([
 	return res, err
 }
 
-func (r *taskRepoImpl) AddNewCategory(ctx context.Context, name shared.NameInput, projectId int) error {
+func (r *taskRepoImpl) AddNewCategory(ctx context.Context, input shared.NameInput, projectId int) error {
 	_, err := r.QueryContext(ctx, `
 		INSERT INTO task_categories (name, project_id)
 		VALUES ($1, $2)
-	`, name, projectId)
+	`, input.Name, projectId)
 
 	return err
 }
 
-func (r *taskRepoImpl) UpdateCategory(ctx context.Context, name shared.NameInput, id int) error {
+func (r *taskRepoImpl) UpdateCategory(ctx context.Context, input shared.NameInput, id int) error {
 	_, err := r.QueryContext(ctx, `
 		UPDATE task_categories SET name = $1
 		WHERE id = $2
-	`, name, id)
+	`, input.Name, id)
 
 	return err
 }
