@@ -14,9 +14,6 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-func init() {
-}
-
 func InitializeAppRouter() *chi.Mux {
 	root := chi.NewRouter()
 	root.Use(middleware.Recoverer)

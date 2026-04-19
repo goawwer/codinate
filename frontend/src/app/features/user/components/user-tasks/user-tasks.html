@@ -1,0 +1,204 @@
+<div class="tasks-layout py-2">
+
+  <tui-tabs class="tabs" [activeItemIndex]="activeTabIndex()">
+    <button tuiTab type="button" (click)="setTab('assigned')">Assigned to me</button>
+    <button tuiTab type="button" (click)="setTab('created')">Created by me</button>
+  </tui-tabs>
+
+  <search tuiSearch class="feed-search-wrapper">
+    <form [formGroup]="form">
+      <fieldset tuiTextfieldSize="s">
+        <tui-textfield iconStart="@tui.search">
+          <input
+            formControlName="search"
+            tuiTextfield
+            [placeholder]="'generic.actions.search' | translate: { value: ('models.task.title.plural' | translate | lowercase) }"
+          />
+        </tui-textfield>
+        <button
+          size="s"
+          tuiButton
+          class="btn-primary"
+          type="button"
+          (click)="fetchTasks()"
+        >
+          {{ 'generic.actions.find' | translate }}
+        </button>
+      </fieldset>
+
+      <fieldset>
+        <button
+          appearance="secondary-grayscale"
+          iconStart="@tui.circle-dot"
+          size="s"
+          tuiButton
+          tuiButtonSelect
+          type="button"
+          [formControl]="form.controls.statusIds"
+        >
+          {{ statusLabel() }}
+          <tui-data-list *tuiTextfieldDropdown>
+            <tui-opt-group label="Status" tuiMultiSelectGroup>
+              @for (s of statuses(); track s.id) {
+                <button new tuiOption type="button" [value]="s">{{ s.name }}</button>
+              }
+            </tui-opt-group>
+          </tui-data-list>
+        </button>
+
+        <button
+          appearance="secondary-grayscale"
+          iconStart="@tui.flame"
+          size="s"
+          tuiButton
+          tuiButtonSelect
+          type="button"
+          [formControl]="form.controls.priorityIds"
+        >
+          {{ priorityLabel() }}
+          <tui-data-list *tuiTextfieldDropdown>
+            <tui-opt-group label="Priority" tuiMultiSelectGroup>
+              @for (p of priorities(); track p.id) {
+                <button new tuiOption type="button" [value]="p">{{ p.name }}</button>
+              }
+            </tui-opt-group>
+          </tui-data-list>
+        </button>
+
+        <button
+          appearance="secondary-grayscale"
+          iconStart="@tui.folder-open"
+          size="s"
+          tuiButton
+          tuiButtonSelect
+          type="button"
+          [formControl]="form.controls.projectIds"
+        >
+          {{ projectLabel() }}
+          <tui-data-list *tuiTextfieldDropdown>
+            <tui-opt-group label="Project" tuiMultiSelectGroup>
+              @for (p of projects(); track p.id) {
+                <button new tuiOption type="button" [value]="p">{{ p.projectName }}</button>
+              }
+            </tui-opt-group>
+          </tui-data-list>
+        </button>
+
+        <button
+          appearance="secondary-grayscale"
+          iconStart="@tui.calendar"
+          size="s"
+          tuiButton
+          type="button"
+          [tuiDropdown]="calendarDropdown"
+          [tuiDropdownOpen]="calendarOpen()"
+          (tuiDropdownOpenChange)="calendarOpen.set($event)"
+        >
+          {{ dateLabel() }}
+        </button>
+
+        <ng-template #calendarDropdown>
+          <tui-calendar-range
+            [value]="formValue()?.dateRange ?? null"
+            (valueChange)="onDateRangeChange($event!)"
+          />
+        </ng-template>
+
+        <button
+          appearance="flat"
+          iconStart="@tui.rotate-cw"
+          size="xs"
+          tuiButton
+          type="button"
+          [disabled]="!filterCount()"
+          (click)="resetFilters()"
+        >
+          {{ 'generic.actions.clear' | translate }} {{ filterCount() ? '(' + filterCount() + ')' : '' }}
+        </button>
+      </fieldset>
+    </form>
+  </search>
+
+  <tui-scrollbar class="feed-scroll">
+    <div class="feed-items">
+
+      @if (isLoading()) {
+        <tui-block-status>
+          <h4>Loading...</h4>
+        </tui-block-status>
+      } @else {
+        @for (item of pagedTasks(); track item.id) {
+          <div class="feed-card">
+            <div class="feed-card-header">
+              <span class="feed-card-identifier">#{{ item.identifier }}</span>
+              <div class="feed-card-badges">
+                <tui-badge size="s">{{ item.status }}</tui-badge>
+                <tui-badge size="s" appearance="neutral">{{ item.priority }}</tui-badge>
+                <tui-badge size="s" appearance="neutral">{{ item.category }}</tui-badge>
+              </div>
+            </div>
+            <p class="feed-card-title">{{ item.title }}</p>
+            <p class="feed-card-description">{{ item.description }}</p>
+            <div class="feed-card-footer">
+              <span class="feed-card-meta">
+                <tui-icon icon="@tui.user" class="feed-meta-icon" />
+                {{ item.assigneeUserame }}
+              </span>
+              <span class="feed-card-meta">
+                <tui-icon icon="@tui.clock" class="feed-meta-icon" />
+                {{ item.createdAt | date: 'MMM d, HH:mm' }}
+              </span>
+            </div>
+          </div>
+        }
+
+        @if (allTasks().length === 0) {
+          <div class="empty-state">
+            <tui-block-status>
+              <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
+              <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
+            </tui-block-status>
+          </div>
+        }
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="feed-pagination">
+        <button
+          tuiIconButton
+          appearance="ghost"
+          iconStart="@tui.chevron-left"
+          size="s"
+          type="button"
+          [disabled]="currentPage() === 0"
+          (click)="setPage(currentPage() - 1)"
+        ></button>
+
+        @for (page of pages(); track page) {
+          <button
+            tuiButton
+            appearance="ghost"
+            size="xs"
+            type="button"
+            [class.active-page]="page === currentPage()"
+            (click)="setPage(page)"
+          >
+            {{ page + 1 }}
+          </button>
+        }
+
+        <button
+          tuiIconButton
+          appearance="ghost"
+          iconStart="@tui.chevron-right"
+          size="s"
+          type="button"
+          [disabled]="currentPage() === totalPages() - 1"
+          (click)="setPage(currentPage() + 1)"
+        ></button>
+      </div>
+    }
+  </tui-scrollbar>
+
+</div>

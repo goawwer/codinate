@@ -1,0 +1,179 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+::ng-deep search[tuiSearch] form {
+  gap: 1rem;
+}
+
+.activity-layout {
+  display: flex;
+  gap: 1.25rem;
+  height: calc(100dvh - 7rem);
+}
+
+.feed-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+}
+
+.feed-search-wrapper {
+  flex-shrink: 0;
+}
+
+.feed-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.feed-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-right: 0.5rem;
+}
+
+.feed-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--tui-background-neutral-1);
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--tui-background-neutral-2);
+  }
+}
+
+.feed-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.feed-card-identifier {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--tui-text-secondary);
+  font-family: monospace;
+}
+
+.feed-card-badges {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.feed-card-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--tui-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.feed-card-description {
+  font-size: 0.8rem;
+  color: var(--tui-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.feed-card-footer {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.feed-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--tui-text-tertiary);
+}
+
+.feed-meta-icon {
+  font-size: 0.7rem;
+}
+
+.feed-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  padding: 0.25rem 0;
+}
+
+.active-page {
+  background: var(--tui-background-accent-1) !important;
+  color: var(--tui-text-primary-on-accent-1) !important;
+}
+
+.widgets-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  min-height: 0;
+  max-height: 85vh;
+}
+
+.widget {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  border-radius: 0.75rem;
+  background: var(--tui-background-neutral-1);
+  overflow: hidden;
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--tui-border-normal);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tui-text-primary);
+  flex-shrink: 0;
+}
+
+.widget-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 2rem;
+  text-align: center;
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--tui-text-secondary);
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: var(--tui-text-tertiary);
+  }
+}
+
+.widget-placeholder-icon {
+  font-size: 2rem;
+  color: var(--tui-text-tertiary);
+  margin-bottom: 0.25rem;
+}

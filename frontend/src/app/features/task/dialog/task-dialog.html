@@ -1,0 +1,119 @@
+<div class="task-dialog w-full max-w py-5" [formGroup]="form">
+  <tui-stepper class="task-dialog-stepper py-1" [activeItemIndex]="step()">
+    <button tuiStep type="button" [disabled]="true">
+      {{ 'generic.tabs.general' | translate }}
+    </button>
+    <button tuiStep type="button" [disabled]="true">
+      {{ 'generic.tabs.details' | translate }}
+    </button>
+  </tui-stepper>
+
+  @switch (step()) {
+    @case (0) {
+      <div class="task-dialog-grid">
+        <tui-textfield class="col-span-2">
+          <label tuiLabel>{{ 'models.task.fields.title' | translate }}</label>
+          <input tuiTextfield formControlName="title" autocomplete="off" />
+        </tui-textfield>
+        <tui-error class="col-span-2" formControlName="title" [error]="[] | tuiFieldError | async" />
+
+        <div class="flex flex-col gap-1">
+          <tui-textfield tuiChevron [stringify]="stringifyProject">
+            <label tuiLabel>{{ 'generic.titles.project' | translate }}</label>
+            <input tuiSelect formControlName="project" />
+            <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="projects()" [emptyContent]="'generic.statuses.notFound' | translate" />
+          </tui-textfield>
+          <tui-error formControlName="project" [error]="[] | tuiFieldError | async" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <tui-textfield tuiChevron [stringify]="stringifyCategory">
+            <label tuiLabel>{{ 'models.task.fields.category' | translate }}</label>
+            <input tuiSelect formControlName="category" [disabled]="!form.controls.project.value" />
+            <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="categories()" [emptyContent]="'generic.statuses.notFound' | translate" />
+          </tui-textfield>
+          <tui-error class="p-1" formControlName="category" [error]="[] | tuiFieldError | async" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <tui-textfield tuiChevron [stringify]="stringifyPriority" >
+            <label tuiLabel>{{ 'generic.titles.priority' | translate }}</label>
+            <input tuiSelect formControlName="priority" />
+            <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="priorities()" [emptyContent]="'generic.statuses.notFound' | translate" />
+          </tui-textfield>
+          <tui-error class="p-1" formControlName="priority" [error]="[] | tuiFieldError | async" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <tui-textfield tuiChevron [stringify]="stringifyUser">
+            <label tuiLabel>{{ 'generic.actions.assign' | translate }}</label>
+            <input tuiSelect formControlName="assignee" />
+            <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="userStore.users()" [emptyContent]="'generic.statuses.notFound' | translate"  />
+          </tui-textfield>
+          <tui-error class="p-1" formControlName="assignee" [error]="[] | tuiFieldError | async" />
+        </div>
+      </div>
+
+      <tui-textfield class="task-dialog-textarea-field">
+        <label tuiLabel>{{ 'models.task.fields.description' | translate }}</label>
+        <textarea
+          tuiTextfield
+          formControlName="description"
+          class="task-dialog-textarea"
+        ></textarea>
+      </tui-textfield>
+
+      <footer class="task-dialog-footer">
+        <button tuiButton appearance="flat" type="button" (click)="context.completeWith(false)">
+          {{ 'generic.actions.cancel' | translate }}
+        </button>
+        <button tuiButton class="btn-primary" type="button" (click)="next()">
+          {{ 'generic.actions.next' | translate }}
+        </button>
+      </footer>
+    }
+
+    @case (1) {
+      <div class="task-dialog-details">
+        <div class="flex flex-col gap-1">
+          <tui-textfield tuiChevron [stringify]="stringifyRelease">
+            <label tuiLabel>{{ 'models.task.fields.release' | translate }}</label>
+            <input tuiSelect formControlName="release" [disabled]="!form.controls.project.value" />
+            <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="releases()" [emptyContent]="'generic.statuses.notFound' | translate"  />
+          </tui-textfield>
+          <tui-error formControlName="release" [error]="[] | tuiFieldError | async"/>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <tui-textfield tuiChevron [stringify]="stringifyStatus">
+            <label tuiLabel>{{ 'generic.titles.status' | translate }}</label>
+            <input tuiSelect formControlName="status" />
+            <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="statuses()" [emptyContent]="'generic.statuses.notFound' | translate"  />
+          </tui-textfield>
+          <tui-error class="p-1" formControlName="status" [error]="[] | tuiFieldError | async" />
+        </div>
+
+        <tui-textfield>
+          <label tuiLabel>{{ 'models.task.fields.dueAt' | translate }}</label>
+          <input tuiTextfield type="date" formControlName="dueAt" />
+        </tui-textfield>
+        <div></div>
+      </div>
+
+      <footer class="task-dialog-footer">
+        <button tuiButton appearance="flat" type="button" (click)="previous()">
+          {{ 'generic.actions.back' | translate }}
+        </button>
+        <button
+          tuiButton
+          class="btn-primary"
+          type="submit"
+          [disabled]="isSubmitting()"
+          (click)="submit()"
+        >
+          {{ 'generic.actions.add' | translate }}
+        </button>
+      </footer>
+    }
+  }
+</div>

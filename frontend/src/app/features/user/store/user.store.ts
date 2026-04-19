@@ -2,7 +2,6 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { User } from '../types/model/user.model';
 import { computed, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { CurrentApiService } from '../../current/service/current.service';
 import { Nullable } from '../../../core/declarations/types/nullable.type';
 import { AlertService } from '../../../core/declarations/services/alert.service';
 import { StoreStatus } from '../../../core/declarations/types/store-statuses.type';
@@ -47,7 +46,6 @@ export const UserStore = signalStore(
   withMethods(
     (
       store,
-      currentApiService = inject(CurrentApiService),
       usersService = inject(UserApiService),
       alertService = inject(AlertService),
       translate = inject(TranslateService),
@@ -56,7 +54,7 @@ export const UserStore = signalStore(
         pipe(
           tap(() => patchState(store, { status: StoreStatus.Loading })),
           exhaustMap(() =>
-            currentApiService.user().pipe(
+            usersService.currentUser().pipe(
               tap((response) => {
                 patchState(store, { user: response, status: StoreStatus.Loaded });
               }),

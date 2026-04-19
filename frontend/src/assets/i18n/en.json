@@ -13,10 +13,15 @@
       "add": "Add",
       "delete": "Delete",
       "cancel": "Cancel",
-      "create": "Create",
+      "create": "Create {{ value }}",
       "save": "Save",
       "selectAll": "Select All",
-      "selectNone": "Select None"
+      "selectNone": "Select None",
+      "search": "Search {{ value }}...",
+      "clear": "Clear",
+      "find": "Find",
+      "next": "Next",
+      "assign": "Assign"
     },
     "statuses": {
       "active": "Active",
@@ -36,7 +41,18 @@
     "hints": {
       "changePicture": "Change picture",
       "deletePicture": "Delete picture"
-    }
+    },
+    "titles": {
+      "status": "Status",
+      "priority": "Priority",
+      "project": "Project",
+      "dateRange": "Date range"
+    },
+    "tabs": {
+      "general": "General",
+      "details": "Details"
+    },
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   },
   "auth": {
     "title": "Login",
@@ -115,6 +131,19 @@
       "updatedAt": "Update at"
     },
     "task": {
+      "title": {
+        "default": "Task",
+        "plural": "Tasks",
+        "accusative": "Task"
+      },
+      "fields": {
+        "title": "Title",
+        "description": "Description",
+        "category": "Category",
+        "release": "Release",
+        "assignee": "Assignee",
+        "dueAt": "Due at"
+      },
       "categories": {
         "title": "Task categories",
         "subtitle": "Categories help organize tasks within this project. Each task can be assigned one category — use them to group work by feature, module, or any other logical area.",

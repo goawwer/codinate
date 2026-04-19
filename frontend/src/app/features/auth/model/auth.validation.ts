@@ -18,6 +18,12 @@ export function loginValidationErrorsFactory(translate: TranslateService) {
   };
 }
 
+export function requiredErrorFactory(translate: TranslateService) {
+  return {
+    required: translate.stream('generic.validation.required'),
+  };
+}
+
 export function usernameMinLength(min: number): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const error = Validators.minLength(min)(control);

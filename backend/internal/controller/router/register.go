@@ -8,6 +8,7 @@ import (
 	"github.com/goawwer/codinate/internal/controller/ui/task/categories"
 	"github.com/goawwer/codinate/internal/controller/ui/task/priority"
 	"github.com/goawwer/codinate/internal/controller/ui/task/status"
+	"github.com/goawwer/codinate/internal/controller/ui/task/tasks"
 	"github.com/goawwer/codinate/internal/controller/ui/team"
 	"github.com/goawwer/codinate/internal/controller/ui/user"
 )
@@ -21,6 +22,7 @@ func init() {
 	team.Register()
 	project.Register()
 	categories.Register()
+	tasks.Register()
 
 	// public
 	pictures.Register()

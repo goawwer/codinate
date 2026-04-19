@@ -76,10 +76,12 @@ func (qb *QueryFiltersBuilder) Eqs(params map[string]any) *QueryFiltersBuilder {
 
 func (qb *QueryFiltersBuilder) In(params map[string]any) *QueryFiltersBuilder {
 	for c, v := range params {
-		qb.Add(c, Filter{
-			Arg: v,
-			Op:  "IN",
-		})
+		if reflect.ValueOf(v).Kind() == reflect.Slice || reflect.ValueOf(v).Kind() == reflect.Array {
+			qb.Add(c, Filter{
+				Arg: v,
+				Op:  "IN",
+			})
+		}
 	}
 
 	return qb

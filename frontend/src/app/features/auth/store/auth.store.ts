@@ -8,8 +8,8 @@ import { LoginBody } from '../model/auth.model';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, exhaustMap, firstValueFrom, of, pipe, tap } from 'rxjs';
 import { inject } from '@angular/core';
-import { CurrentApiService } from '../../current/service/current.service';
 import { AuthStateService } from '../../../core/services/auth-state.service';
+import { UserApiService } from '../../user/service/user.service';
 
 interface IAuthState {
   loading: boolean;
@@ -28,7 +28,7 @@ export const AuthStore = signalStore(
     (
       store,
       authApiService = inject(AuthApiService),
-      currentApiService = inject(CurrentApiService),
+      usersService = inject(UserApiService),
       userStore = inject(UserStore),
       router = inject(Router),
       translate = inject(TranslateService),
@@ -57,7 +57,7 @@ export const AuthStore = signalStore(
 
         try {
           const user = await firstValueFrom(
-            currentApiService.user().pipe(catchError(() => of(null))),
+            usersService.currentUser().pipe(catchError(() => of(null))),
           );
 
           if (user) {
