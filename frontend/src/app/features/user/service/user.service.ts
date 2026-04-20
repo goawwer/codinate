@@ -18,6 +18,10 @@ export class UserApiService {
     return this.httpClient.get<User[]>(`${this.baseURL}/all`, { params });
   }
 
+  getById(id: string): Observable<User> {
+    return this.httpClient.get<User>(`${this.baseURL}/${id}`);
+  }
+
   create(body: CreateUserInput): Observable<void> {
     return this.httpClient.post<void>(`${this.baseURL}/add`, body);
   }

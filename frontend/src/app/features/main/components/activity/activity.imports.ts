@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import {
   TuiButton,
   TuiDataList,
@@ -27,6 +28,7 @@ import { LowerCasePipe } from '@angular/common';
 export const ACTIVITYIMPORTS = [
   DatePipe,
   ReactiveFormsModule,
+  RouterLink,
   TuiScrollbar,
   TuiButton,
   TuiDataList,

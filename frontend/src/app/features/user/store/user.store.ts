@@ -14,12 +14,14 @@ import { CreateUserInput, UpdateUserInput, UserFilters } from '../types/model/da
 type UserState = {
   user: User | null;
   users: User[];
+  viewedUser: User | null;
   status: Nullable<StoreStatus>;
 };
 
 const initialState: UserState = {
   user: null,
   users: [],
+  viewedUser: null,
   status: null,
 };
 
@@ -76,6 +78,17 @@ export const UserStore = signalStore(
       clearUser(): void {
         patchState(store, initialState);
       },
+
+      loadUserById: rxMethod<string>(
+        pipe(
+          exhaustMap((id) =>
+            usersService.getById(id).pipe(
+              tap((viewedUser) => patchState(store, { viewedUser })),
+              catchError(() => EMPTY),
+            ),
+          ),
+        ),
+      ),
 
       loadUsers: rxMethod<UserFilters>(
         pipe(

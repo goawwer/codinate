@@ -95,6 +95,17 @@
 
           <button
             appearance="secondary-grayscale"
+            [iconStart]="sortIcon()"
+            size="s"
+            tuiButton
+            type="button"
+            (click)="toggleSort()"
+          >
+            {{ 'generic.titles.sort' | translate }}
+          </button>
+
+          <button
+            appearance="secondary-grayscale"
             iconStart="@tui.calendar"
             size="s"
             tuiButton
@@ -137,7 +148,7 @@
           </tui-block-status>
         } @else {
           @for (item of pagedFeed(); track item.id) {
-            <div class="feed-card">
+            <div class="feed-card" [routerLink]="['/tasks', item.id]">
               <div class="feed-card-header">
                 <span class="feed-card-identifier">#{{ item.identifier }}</span>
                 <div class="feed-card-badges">

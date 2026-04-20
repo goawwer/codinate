@@ -5,7 +5,9 @@ import { map } from 'rxjs';
 
 @Component({
   selector: 'app-project-detail',
-  template: `<p>Project {{ id() }} — it works</p>`,
+  imports: [],
+  templateUrl: './project-detail.html',
+  styleUrl: './project-detail.scss',
 })
 export class ProjectDetailComponent {
   private readonly route = inject(ActivatedRoute);

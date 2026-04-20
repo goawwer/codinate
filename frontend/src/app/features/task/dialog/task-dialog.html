@@ -1,4 +1,4 @@
-<div class="task-dialog w-full max-w py-5" [formGroup]="form">
+<div class="task-dialog" [formGroup]="form">
   <tui-stepper class="task-dialog-stepper py-1" [activeItemIndex]="step()">
     <button tuiStep type="button" [disabled]="true">
       {{ 'generic.tabs.general' | translate }}
@@ -29,7 +29,7 @@
         <div class="flex flex-col gap-1">
           <tui-textfield tuiChevron [stringify]="stringifyCategory">
             <label tuiLabel>{{ 'models.task.fields.category' | translate }}</label>
-            <input tuiSelect formControlName="category" [disabled]="!form.controls.project.value" />
+            <input tuiSelect formControlName="category" />
             <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="categories()" [emptyContent]="'generic.statuses.notFound' | translate" />
           </tui-textfield>
           <tui-error class="p-1" formControlName="category" [error]="[] | tuiFieldError | async" />
@@ -52,18 +52,16 @@
           </tui-textfield>
           <tui-error class="p-1" formControlName="assignee" [error]="[] | tuiFieldError | async" />
         </div>
+        <div class="task-dialog-textarea-field col-span-2">
+          <label tuiLabel>{{ 'models.task.fields.description' | translate }}</label>
+          <textarea
+            tuiTextfield
+            formControlName="description"
+          ></textarea>
+        </div>
       </div>
 
-      <tui-textfield class="task-dialog-textarea-field">
-        <label tuiLabel>{{ 'models.task.fields.description' | translate }}</label>
-        <textarea
-          tuiTextfield
-          formControlName="description"
-          class="task-dialog-textarea"
-        ></textarea>
-      </tui-textfield>
-
-      <footer class="task-dialog-footer">
+      <footer class="task-dialog-footer" style="margin-top: auto">
         <button tuiButton appearance="flat" type="button" (click)="context.completeWith(false)">
           {{ 'generic.actions.cancel' | translate }}
         </button>
@@ -78,7 +76,7 @@
         <div class="flex flex-col gap-1">
           <tui-textfield tuiChevron [stringify]="stringifyRelease">
             <label tuiLabel>{{ 'models.task.fields.release' | translate }}</label>
-            <input tuiSelect formControlName="release" [disabled]="!form.controls.project.value" />
+            <input tuiSelect formControlName="release" />
             <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="releases()" [emptyContent]="'generic.statuses.notFound' | translate"  />
           </tui-textfield>
           <tui-error formControlName="release" [error]="[] | tuiFieldError | async"/>
@@ -100,7 +98,7 @@
         <div></div>
       </div>
 
-      <footer class="task-dialog-footer">
+      <footer class="task-dialog-footer" style="margin-top: auto">
         <button tuiButton appearance="flat" type="button" (click)="previous()">
           {{ 'generic.actions.back' | translate }}
         </button>

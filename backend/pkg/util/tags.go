@@ -7,10 +7,11 @@ import (
 )
 
 func GetDBColumn(entity any, fieldName string, defaultValues map[string]string) (string, error) {
-	if v, ok := defaultValues[StringCapitalize(fieldName)]; ok {
-		return v, nil
+	for _, key := range []string{StringCapitalize(fieldName), fieldName} {
+		if v, ok := defaultValues[key]; ok {
+			return v, nil
+		}
 	}
-
 	return getDbFieldByEntity(entity, fieldName)
 }
 

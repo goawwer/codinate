@@ -6,23 +6,21 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormControl, FormGroup } from '@angular/forms';
 import { HttpParams } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TuiDay, TuiDayRange } from '@taiga-ui/cdk';
 import { tuiScrollbarOptionsProvider } from '@taiga-ui/core';
-import { debounceTime, forkJoin, startWith } from 'rxjs';
+import { debounceTime, map, startWith } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { USERTASKSIMPORTS } from './user-tasks.imports';
 import { Task } from '../../../task/types/task.model';
 import { TaskCoreService } from '../../../task/service/task-core.service';
-import { TaskStatus, TaskStatusesService } from '../../../task/service/task-statuses.service';
-import { TaskPriority, TaskPrioritiesService } from '../../../task/service/task-priorities.service';
-import { ProjectApiService } from '../../../project/service/project.service';
-import { Project } from '../../../project/types/model/project.model';
 import { UserStore } from '../../store/user.store';
 
-type TabMode = 'assigned' | 'created';
+type TabMode = 'assigned' | 'created' | 'history';
+type SortOrder = 'asc' | 'desc';
 
 const PAGE_SIZE = 10;
 
@@ -36,53 +34,33 @@ const PAGE_SIZE = 10;
 })
 export class UserTasks implements OnInit {
   private readonly taskService = inject(TaskCoreService);
-  private readonly statusesService = inject(TaskStatusesService);
-  private readonly prioritiesService = inject(TaskPrioritiesService);
-  private readonly projectsService = inject(ProjectApiService);
   private readonly translate = inject(TranslateService);
   private readonly userStore = inject(UserStore);
+  private readonly route = inject(ActivatedRoute);
 
-  protected readonly activeTab = signal<TabMode>('assigned');
-  protected readonly activeTabIndex = computed(() => this.activeTab() === 'assigned' ? 0 : 1);
+  protected readonly activeTab = toSignal(
+    this.route.url.pipe(map((segments) => (segments[0]?.path as TabMode) ?? 'assigned')),
+    { initialValue: 'assigned' as TabMode },
+  );
   protected readonly currentPage = signal(0);
   protected readonly allTasks = signal<Task[]>([]);
   protected readonly isLoading = signal(false);
-  protected readonly statuses = signal<TaskStatus[]>([]);
-  protected readonly priorities = signal<TaskPriority[]>([]);
-  protected readonly projects = signal<Project[]>([]);
 
   protected readonly form = new FormGroup({
     search: new FormControl(''),
-    statusIds: new FormControl<TaskStatus[]>([]),
-    priorityIds: new FormControl<TaskPriority[]>([]),
-    projectIds: new FormControl<Project[]>([]),
+    sortOrder: new FormControl<SortOrder>('desc'),
     dateRange: new FormControl<TuiDayRange | null>(null),
   });
 
   protected readonly formValue = toSignal(this.form.valueChanges.pipe(startWith(this.form.value)));
 
-  protected readonly statusLabel = computed(() => {
-    const ids = this.formValue()?.statusIds ?? [];
-    if (!ids.length) return this.translate.instant('generic.titles.status');
-    if (ids.length === 1) return ids[0].name;
-    return `${this.translate.instant('generic.titles.status')} (${ids.length})`;
-  });
-
-  protected readonly priorityLabel = computed(() => {
-    const ids = this.formValue()?.priorityIds ?? [];
-    if (!ids.length) return this.translate.instant('generic.titles.priority');
-    if (ids.length === 1) return ids[0].name;
-    return `${this.translate.instant('generic.titles.priority')} (${ids.length})`;
-  });
-
-  protected readonly projectLabel = computed(() => {
-    const ids = this.formValue()?.projectIds ?? [];
-    if (!ids.length) return this.translate.instant('generic.titles.project');
-    if (ids.length === 1) return ids[0].projectName;
-    return `${this.translate.instant('generic.titles.project')} (${ids.length})`;
-  });
-
   protected readonly calendarOpen = signal(false);
+
+  protected readonly sortIcon = computed(() =>
+    this.formValue()?.sortOrder === 'asc'
+      ? '@tui.arrow-up-narrow-wide'
+      : '@tui.arrow-down-wide-narrow',
+  );
 
   protected readonly dateLabel = computed(() => {
     const range = this.formValue()?.dateRange;
@@ -93,13 +71,7 @@ export class UserTasks implements OnInit {
   protected readonly filterCount = computed(() => {
     const v = this.formValue();
     if (!v) return 0;
-    return [
-      !!v.search?.trim(),
-      !!v.statusIds?.length,
-      !!v.priorityIds?.length,
-      !!v.projectIds?.length,
-      !!v.dateRange,
-    ].filter(Boolean).length;
+    return [!!v.search?.trim(), v.sortOrder !== 'desc', !!v.dateRange].filter(Boolean).length;
   });
 
   protected readonly totalPages = computed(() => Math.ceil(this.allTasks().length / PAGE_SIZE));
@@ -111,53 +83,41 @@ export class UserTasks implements OnInit {
   });
 
   ngOnInit(): void {
-    forkJoin([
-      this.statusesService.getAll(),
-      this.prioritiesService.getAll(),
-      this.projectsService.getAll(),
-    ]).subscribe(([statuses, priorities, projects]) => {
-      this.statuses.set(statuses);
-      this.priorities.set(priorities);
-      this.projects.set(projects);
+    this.route.url.subscribe(() => {
+      this.currentPage.set(0);
+      this.fetchTasks();
     });
 
-    this.form.valueChanges.pipe(startWith(this.form.value), debounceTime(300)).subscribe(() => {
+    this.form.valueChanges.pipe(debounceTime(300)).subscribe(() => {
       this.currentPage.set(0);
       this.fetchTasks();
     });
   }
 
-  protected setTab(tab: TabMode): void {
-    this.activeTab.set(tab);
-    this.currentPage.set(0);
-    this.fetchTasks();
+  protected toggleSort(): void {
+    const current = this.form.controls.sortOrder.value;
+    this.form.controls.sortOrder.setValue(current === 'desc' ? 'asc' : 'desc');
   }
 
   protected fetchTasks(): void {
     const userId = this.userStore.user()?.id;
     if (!userId) return;
 
-    const { search, statusIds, priorityIds, projectIds, dateRange } = this.form.value;
+    const { search, sortOrder, dateRange } = this.form.value;
 
     let params = new HttpParams();
 
     if (this.activeTab() === 'assigned') {
       params = params.set('assigneeId', userId);
-    } else {
+    } else if (this.activeTab() === 'created') {
       params = params.set('authorId', userId);
     }
 
     if (search?.trim()) {
       params = params.set('searchBy', 'title').set('searchValue', search.trim());
     }
-    if (statusIds?.length) {
-      params = params.set('statusId', statusIds.map((s) => s.id).join(','));
-    }
-    if (priorityIds?.length) {
-      params = params.set('priorityId', priorityIds.map((p) => p.id).join(','));
-    }
-    if (projectIds?.length) {
-      params = params.set('projectId', projectIds.map((p) => p.id).join(','));
+    if (sortOrder) {
+      params = params.set('orderBy', 'updatedAt').set('order', sortOrder);
     }
     if (dateRange) {
       params = params.set('from', dateRange.from.toLocalNativeDate().toISOString());
@@ -177,9 +137,7 @@ export class UserTasks implements OnInit {
   protected resetFilters(): void {
     this.form.reset({
       search: '',
-      statusIds: [],
-      priorityIds: [],
-      projectIds: [],
+      sortOrder: 'desc',
       dateRange: null,
     });
   }

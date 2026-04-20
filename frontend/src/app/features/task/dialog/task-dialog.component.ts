@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+  ViewEncapsulation,
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TuiDialogContext, TUI_ITEMS_HANDLERS, TuiItemsHandlers } from '@taiga-ui/core';
 import { injectContext } from '@taiga-ui/polymorpheus';
@@ -26,6 +32,7 @@ import { requiredErrorFactory } from '../../auth/model/auth.validation';
   templateUrl: './task-dialog.html',
   styleUrl: './task-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: TUI_VALIDATION_ERRORS,
@@ -59,8 +66,12 @@ export class TaskDialogComponent {
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     description: new FormControl('', { nonNullable: true }),
     project: new FormControl<Project | null>(null, [Validators.required]),
-    release: new FormControl<Release | null>(null, [Validators.required]),
-    category: new FormControl<TaskCategory | null>(null, [Validators.required]),
+    release: new FormControl<Release | null>({ value: null, disabled: true }, [
+      Validators.required,
+    ]),
+    category: new FormControl<TaskCategory | null>({ value: null, disabled: true }, [
+      Validators.required,
+    ]),
     priority: new FormControl<TaskPriority | null>(null, [Validators.required]),
     status: new FormControl<TaskStatus | null>(null, [Validators.required]),
     assignee: new FormControl<User | null>(null, [Validators.required]),
@@ -91,6 +102,8 @@ export class TaskDialogComponent {
       this.form.controls.release.setValue(null);
       this.form.controls.category.setValue(null);
       if (project) {
+        this.form.controls.release.enable();
+        this.form.controls.category.enable();
         forkJoin([
           this.releaseService.getByProject(project.id),
           this.categoriesService.getAll(project.id),
@@ -98,22 +111,17 @@ export class TaskDialogComponent {
           this.releases.set(releases);
           this.categories.set(categories);
         });
+      } else {
+        this.form.controls.release.disable();
+        this.form.controls.category.disable();
       }
     });
   }
 
   protected next(): void {
-    const step1 = [
-      'title',
-      'project',
-      'release',
-      'category',
-      'priority',
-      'status',
-      'assignee',
-    ] as const;
-    step1.forEach((key) => this.form.controls[key].markAsTouched());
-    if (step1.every((key) => this.form.controls[key].valid)) {
+    const step1Fields = ['title', 'project', 'category', 'priority', 'assignee'] as const;
+    step1Fields.forEach((key) => this.form.controls[key].markAsTouched());
+    if (step1Fields.every((key) => this.form.controls[key].valid)) {
       this.step.set(1);
     }
   }

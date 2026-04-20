@@ -3,10 +3,6 @@
   height: 100%;
 }
 
-::ng-deep search[tuiSearch] form {
-  gap: 1rem;
-}
-
 .tasks-layout {
   display: flex;
   flex-direction: column;
@@ -14,12 +10,23 @@
   height: calc(100dvh - 7rem);
 }
 
-.tabs {
+.filter-row {
   flex-shrink: 0;
-}
 
-.feed-search-wrapper {
-  flex-shrink: 0;
+  fieldset {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  tui-textfield {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 .feed-scroll {

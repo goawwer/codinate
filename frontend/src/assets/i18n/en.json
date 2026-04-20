@@ -21,6 +21,7 @@
       "clear": "Clear",
       "find": "Find",
       "next": "Next",
+      "back": "Back",
       "assign": "Assign"
     },
     "statuses": {
@@ -46,7 +47,8 @@
       "status": "Status",
       "priority": "Priority",
       "project": "Project",
-      "dateRange": "Date range"
+      "dateRange": "Date range",
+      "sort": "Sort"
     },
     "tabs": {
       "general": "General",
@@ -76,6 +78,7 @@
   "main": {
     "subnav": {
       "activity": "Activity",
+      "tasks": "My Tasks",
       "teams": "Teams",
       "projects": "Projects"
     }
@@ -148,6 +151,29 @@
         "title": "Task categories",
         "subtitle": "Categories help organize tasks within this project. Each task can be assigned one category — use them to group work by feature, module, or any other logical area.",
         "empty": "No categories provided"
+      },
+      "detailed": {
+        "additionalInfo": "Additional Info",
+        "createdAt": "Created",
+        "updatedAt": "Updated",
+        "closedAt": "Closed",
+        "noDescription": "No description provided",
+        "comments": "Comments",
+        "commentsEmpty": "No comments yet",
+        "commentsEmptySub": "Comments will appear here once added",
+        "participants": "Participants",
+        "assignee": "Assignee"
+      },
+      "state": {
+        "assigned": "Assigned",
+        "created": "Created by me",
+        "history": "History",
+        "assignedEmptyLabel": "No assigned tasks",
+        "assignedEmptySub": "You can rest",
+        "createdEmptyLabel": "You have never ever create a task before",
+        "createdEmptySub": "Everything is ahead!",
+        "historyEmptyLabel": "Your tasks history is empty",
+        "historyEmptySub": "Histore just have started"
       }
     }
   },

@@ -1,1 +1,131 @@
-<p>detailed works!</p>
+<div class="detailed-page py-2">
+
+  @if (isLoading()) {
+    <tui-block-status>
+      <h4>Loading...</h4>
+    </tui-block-status>
+  } @else if (task(); as t) {
+
+
+    <div class="main-layout">
+      <div class="main-col">
+        <div class="task-header">
+          <span class="task-identifier">#{{ t.identifier }}</span>
+          <div class="task-badges">
+            <tui-badge [style.background]="'var(--tui-chart-categorical-01)'">{{ t.priority }}</tui-badge>
+            <tui-badge>{{ t.category }}</tui-badge>
+            <tui-badge>{{ t.status }}</tui-badge>
+          </div>
+        </div>
+
+        <h2 class="task-title">{{ t.title }}</h2>
+
+        @if (t.description) {
+          <p class="task-description">{{ t.description }}</p>
+        } @else {
+          <p class="task-description task-description--empty">
+            {{ 'models.task.detailed.noDescription' | translate }}
+          </p>
+        }
+
+        <div class="comments-section">
+          <div class="comments-header">
+            <tui-icon icon="@tui.message-square" />
+            <span>{{ 'models.task.detailed.comments' | translate }}</span>
+          </div>
+          <div class="comments-placeholder">
+            <tui-icon icon="@tui.message-square-dashed" class="comments-placeholder-icon" />
+            <p>{{ 'models.task.detailed.commentsEmpty' | translate }}</p>
+            <span>{{ 'models.task.detailed.commentsEmptySub' | translate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-col">
+        <div class="widget">
+          <div class="widget-header">
+            <tui-icon icon="@tui.users" />
+            <span>{{ 'models.task.detailed.participants' | translate }}</span>
+          </div>
+          <div class="widget-body">
+            <div class="participant-row">
+              <div class="participant-avatar">
+                <app-picture
+                  [name]="this.userStore.user()?.name ?? ''"
+                  size="s"
+                  [pictureName]="this.userStore.user()?.picture ?? ''"
+                  entityType="users"
+                ></app-picture>
+              </div>
+              <div class="participant-info">
+                <span class="participant-role">{{ 'models.task.detailed.assignee' | translate }}</span>
+                <span class="participant-name">{{ t.assigneeUserame }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-header" (click)="toggleInfo()">
+            <div class="info-card-title">
+              <tui-icon icon="@tui.info" />
+              <span>{{ 'models.task.detailed.additionalInfo' | translate }}</span>
+            </div>
+            <tui-icon [icon]="infoExpanded() ? '@tui.chevron-up' : '@tui.chevron-down'" />
+          </div>
+        </div>
+
+        @if (infoExpanded()) {
+          <div class="info-card-body">
+            <div class="info-row">
+              <span class="info-label">
+                <tui-icon icon="@tui.tag" />
+                {{ 'models.task.fields.release' | translate }}
+              </span>
+              <span class="info-value">{{ t.projectRelease }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">
+                <tui-icon icon="@tui.calendar-plus" />
+                {{ 'models.task.detailed.createdAt' | translate }}
+              </span>
+              <span class="info-value">{{ t.createdAt | date: 'MMM d, yyyy HH:mm' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">
+                <tui-icon icon="@tui.pencil" />
+                {{ 'models.task.detailed.updatedAt' | translate }}
+              </span>
+              <span class="info-value">{{ t.updatedAt | date: 'MMM d, yyyy HH:mm' }}</span>
+            </div>
+            @if (t.closedAt) {
+              <div class="info-row">
+                <span class="info-label">
+                  <tui-icon icon="@tui.circle-check" />
+                  {{ 'models.task.detailed.closedAt' | translate }}
+                </span>
+                <span class="info-value">{{ t.closedAt | date: 'MMM d, yyyy HH:mm' }}</span>
+              </div>
+            }
+            @if (t.dueAt) {
+              <div class="info-row">
+                <span class="info-label">
+                  <tui-icon icon="@tui.clock" />
+                  {{ 'models.task.fields.dueAt' | translate }}
+                </span>
+                <span class="info-value">{{ t.dueAt | date: 'MMM d, yyyy' }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+
+  } @else {
+    <tui-block-status>
+      <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
+    </tui-block-status>
+  }
+
+</div>

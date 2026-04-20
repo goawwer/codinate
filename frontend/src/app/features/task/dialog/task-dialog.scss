@@ -1,36 +1,23 @@
+.t-filler {
+  display: none !important;
+}
+
 .task-dialog {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  padding: 0.25rem 0;
+  flex: 1;
+  min-height: 0;
 }
 
-.task-dialog-steps {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.task-dialog-step {
-  font-size: 0.8125rem;
-  color: var(--tui-text-tertiary);
-  font-weight: 500;
-  transition: color 0.15s;
-
-  &.active {
-    color: var(--tui-text-primary);
-  }
-}
-
-.task-dialog-step-sep {
-  font-size: 0.75rem;
-  color: var(--tui-text-tertiary);
+.task-dialog-stepper {
+  flex-shrink: 0;
 }
 
 .task-dialog-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.25rem 1rem;
+  gap: 0.5rem 1.25rem;
   align-items: start;
 }
 
@@ -39,23 +26,37 @@
 }
 
 .task-dialog-details {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1.25rem;
+  align-items: start;
 }
 
 .task-dialog-textarea-field {
-  flex: 1;
-}
+  grid-column: span 2;
 
-.task-dialog-textarea {
-  min-height: 14rem;
-  resize: vertical;
+  textarea[tuiTextfield] {
+    min-height: 8rem;
+    max-height: 16rem;
+    resize: vertical;
+    border-radius: var(--tui-radius-m);
+    padding: 0.625rem 0.75rem;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--tui-background-);
+    color: var(--tui-text-primary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    outline: 1px solid var(--tui-border-normal);
+
+    &:focus {
+      outline-color: var(--tui-border-focus);
+    }
+  }
 }
 
 .task-dialog-footer {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-  padding-top: 0.25rem;
 }

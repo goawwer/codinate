@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/goawwer/codinate/internal/adapter/dto/filters"
 	"github.com/goawwer/codinate/internal/adapter/dto/shared"
 	"github.com/goawwer/codinate/internal/adapter/dto/task"
 	"github.com/goawwer/codinate/internal/adapter/model"
@@ -26,7 +27,7 @@ func (s *service) getAllTasks(ctx context.Context, f *task.Filters) ([]task.Row,
 }
 
 func (s *service) addTask(ctx context.Context, input task.CreateTaskInput) (shared.IdOutput, error) {
-	dueAt, _ := time.Parse("2006-01-02T15:04:05-07:00", input.DueAt)
+	dueAt := filters.ResolveDateTime(input.DueAt)
 
 	nextSeq, err := repository.GetTaskRepo().GetNextTaskIdentifier(ctx, input.ReleaseId)
 	if err != nil {
@@ -51,8 +52,8 @@ func (s *service) addTask(ctx context.Context, input task.CreateTaskInput) (shar
 }
 
 func (s *service) updateTask(ctx context.Context, input task.UpdateTaskInput, id uuid.UUID) error {
-	dueAt, _ := time.Parse("2006-01-02T15:04:05-07:00", input.DueAt)
-	closedAt, _ := time.Parse("2006-01-02T15:04:05-07:00", *input.ClosedAt)
+	dueAt, _ := time.Parse(time.RFC3339Nano, input.DueAt)
+	closedAt, _ := time.Parse(time.RFC3339Nano, *input.ClosedAt)
 
 	return repository.GetTaskRepo().UpdateTaskBy(ctx, model.Task{
 		AuthorId:    uuid.MustParse(input.AuthorId),

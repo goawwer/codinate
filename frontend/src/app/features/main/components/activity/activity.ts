@@ -27,6 +27,7 @@ import { LowerCasePipe } from '@angular/common';
 const PAGE_SIZE = 10;
 
 type Segment = '' | 'Open' | 'Closed';
+type SortOrder = 'asc' | 'desc';
 
 @Component({
   selector: 'app-activity',
@@ -57,6 +58,7 @@ export class MainActivityComponent implements OnInit {
     priorityIds: new FormControl<TaskPriority[]>([]),
     projectIds: new FormControl<Project[]>([]),
     segmented: new FormControl<Segment>(''),
+    sortOrder: new FormControl<SortOrder>('desc'),
     dateRange: new FormControl<TuiDayRange | null>(null),
   });
 
@@ -85,6 +87,12 @@ export class MainActivityComponent implements OnInit {
 
   protected readonly calendarOpen = signal(false);
 
+  protected readonly sortIcon = computed(() =>
+    this.formValue()?.sortOrder === 'asc'
+      ? '@tui.arrow-up-narrow-wide'
+      : '@tui.arrow-down-wide-narrow',
+  );
+
   protected readonly dateLabel = computed(() => {
     const range = this.formValue()?.dateRange;
     if (!range) return this.translate.instant('generic.titles.dateRange');
@@ -100,6 +108,7 @@ export class MainActivityComponent implements OnInit {
       !!v.priorityIds?.length,
       !!v.projectIds?.length,
       !!v.segmented,
+      v.sortOrder !== 'desc',
       !!v.dateRange,
     ].filter(Boolean).length;
   });
@@ -143,6 +152,11 @@ export class MainActivityComponent implements OnInit {
     });
   }
 
+  protected toggleSort(): void {
+    const current = this.form.controls.sortOrder.value;
+    this.form.controls.sortOrder.setValue(current === 'desc' ? 'asc' : 'desc');
+  }
+
   protected openCreateDialog(): void {
     this.dialogService
       .component<TaskDialogComponent, boolean>(TaskDialogComponent, {
@@ -156,7 +170,7 @@ export class MainActivityComponent implements OnInit {
   }
 
   protected fetchTasks(): void {
-    const { search, statusIds, priorityIds, projectIds, dateRange } = this.form.value;
+    const { search, statusIds, priorityIds, projectIds, sortOrder, dateRange } = this.form.value;
 
     let params = new HttpParams();
 
@@ -171,6 +185,9 @@ export class MainActivityComponent implements OnInit {
     }
     if (projectIds?.length) {
       params = params.set('projectId', projectIds.map((p) => p.id).join(','));
+    }
+    if (sortOrder) {
+      params = params.set('orderBy', 'updatedAt').set('order', sortOrder);
     }
     if (dateRange) {
       params = params.set('from', dateRange.from.toLocalNativeDate().toISOString());
@@ -194,6 +211,7 @@ export class MainActivityComponent implements OnInit {
       priorityIds: [],
       projectIds: [],
       segmented: '',
+      sortOrder: 'desc',
       dateRange: null,
     });
   }

@@ -2,6 +2,7 @@ export interface Task {
   id: string;
   assigneeUserame: string;
   projectPicture: string;
+  projectRelease: string;
   category: string;
   priority: string;
   status: string;

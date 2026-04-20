@@ -55,12 +55,17 @@ func (r *taskRepoImpl) GetTasksRows(ctx context.Context, f *task.Filters) ([]tas
 	var qb QueryFiltersBuilder
 	var res []task.Row
 
-	searchCol, err := util.GetDBColumn(model.Task{}, f.SearchBy.Column, nil)
+	customNames := map[string]string{
+		"updatedAt": "t.updated_at",
+		"createdAt": "t.updated_at",
+	}
+
+	searchCol, err := util.GetDBColumn(model.Task{}, f.SearchBy.Column, customNames)
 	if err != nil && f.SearchBy.Column != "" {
 		return nil, err
 	}
 
-	orderCol, err := util.GetDBColumn(model.Task{}, f.SortBy.Column, nil)
+	orderCol, err := util.GetDBColumn(model.Task{}, f.SortBy.Column, customNames)
 	if err != nil && f.SortBy.Column != "" {
 		return nil, err
 	}
@@ -68,7 +73,7 @@ func (r *taskRepoImpl) GetTasksRows(ctx context.Context, f *task.Filters) ([]tas
 	err = r.SelectContext(ctx, &res, r.getTaskClause()+
 		qb.In(util.GetDBColumnsFiltersValuesMap(nil, model.Task{}, f)).
 			Like(searchCol, f.SearchBy.Value).
-			Order(orderCol, f.SortBy.Direction, "t.created_at", "DESC").
+			Order(orderCol, f.SortBy.Direction, "t.updated_at", "DESC").
 			Limit(f.Paging.GetOffset(), f.Paging.GetLimit()).
 			Build(),
 	)
@@ -83,7 +88,7 @@ func (r *taskRepoImpl) GetTasksRows(ctx context.Context, f *task.Filters) ([]tas
 func (r *taskRepoImpl) GetTaskBy(ctx context.Context, id uuid.UUID) (task.RowDetailed, error) {
 	var result task.RowDetailed
 
-	err := r.SelectContext(ctx, &result, r.getTaskClause()+"WHERE id = $1", id)
+	err := r.QueryRowContext(ctx, r.getTaskClause()+"WHERE t.id = $1", id).StructScan(&result)
 
 	return result, err
 }
@@ -282,6 +287,7 @@ func (r *taskRepoImpl) getTaskClause() string {
 			t.id,
 			u.username as assignee_username,
 			p.picture_name as project_picture,
+			pr.title as release,
 			tc.name as category,
 			tp.name as priority,
 			ts.name as status,
@@ -294,6 +300,7 @@ func (r *taskRepoImpl) getTaskClause() string {
 		FROM tasks t
 		LEFT JOIN users u ON t.assignee_id = u.id
 		LEFT JOIN projects p ON t.project_id = p.id
+		LEFT JOIN project_releases pr ON p.id = pr.project_id
 		LEFT JOIN task_categories tc ON t.category_id = tc.id
 		LEFT JOIN task_priorities tp ON t.priority_id = tp.id
 		LEFT JOIN task_statuses ts ON t.status_id = ts.id

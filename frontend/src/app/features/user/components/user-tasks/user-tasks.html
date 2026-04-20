@@ -1,123 +1,68 @@
 <div class="tasks-layout py-2">
 
-  <tui-tabs class="tabs" [activeItemIndex]="activeTabIndex()">
-    <button tuiTab type="button" (click)="setTab('assigned')">Assigned to me</button>
-    <button tuiTab type="button" (click)="setTab('created')">Created by me</button>
-  </tui-tabs>
+  <form [formGroup]="form" class="filter-row">
+    <fieldset tuiTextfieldSize="s">
+      <tui-textfield iconStart="@tui.search">
+        <input
+          formControlName="search"
+          tuiTextfield
+          [placeholder]="'generic.actions.search' | translate: { value: ('models.task.title.plural' | translate | lowercase) }"
+        />
+      </tui-textfield>
+      <button
+        size="s"
+        tuiButton
+        class="btn-primary"
+        type="button"
+        (click)="fetchTasks()"
+      >
+        {{ 'generic.actions.find' | translate }}
+      </button>
 
-  <search tuiSearch class="feed-search-wrapper">
-    <form [formGroup]="form">
-      <fieldset tuiTextfieldSize="s">
-        <tui-textfield iconStart="@tui.search">
-          <input
-            formControlName="search"
-            tuiTextfield
-            [placeholder]="'generic.actions.search' | translate: { value: ('models.task.title.plural' | translate | lowercase) }"
-          />
-        </tui-textfield>
-        <button
-          size="s"
-          tuiButton
-          class="btn-primary"
-          type="button"
-          (click)="fetchTasks()"
-        >
-          {{ 'generic.actions.find' | translate }}
-        </button>
-      </fieldset>
+      <button
+        appearance="secondary-grayscale"
+        [iconStart]="sortIcon()"
+        size="s"
+        tuiButton
+        type="button"
+        (click)="toggleSort()"
+      >
+        {{ 'generic.titles.sort' | translate }}
+      </button>
 
-      <fieldset>
-        <button
-          appearance="secondary-grayscale"
-          iconStart="@tui.circle-dot"
-          size="s"
-          tuiButton
-          tuiButtonSelect
-          type="button"
-          [formControl]="form.controls.statusIds"
-        >
-          {{ statusLabel() }}
-          <tui-data-list *tuiTextfieldDropdown>
-            <tui-opt-group label="Status" tuiMultiSelectGroup>
-              @for (s of statuses(); track s.id) {
-                <button new tuiOption type="button" [value]="s">{{ s.name }}</button>
-              }
-            </tui-opt-group>
-          </tui-data-list>
-        </button>
+      <button
+        appearance="secondary-grayscale"
+        iconStart="@tui.calendar"
+        size="s"
+        tuiButton
+        type="button"
+        [tuiDropdown]="calendarDropdown"
+        [tuiDropdownOpen]="calendarOpen()"
+        (tuiDropdownOpenChange)="calendarOpen.set($event)"
+      >
+        {{ dateLabel() }}
+      </button>
 
-        <button
-          appearance="secondary-grayscale"
-          iconStart="@tui.flame"
-          size="s"
-          tuiButton
-          tuiButtonSelect
-          type="button"
-          [formControl]="form.controls.priorityIds"
-        >
-          {{ priorityLabel() }}
-          <tui-data-list *tuiTextfieldDropdown>
-            <tui-opt-group label="Priority" tuiMultiSelectGroup>
-              @for (p of priorities(); track p.id) {
-                <button new tuiOption type="button" [value]="p">{{ p.name }}</button>
-              }
-            </tui-opt-group>
-          </tui-data-list>
-        </button>
+      <ng-template #calendarDropdown>
+        <tui-calendar-range
+          [value]="formValue()?.dateRange ?? null"
+          (valueChange)="onDateRangeChange($event!)"
+        />
+      </ng-template>
 
-        <button
-          appearance="secondary-grayscale"
-          iconStart="@tui.folder-open"
-          size="s"
-          tuiButton
-          tuiButtonSelect
-          type="button"
-          [formControl]="form.controls.projectIds"
-        >
-          {{ projectLabel() }}
-          <tui-data-list *tuiTextfieldDropdown>
-            <tui-opt-group label="Project" tuiMultiSelectGroup>
-              @for (p of projects(); track p.id) {
-                <button new tuiOption type="button" [value]="p">{{ p.projectName }}</button>
-              }
-            </tui-opt-group>
-          </tui-data-list>
-        </button>
-
-        <button
-          appearance="secondary-grayscale"
-          iconStart="@tui.calendar"
-          size="s"
-          tuiButton
-          type="button"
-          [tuiDropdown]="calendarDropdown"
-          [tuiDropdownOpen]="calendarOpen()"
-          (tuiDropdownOpenChange)="calendarOpen.set($event)"
-        >
-          {{ dateLabel() }}
-        </button>
-
-        <ng-template #calendarDropdown>
-          <tui-calendar-range
-            [value]="formValue()?.dateRange ?? null"
-            (valueChange)="onDateRangeChange($event!)"
-          />
-        </ng-template>
-
-        <button
-          appearance="flat"
-          iconStart="@tui.rotate-cw"
-          size="xs"
-          tuiButton
-          type="button"
-          [disabled]="!filterCount()"
-          (click)="resetFilters()"
-        >
-          {{ 'generic.actions.clear' | translate }} {{ filterCount() ? '(' + filterCount() + ')' : '' }}
-        </button>
-      </fieldset>
-    </form>
-  </search>
+      <button
+        appearance="flat"
+        iconStart="@tui.rotate-cw"
+        size="xs"
+        tuiButton
+        type="button"
+        [disabled]="!filterCount()"
+        (click)="resetFilters()"
+      >
+        {{ 'generic.actions.clear' | translate }} {{ filterCount() ? '(' + filterCount() + ')' : '' }}
+      </button>
+    </fieldset>
+  </form>
 
   <tui-scrollbar class="feed-scroll">
     <div class="feed-items">
@@ -154,10 +99,26 @@
 
         @if (allTasks().length === 0) {
           <div class="empty-state">
-            <tui-block-status>
-              <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
-              <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
-            </tui-block-status>
+              @switch (this.activeTab()) {
+                @case ('assigned') {
+                <tui-block-status>
+                  <h4>{{ 'models.task.state.assignedEmptyLabel' | translate }}</h4>
+                  <p>{{ 'models.task.state.assignedEmptySub' | translate }}</p>
+                </tui-block-status>
+                }
+                @case ('created') {
+                <tui-block-status>
+                  <h4>{{ 'models.task.state.createdEmptyLabel' | translate }}</h4>
+                  <p>{{ 'models.task.state.createdEmptySub' | translate }}</p>
+                </tui-block-status>
+                }
+                @default {
+                <tui-block-status>
+                  <h4>{{ 'models.task.state.historyEmptyLabel' | translate }}</h4>
+                  <p>{{ 'models.task.state.historyEmptySub' | translate }}</p>
+                </tui-block-status>
+                }
+              }
           </div>
         }
       }

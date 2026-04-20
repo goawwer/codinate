@@ -37,6 +37,11 @@ export const routes: Routes = [
         path: 'mine',
         loadChildren: () => import('./features/user/users.routes').then((m) => m.USERS_ROUTES),
       },
+      {
+        path: 'tasks/:id',
+        loadComponent: () =>
+          import('./features/task/detailed/detailed').then((m) => m.Detailed),
+      },
     ],
   },
 
