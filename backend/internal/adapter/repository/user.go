@@ -91,7 +91,7 @@ func (r *userRepoImpl) UpdateById(ctx context.Context, newFields user.UpdateInpu
 		Eq("id::uuid", id).
 		Build()
 
-	_, err := r.ExecContext(ctx, "UPDATE users "+clause)
+	_, err := r.ExecContext(ctx, "UPDATE users "+clause, qb.Args()...)
 	return err
 }
 

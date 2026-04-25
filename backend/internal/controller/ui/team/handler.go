@@ -68,7 +68,7 @@ func teamMembers(s ui.UIService) (any, error) {
 //	@Failure	500	{object}	string	"Internal Server Error"
 //	@Router		/api/teams/create [post]
 func createTeam(s ui.UIService) (any, error) {
-	input, pictureName, err := ui.ParseMultipartPayload[team.CreateTeamInput](s, "picture", "teams")
+	input, pictureName, err := ui.ParseMultipartPayload[team.CreateTeamInput](s, "avatar", "teams")
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func createTeam(s ui.UIService) (any, error) {
 //	@Failure	500	{object}	string	"Internal Server Error"
 //	@Router		/api/teams/{id}/update [patch]
 func update(s ui.UIService) (any, error) {
-	input, pictureName, err := ui.ParseMultipartPayload[team.UpdateTeamInput](s, "picture", "teams")
+	input, pictureName, err := ui.ParseMultipartPayload[team.UpdateTeamInput](s, "avatar", "teams")
 	if err != nil {
 		return nil, err
 	}

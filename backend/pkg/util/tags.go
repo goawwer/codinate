@@ -7,7 +7,7 @@ import (
 )
 
 func GetDBColumn(entity any, fieldName string, defaultValues map[string]string) (string, error) {
-	for _, key := range []string{StringCapitalize(fieldName), fieldName} {
+	for _, key := range []string{StringCapitalize(fieldName), fieldName, StringUncapitalize(fieldName)} {
 		if v, ok := defaultValues[key]; ok {
 			return v, nil
 		}

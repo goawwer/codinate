@@ -1,18 +1,11 @@
 import { DatePipe, LowerCasePipe } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import {
-  TuiButton,
-  TuiDropdown,
-  TuiIcon,
-  TuiScrollbar,
-  TuiTextfield,
-} from '@taiga-ui/core';
-import {
-  TuiBadge,
-  TuiCalendarRange,
-} from '@taiga-ui/kit';
+import { TuiButton, TuiDropdown, TuiIcon, TuiScrollbar, TuiTextfield } from '@taiga-ui/core';
+import { TuiBadge, TuiCalendarRange } from '@taiga-ui/kit';
 import { TuiBlockStatus } from '@taiga-ui/layout';
 import { TranslatePipe } from '@ngx-translate/core';
+import { StripHtmlPipe } from '../../../../common/pipes/strip-html.pipe';
+import { RouterLink } from '@angular/router';
 
 export const USERTASKSIMPORTS = [
   DatePipe,
@@ -27,4 +20,6 @@ export const USERTASKSIMPORTS = [
   TuiBlockStatus,
   TranslatePipe,
   TuiTextfield,
+  StripHtmlPipe,
+  RouterLink,
 ];

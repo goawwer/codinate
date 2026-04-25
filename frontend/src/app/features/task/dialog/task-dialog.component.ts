@@ -2,13 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
-  signal,
+  OnDestroy,
+  Signal,
   ViewEncapsulation,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { TuiDialogContext, TUI_ITEMS_HANDLERS, TuiItemsHandlers } from '@taiga-ui/core';
+import { TuiDialogContext } from '@taiga-ui/core';
 import { injectContext } from '@taiga-ui/polymorpheus';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of, switchMap } from 'rxjs';
 import { TASK_DIALOG_IMPORTS } from './task-dialog.imports';
 import { CreateTaskInput } from '../types/task.model';
 import { TaskCoreService } from '../service/task-core.service';
@@ -24,6 +25,11 @@ import { AlertService } from '../../../core/declarations/services/alert.service'
 import { TranslateService } from '@ngx-translate/core';
 import { TUI_VALIDATION_ERRORS } from '@taiga-ui/kit';
 import { requiredErrorFactory } from '../../auth/model/auth.validation';
+import {
+  PendingEditorUploads,
+  PendingFile,
+} from '../../../common/editor/pending-editor-uploads.service';
+import { signal } from '@angular/core';
 
 @Component({
   selector: 'app-task-dialog',
@@ -41,8 +47,9 @@ import { requiredErrorFactory } from '../../auth/model/auth.validation';
     },
   ],
 })
-export class TaskDialogComponent {
+export class TaskDialogComponent implements OnDestroy {
   private readonly taskService = inject(TaskCoreService);
+  private readonly pendingUploads = inject(PendingEditorUploads);
   private readonly statusesService = inject(TaskStatusesService);
   private readonly prioritiesService = inject(TaskPrioritiesService);
   private readonly projectsService = inject(ProjectApiService);
@@ -61,6 +68,7 @@ export class TaskDialogComponent {
   protected readonly categories = signal<TaskCategory[]>([]);
   protected readonly isSubmitting = signal(false);
   protected readonly step = signal(0);
+  protected readonly pendingFiles: Signal<PendingFile[]> = this.pendingUploads.pending;
 
   protected readonly form = new FormGroup({
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -118,6 +126,26 @@ export class TaskDialogComponent {
     });
   }
 
+  ngOnDestroy(): void {
+    this.pendingUploads.clear();
+  }
+
+  protected isImage(type: string): boolean {
+    return type.startsWith('image/');
+  }
+
+  protected removeFile(blobUrl: string): void {
+    this.pendingUploads.remove(blobUrl);
+    const desc = this.form.controls.description.value;
+    const escaped = blobUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const cleaned = desc
+      .replace(new RegExp(`<img[^>]+src="${escaped}"[^>]*/?>`, 'gi'), '')
+      .replace(new RegExp(`<a[^>]+href="${escaped}"[^>]*>[\\s\\S]*?<\\/a>`, 'gi'), '');
+    if (cleaned !== desc) {
+      this.form.controls.description.setValue(cleaned);
+    }
+  }
+
   protected next(): void {
     const step1Fields = ['title', 'project', 'category', 'priority', 'assignee'] as const;
     step1Fields.forEach((key) => this.form.controls[key].markAsTouched());
@@ -136,14 +164,14 @@ export class TaskDialogComponent {
       return;
     }
 
-    const userId = this.userStore.user()?.id;
-    if (!userId) return;
+    const authorId = this.userStore.user()?.id;
+    if (!authorId) return;
 
     const v = this.form.getRawValue();
     const dueAt = v.dueAt ? new Date(v.dueAt).toISOString() : new Date(0).toISOString();
 
     const input: CreateTaskInput = {
-      userId,
+      authorId,
       assigneeId: v.assignee!.id,
       projectId: v.project!.id,
       releaseId: v.release!.id,
@@ -156,15 +184,28 @@ export class TaskDialogComponent {
     };
 
     this.isSubmitting.set(true);
-    this.taskService.add(input).subscribe({
-      next: () => {
-        this.isSubmitting.set(false);
-        this.context.completeWith(true);
-      },
-      error: () => {
-        this.isSubmitting.set(false);
-        this.alert.error(this.translate.instant('cmd.tasks.errors.createFailed'));
-      },
-    });
+    this.taskService
+      .add(input)
+      .pipe(
+        switchMap(({ id }) =>
+          this.pendingUploads.flush('tasks', id, input.description).pipe(
+            switchMap((updatedDesc) =>
+              updatedDesc !== input.description
+                ? this.taskService.update(id, { description: updatedDesc })
+                : of(null),
+            ),
+          ),
+        ),
+      )
+      .subscribe({
+        next: () => {
+          this.isSubmitting.set(false);
+          this.context.completeWith(true);
+        },
+        error: () => {
+          this.isSubmitting.set(false);
+          this.alert.error(this.translate.instant('cmd.tasks.errors.createFailed'));
+        },
+      });
   }
 }

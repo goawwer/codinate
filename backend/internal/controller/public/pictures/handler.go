@@ -12,7 +12,7 @@ import (
 type service struct{}
 
 func Register() {
-	public.RegisterGet("/{entity_type}", reflect.TypeOf(service{}), getEntityPicture)
+	public.RegisterGet("/{entity_type}", reflect.TypeOf(service{}), getEntityAvatar)
 }
 
 // getEntityPicture
@@ -26,15 +26,15 @@ func Register() {
 //	@Success	200
 //	@Failure	404	{object}	string	"Not Found"
 //	@Failure	500	{object}	string	"Internal Server Error"
-//	@Router		/pictures/{entity_type} [get]
-func getEntityPicture(s public.PublicService) (any, error) {
+//	@Router		/{entity_type} [get]
+func getEntityAvatar(s public.PublicService) (any, error) {
 	entityType, err := s.GetPathParameterAsString("entity_type")
 	if err != nil {
 		return nil, err
 	}
 
 	filename, _ := s.GetUrlParamAsString("filename")
-	file := path.Join(viper.GetString("UPLOADS_DIR"), "pictures", entityType, filename)
+	file := path.Join(viper.GetString("UPLOADS_DIR"), "avatars", entityType, filename)
 
 	http.ServeFile(s.GetResponse(), s.GetRequest(), file)
 

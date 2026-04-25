@@ -6,6 +6,7 @@ type MemberShort struct {
 	Id      string `json:"id"`
 	Name    string `json:"name"`
 	Surname string `json:"surname"`
+	Role    string `json:"role"`
 }
 
 type MembersShort []MemberShort

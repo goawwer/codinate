@@ -163,7 +163,7 @@ export class MainActivityComponent implements OnInit {
         label: this.translate.instant('generic.actions.create', {
           value: this.translate.instant('models.task.title.accusative'),
         }),
-        size: 'l',
+        size: 'fullscreen',
       })
       .pipe(filter(Boolean))
       .subscribe(() => this.fetchTasks());

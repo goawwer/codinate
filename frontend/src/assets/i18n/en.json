@@ -22,13 +22,15 @@
       "find": "Find",
       "next": "Next",
       "back": "Back",
-      "assign": "Assign"
+      "assign": "Assign",
+      "send": "Send"
     },
     "statuses": {
       "active": "Active",
       "disabled": "Disabled",
       "notFound": "Not found",
-      "notFoundDetails": "Please try another options"
+      "notFoundDetails": "Please try another options",
+      "empty": "Nothing here yet"
     },
     "permissions": {
       "owner": "Owner",
@@ -145,7 +147,8 @@
         "category": "Category",
         "release": "Release",
         "assignee": "Assignee",
-        "dueAt": "Due at"
+        "dueAt": "Due at",
+        "attachments": "Attached files"
       },
       "categories": {
         "title": "Task categories",
@@ -159,10 +162,13 @@
         "closedAt": "Closed",
         "noDescription": "No description provided",
         "comments": "Comments",
+        "addComment": "Add a comment...",
         "commentsEmpty": "No comments yet",
         "commentsEmptySub": "Comments will appear here once added",
         "participants": "Participants",
-        "assignee": "Assignee"
+        "assignee": "Assignee",
+        "author": "Author",
+        "properties": "Properties"
       },
       "state": {
         "assigned": "Assigned",
@@ -299,6 +305,23 @@
         "updateFailed": "Failed to update user",
         "deleteFailed": "Failed to delete user(s)",
         "currentUserLoadFailed": "Failed to retrieve the current user"
+      }
+    },
+    "tasks": {
+      "success": {
+        "updated": "Task updated successfully",
+        "deleted": "Task deleted successfully",
+        "closed": "Task closed successfully"
+      },
+      "errors": {
+        "updateFailed": "Failed to update task",
+        "deleteFailed": "Failed to delete task",
+        "createFailed": "Failed to create task",
+        "closeFailed": "Failed to close task"
+      },
+      "dialogs": {
+        "deleteTitle": "Delete task",
+        "deleteContent": "Are you sure you want to delete this task? This action cannot be undone."
       }
     }
   }

@@ -1,3 +1,5 @@
+@use './prose' as *;
+
 .btn-primary {
   --tui-background-accent-1: var(--app-brand-500);
   --tui-background-accent-1-hover: var(--app-brand-400);
@@ -36,4 +38,12 @@
 [tuiTd] {
   border-inline-end: none !important;
   border-inline-start: none !important;
+}
+
+[data-size='fullscreen'] > .t-content {
+  padding: 3rem 5rem !important;
+}
+
+.ProseMirror {
+  @include prose;
 }

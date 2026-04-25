@@ -73,7 +73,7 @@
         </tui-block-status>
       } @else {
         @for (item of pagedTasks(); track item.id) {
-          <div class="feed-card">
+          <div class="feed-card" [routerLink]="['/tasks', item.id]">
             <div class="feed-card-header">
               <span class="feed-card-identifier">#{{ item.identifier }}</span>
               <div class="feed-card-badges">
@@ -83,11 +83,11 @@
               </div>
             </div>
             <p class="feed-card-title">{{ item.title }}</p>
-            <p class="feed-card-description">{{ item.description }}</p>
+            <p class="feed-card-description">{{ item.description | stripHtml  }}</p>
             <div class="feed-card-footer">
               <span class="feed-card-meta">
                 <tui-icon icon="@tui.user" class="feed-meta-icon" />
-                {{ item.assigneeUserame }}
+                {{ item.assigneeUsername }}
               </span>
               <span class="feed-card-meta">
                 <tui-icon icon="@tui.clock" class="feed-meta-icon" />

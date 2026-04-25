@@ -1,6 +1,18 @@
+export interface TaskMember {
+  id: string;
+  name: string;
+  surname: string;
+  role: string;
+}
+
+export interface TaskFile {
+  id: string;
+  name: string;
+}
+
 export interface Task {
   id: string;
-  assigneeUserame: string;
+  assigneeUsername: string;
   projectPicture: string;
   projectRelease: string;
   category: string;
@@ -15,12 +27,24 @@ export interface Task {
 }
 
 export interface TaskDetailed extends Task {
+  projectId: number;
+  releaseId: number;
+  categoryId: number;
+  projectName: string;
+  projectPicture: string;
   authorId: string;
+  authorName: string;
+  authorSurname: string;
+  assigneeId: string;
+  assigneeName: string;
+  assigneeSurname: string;
+  members: TaskMember[];
+  attachedFiles: TaskFile[];
   updatedAt: string;
 }
 
 export interface CreateTaskInput {
-  userId: string;
+  authorId: string;
   assigneeId: string;
   projectId: number;
   releaseId: number;

@@ -15,16 +15,16 @@ export class ProjectApiService {
 
   create(body: CreateProjectInput, file?: File): Observable<number> {
     const formData = new FormData();
-    if (file) formData.append('picture', file);
+    if (file) formData.append('avatar', file);
     formData.append('payload', JSON.stringify(body));
-    return this.httpClient.post<{ id: number }>(`${this.baseURL}/create`, formData).pipe(
-      map((res) => res.id),
-    );
+    return this.httpClient
+      .post<{ id: number }>(`${this.baseURL}/create`, formData)
+      .pipe(map((res) => res.id));
   }
 
   update(id: number, body: UpdateProjectInput, file?: File): Observable<void> {
     const formData = new FormData();
-    if (file) formData.append('picture', file);
+    if (file) formData.append('avatar', file);
     formData.append('payload', JSON.stringify(body));
     return this.httpClient.patch<void>(`${this.baseURL}/${id}/update`, formData);
   }

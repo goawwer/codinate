@@ -37,26 +37,29 @@ func (s *service) addTask(ctx context.Context, input task.CreateTaskInput) (shar
 	identifier := releasePrefix(input.ReleaseId)*1000 + nextSeq
 
 	return repository.GetTaskRepo().AddNewTask(ctx, model.Task{
-		AuthorId:    uuid.MustParse(input.AuthorId),
-		AssigneeId:  uuid.MustParse(input.AssigneeId),
-		ProjectId:   input.ProjectId,
-		ReleaseId:   input.ReleaseId,
-		CategoryId:  input.CategoryId,
-		PriotiryId:  input.PriorityId,
-		StatusId:    input.StatusId,
-		Identifier:  identifier,
-		Title:       input.Title,
-		Description: input.Description,
-		DueAt:       dueAt,
+		AuthorId:     uuid.MustParse(input.AuthorId),
+		AssigneeId:   uuid.MustParse(input.AssigneeId),
+		ProjectId:    input.ProjectId,
+		ReleaseId:    input.ReleaseId,
+		CategoryId:   input.CategoryId,
+		PriotiryId:   input.PriorityId,
+		StatusId:     input.StatusId,
+		Identifier:   identifier,
+		Title:        input.Title,
+		Description:  input.Description,
+		DueAt:        dueAt,
+		Participants: uniqueUUIDs(uuid.MustParse(input.AuthorId), uuid.MustParse(input.AssigneeId)),
 	})
 }
 
 func (s *service) updateTask(ctx context.Context, input task.UpdateTaskInput, id uuid.UUID) error {
 	dueAt, _ := time.Parse(time.RFC3339Nano, input.DueAt)
-	closedAt, _ := time.Parse(time.RFC3339Nano, *input.ClosedAt)
+	var closedAt time.Time
+	if input.ClosedAt != nil {
+		closedAt, _ = time.Parse(time.RFC3339Nano, *input.ClosedAt)
+	}
 
 	return repository.GetTaskRepo().UpdateTaskBy(ctx, model.Task{
-		AuthorId:    uuid.MustParse(input.AuthorId),
 		AssigneeId:  uuid.MustParse(input.AssigneeId),
 		ProjectId:   input.ProjectId,
 		ReleaseId:   input.ReleaseId,
@@ -85,6 +88,18 @@ func (s *service) deleteTask(ctx context.Context, taskId, userId uuid.UUID, user
 	}
 
 	return repository.GetTaskRepo().DeleteTaskBy(ctx, taskId)
+}
+
+func uniqueUUIDs(ids ...uuid.UUID) []uuid.UUID {
+	seen := make(map[uuid.UUID]struct{}, len(ids))
+	out := make([]uuid.UUID, 0, len(ids))
+	for _, id := range ids {
+		if _, ok := seen[id]; !ok {
+			seen[id] = struct{}{}
+			out = append(out, id)
+		}
+	}
+	return out
 }
 
 func releasePrefix(releaseId int) int {

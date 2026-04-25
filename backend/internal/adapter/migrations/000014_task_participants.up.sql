@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS task_participants(
     task_id UUID NOT NULL REFERENCES tasks(id),
     user_id UUID NOT NULL REFERENCES users(id),
-    role BIGINT NOT NULL REFERENCES employee_roles(id),
+    role_id BIGINT NOT NULL REFERENCES employee_roles(id),
     joined_At TIMESTAMPTZ NOT NULL DEFAULT current_timestamp,
     PRIMARY KEY(task_id, user_id)
 );

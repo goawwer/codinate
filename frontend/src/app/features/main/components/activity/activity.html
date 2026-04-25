@@ -158,11 +158,11 @@
                 </div>
               </div>
               <p class="feed-card-title">{{ item.title }}</p>
-              <p class="feed-card-description">{{ item.description }}</p>
+              <p class="feed-card-description">{{ item.description | stripHtml }}</p>
               <div class="feed-card-footer">
                 <span class="feed-card-meta">
                   <tui-icon icon="@tui.user" class="feed-meta-icon" />
-                  {{ item.assigneeUserame }}
+                  {{ item.assigneeUsername }}
                 </span>
                 <span class="feed-card-meta">
                   <tui-icon icon="@tui.clock" class="feed-meta-icon" />

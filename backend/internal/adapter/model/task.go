@@ -23,4 +23,6 @@ type Task struct {
 	ClosedAt         time.Time   `db:"closed_at" json:"closedAt"`
 	CreatedAt        time.Time   `db:"created_at" json:"createdAt"`
 	UpdatedAt        time.Time   `db:"updated_at" json:"updatedAt"`
+
+	Participants []uuid.UUID `db:"-"`
 }

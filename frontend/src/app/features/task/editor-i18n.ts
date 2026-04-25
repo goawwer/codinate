@@ -1,0 +1,37 @@
+import { of } from 'rxjs';
+import { TUI_EDITOR_TOOLBAR_TEXTS } from '@taiga-ui/editor';
+
+export const EDITOR_RU_PROVIDER = {
+  provide: TUI_EDITOR_TOOLBAR_TEXTS,
+  useValue: of({
+    undo: 'Отменить',
+    redo: 'Повторить',
+    font: 'Шрифт',
+    fontStyle: 'Стиль шрифта',
+    fontSize: 'Размер шрифта',
+    bold: 'Полужирный',
+    italic: 'Курсив',
+    underline: 'Подчёркнутый',
+    strikeThrough: 'Зачёркнутый',
+    justify: 'Выравнивание',
+    list: 'Списки',
+    quote: 'Цитата',
+    foreColor: 'Цвет текста',
+    hiliteColor: 'Цвет выделения',
+    clear: 'Сбросить форматирование',
+    link: 'Ссылка',
+    code: 'Код',
+    image: 'Вставить изображение',
+    insertHorizontalRule: 'Разделитель',
+    superscript: 'Надстрочный',
+    subscript: 'Подстрочный',
+    insertTable: 'Добавить таблицу',
+    insertAnchor: 'Добавить якорь',
+    mergeCells: 'Объединить ячейки',
+    splitCells: 'Разъединить ячейки',
+    rowsColumnsManaging: 'Управление строками и столбцами',
+    cellColor: 'Цвет ячейки',
+    setDetails: 'Аккордеон',
+    removeDetails: 'Удалить аккордеон',
+  }),
+};

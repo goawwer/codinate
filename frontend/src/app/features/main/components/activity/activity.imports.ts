@@ -24,6 +24,7 @@ import {
 import { TuiBlockStatus, TuiSearch } from '@taiga-ui/layout';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LowerCasePipe } from '@angular/common';
+import { StripHtmlPipe } from '../../../../common/pipes/strip-html.pipe';
 
 export const ACTIVITYIMPORTS = [
   DatePipe,
@@ -49,4 +50,5 @@ export const ACTIVITYIMPORTS = [
   TuiTextfield,
   LowerCasePipe,
   TuiHint,
+  StripHtmlPipe,
 ];

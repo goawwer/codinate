@@ -52,12 +52,34 @@
           </tui-textfield>
           <tui-error class="p-1" formControlName="assignee" [error]="[] | tuiFieldError | async" />
         </div>
-        <div class="task-dialog-textarea-field col-span-2">
-          <label tuiLabel>{{ 'models.task.fields.description' | translate }}</label>
-          <textarea
-            tuiTextfield
+        <div class="task-dialog-textarea-field">
+          <app-editor
             formControlName="description"
-          ></textarea>
+            [placeholder]="'models.task.fields.description' | translate"
+            entityType="tasks"
+          />
+          @if (pendingFiles().length) {
+            <div class="pending-chips">
+              @for (item of pendingFiles(); track item.blobUrl) {
+                <div class="pending-chip">
+                  @if (isImage(item.type)) {
+                    <img [src]="item.blobUrl" class="pending-chip-thumb" [alt]="item.name" />
+                  } @else {
+                    <tui-icon icon="@tui.file" class="pending-chip-icon" />
+                  }
+                  <span class="pending-chip-name" [title]="item.name">{{ item.name }}</span>
+                  <button
+                    tuiIconButton
+                    appearance="ghost"
+                    type="button"
+                    size="xs"
+                    iconStart="@tui.x"
+                    (click)="removeFile(item.blobUrl)"
+                  ></button>
+                </div>
+              }
+            </div>
+          }
         </div>
       </div>
 

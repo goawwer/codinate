@@ -44,7 +44,8 @@ func (r *teamRepoImpl) GetAllTeamsWithMembersShort(ctx context.Context) ([]team.
 					json_build_object(
 						'id',      u.id,
 						'name',    u.name,
-						'surname', u.surname
+						'surname', u.surname,
+						'role',    er.name
 					)
 				) FILTER (WHERE u.id IS NOT NULL),
 				'[]'::json
@@ -52,6 +53,7 @@ func (r *teamRepoImpl) GetAllTeamsWithMembersShort(ctx context.Context) ([]team.
 		FROM teams t
 		LEFT JOIN team_members m ON t.id = m.team_id
 		LEFT JOIN users u ON u.id = m.user_id
+		LEFT JOIN employee_roles er ON u.role_id = er.id
 		GROUP BY t.id
 	`)
 
@@ -107,7 +109,7 @@ func (r *teamRepoImpl) Update(ctx context.Context, input team.UpdateTeamInput, i
 		Eq("id", id).
 		Build()
 
-	_, err := r.ExecContext(ctx, "UPDATE projects "+clause)
+	_, err := r.ExecContext(ctx, "UPDATE projects "+clause, qb.Args()...)
 	return err
 }
 
