@@ -1,0 +1,359 @@
+<div class="project-page">
+
+  @if (isLoading()) {
+    <tui-loader />
+  } @else if (project(); as p) {
+    <div class="project-header">
+      <div class="flex items-center gap-4">
+        <div class="project-header-picture">
+          <app-picture
+            [name]="p.projectName"
+            [pictureName]="p.projectPictureName"
+            entityType="projects"
+            fontSize="3rem"
+            size="xl"
+            [isRound]="false"
+          />
+        </div>
+        <div class="project-header-info">
+          <h1 class="project-name">{{ p.projectName }}</h1>
+          <div class="project-meta">
+            <span class="meta-item">
+              <span class="text-(--tui-text-tertiary)">
+                {{ 'models.project.authorName' | translate }}:
+              </span>
+              {{ p.authorName }} {{ p.authorSurname }}
+            </span>
+            <span class="meta-sep">·</span>
+            <span class="meta-item">
+              <span class="text-(--tui-text-tertiary)">
+                {{ 'generic.statuses.created' | translate }}:
+              </span>
+               {{ p.createdAt | appDate: 'dd MMMM yyyy' }}
+            </span>
+            <span class="meta-sep">·</span>
+            <span class="meta-item">
+              <span class="text-(--tui-text-tertiary)">
+                {{ 'generic.statuses.updated' | translate }}:
+              </span>
+              {{ p.updatedAt | appDate: 'dd MMMM yyyy' }}
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      @if (userStore.isAtLeastAdmin()) {
+      <button
+        appearance="action"
+        iconStart="@tui.settings"
+        size="m"
+        tuiIconButton
+        tuiHintAppearance="primary-tooltip"
+        tuiHintDirection="bottom"
+        [tuiHint]="'admin.dashboard.projects.hints.edit' | translate"
+        type="button"
+        (click)="openEditDialog(p)"
+      ></button>
+      }
+
+    </div>
+
+    <!-- Two-column layout -->
+    <div class="main-layout">
+
+      <tui-scrollbar class="main-scroll">
+        <div class="main-col">
+
+          <tui-tabs
+            class="mb-1"
+            [activeItemIndex]="activeTab()"
+            (activeItemIndexChange)="activeTab.set($event)"
+          >
+            <button tuiTab>{{ 'generic.titles.info' | translate }}</button>
+            <button tuiTab>{{ 'generic.titles.progress' | translate }}</button>
+          </tui-tabs>
+
+          <!-- Info tab -->
+          @if (activeTab() === 0) {
+            <div class="content-card">
+              <div class="content-card-header">
+                <span class="content-card-title">
+                  <tui-icon icon="@tui.file-text" />
+                  {{ 'models.project.projectDescription' | translate }}
+                </span>
+                <div class="flex items-center gap-1">
+                  @if (isEditing()) {
+                    <button
+                      tuiIconButton
+                      appearance="action"
+                      size="xs"
+                      type="button"
+                      iconStart="@tui.save"
+                      [disabled]="isSaving() || !userStore.isAtLeastAdmin()"
+                      (click)="save()"
+                    ></button>
+                  }
+                  <button
+                    tuiIconButton
+                    appearance="action"
+                    size="xs"
+                    type="button"
+                    [iconStart]="isEditing() ? '@tui.x' : '@tui.pencil'"
+                    (click)="toggleEditing()"
+                  ></button>
+                </div>
+              </div>
+
+              @if (isEditing()) {
+                <app-editor
+                  [formControl]="descriptionControl"
+                  entityType="projects"
+                  [entityId]="numericId()?.toString() ?? null"
+                />
+              } @else if (p.projectDescription) {
+                <div class="prose" [innerHTML]="p.projectDescription"></div>
+              } @else {
+                <p class="empty-text">{{ 'generic.statuses.empty | translate}}</p>
+              }
+            </div>
+          }
+
+          <!-- Progress tab -->
+          @if (activeTab() === 1) {
+            <div class="flex flex-col gap-3">
+              @if (!releases().length) {
+                <tui-block-status>
+                  <img
+                    alt="{{ 'generic.statuses.notFound' | translate }}"
+                    src="assets/images/not-found.svg"
+                    tuiSlot="top"
+                    class="image"
+                  />
+                  <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
+                  <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
+                </tui-block-status>
+              }
+
+              @for (release of releases(); track release.id) {
+                <div class="release-card">
+                  <div class="release-card-header">
+                    <span class="release-title">{{ release.title }}</span>
+                    <tui-badge
+                    [style.background]="'var(--tui-chart-categorical-01)'"
+                    size="m">
+                      {{ release.status | releaseStatus }}</tui-badge>
+                  </div>
+
+                  @if (validDate(release.startAt) || validDate(release.endAt)) {
+                    <div class="release-dates">
+                      <tui-icon icon="@tui.calendar-range" />
+                      @if (validDate(release.startAt)) {
+                        <span>{{ release.startAt | appDate: 'dd MMM yyyy' }}</span>
+                      }
+                      <span>→</span>
+                      @if (validDate(release.endAt)) {
+                        <span>{{ release.endAt | appDate: 'dd MMM yyyy' }}</span>
+                      }
+                    </div>
+                  }
+
+                  <div class="release-progress-wrap">
+                    <progress
+                      tuiProgressBar
+                      [value]="releaseProgress(release.title)"
+                      max="100"
+                      size="s"
+                      class="release-progress-bar"
+                    ></progress>
+                    <span class="release-progress-label">
+                      {{ closedCount(release.title) }}/{{ totalCount(release.title) }}
+                    </span>
+                  </div>
+
+                  @if (releaseTasks(release.title).length) {
+                    <div class="release-task-list">
+                      @for (task of releaseTasksVisible(release.title); track task.id) {
+                        <a [routerLink]="['/tasks', task.id]" class="release-task-row" [class.release-task-row--closed]="isTaskClosed(task)">
+                          <span class="task-link-id">#{{ task.identifier }}</span>
+                          <span class="release-task-title">{{ task.title }}</span>
+                          <tui-badge
+                            class="release-task-status"
+                            appearance="neutral"
+                            size="s"
+                          >{{ task.status }}</tui-badge>
+                        </a>
+                      }
+                      @if (releaseTasks(release.title).length > RELEASE_TASKS_LIMIT) {
+                        <button class="expand-toggle" type="button" (click)="toggleReleaseExpanded(release.title)">
+                          {{ expandedReleases().has(release.title) ? ('generic.actions.showLess' | translate) : ('generic.actions.show' | translate: { n: releaseTasks(release.title).length - RELEASE_TASKS_LIMIT }) }}
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+        </div>
+      </tui-scrollbar>
+
+      <!-- Side column -->
+      <div class="side-col">
+
+        <!-- Members widget -->
+        <div class="widget">
+          <div class="widget-header">
+            <tui-icon icon="@tui.users" />
+            <span>{{ 'models.project.members' | translate }}</span>
+          </div>
+          <div class="widget-body">
+            @for (member of p.members; track member.id) {
+              <div class="participant-row">
+                <div class="participant-avatar">
+                  <app-picture [name]="member.name" size="s" entityType="users" pictureName="" />
+                </div>
+                <div class="participant-info">
+                  <span class="participant-name">{{ member.name }} {{ member.surname }}</span>
+                  <span class="participant-role">{{ member.role | employeeRole }}</span>
+                </div>
+              </div>
+            }
+            @if (!p.members.length) {
+              <span class="empty-text">{{ 'generic.statuses.empty' | translate }}</span>
+            }
+          </div>
+        </div>
+
+        <!-- Recent tasks widget -->
+        <div class="widget">
+          <div class="widget-header widget-header--clickable" (click)="recentExpanded.set(!recentExpanded())">
+            <div class="flex items-center gap-2">
+              <tui-icon icon="@tui.list-checks" />
+              <span>{{ 'models.project.detailed.recent' | translate }}</span>
+            </div>
+            <tui-icon [icon]="recentExpanded() ? '@tui.chevron-up' : '@tui.chevron-down'" />
+          </div>
+          @if (recentExpanded()) {
+            <div class="widget-body">
+              @for (task of recentTasks(); track task.id) {
+                <a [routerLink]="['/tasks', task.id]" class="task-link-row">
+                  <span class="task-link-id">#{{ task.identifier }}</span>
+                  <span class="task-link-title">{{ task.title }}</span>
+                </a>
+              }
+              @if (!tasks().length) {
+                <span class="empty-text">No tasks yet</span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Links widget -->
+        <div class="widget">
+          <div class="widget-header widget-header--clickable" (click)="linksExpanded.set(!linksExpanded())">
+            <div class="flex items-center gap-2">
+              <tui-icon icon="@tui.link" />
+              <span>{{ 'models.project.links' | translate }}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <button
+                tuiIconButton
+                appearance="flat"
+                size="xs"
+                type="button"
+                [iconStart]="linksEditing() ? '@tui.x' : '@tui.pencil'"
+                (click)="toggleLinksEditing(); $event.stopPropagation()"
+              ></button>
+              <tui-icon [icon]="linksExpanded() ? '@tui.chevron-up' : '@tui.chevron-down'" />
+            </div>
+          </div>
+
+          @if (linksExpanded() || linksEditing()) {
+            @if (linksEditing()) {
+              <div class="widget-body links-edit">
+                @for (link of editableLinks(); track $index; let i = $index) {
+                  <div class="link-edit-row">
+                    <tui-textfield class="flex-1" [tuiTextfieldSize]="'s'">
+                      <input
+                        tuiTextfield
+                        placeholder="Title"
+                        [value]="link.title"
+                        (input)="updateLinkField(i, 'title', $any($event.target).value)"
+                      />
+                    </tui-textfield>
+                    <tui-textfield class="flex-1" [tuiTextfieldSize]="'s'">
+                      <input
+                        tuiTextfield
+                        placeholder="https://…"
+                        [value]="link.url"
+                        (input)="updateLinkField(i, 'url', $any($event.target).value)"
+                      />
+                    </tui-textfield>
+                    <button
+                      tuiIconButton
+                      appearance="flat"
+                      size="xs"
+                      type="button"
+                      iconStart="@tui.x"
+                      (click)="removeLink(i)"
+                    ></button>
+                  </div>
+                }
+                <div class="flex gap-2 pt-1">
+                  <button
+                    tuiButton
+                    appearance="flat"
+                    size="xs"
+                    type="button"
+                    iconStart="@tui.plus"
+                    (click)="addLink()"
+                  >Add</button>
+                  <button
+                    tuiButton
+                    appearance="primary"
+                    size="xs"
+                    type="button"
+                    (click)="saveLinks()"
+                  >Save</button>
+                </div>
+              </div>
+            } @else {
+              <div class="widget-body">
+                @for (link of p.links; track $index) {
+                  <a
+                    [href]="link.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="link-row"
+                  >
+                    <tui-icon icon="@tui.external-link" />
+                    <span>{{ link.title || link.url }}</span>
+                  </a>
+                }
+                @if (!p.links.length) {
+                  <span class="empty-text">{{ 'generic.statuses.empty' | translate }}</span>
+                }
+              </div>
+            }
+          }
+        </div>
+
+      </div>
+    </div>
+
+  } @else {
+    <tui-block-status>
+      <img
+        alt="{{ 'generic.statuses.notFound' | translate }}"
+        src="assets/images/not-found.svg"
+        tuiSlot="top"
+        class="image"
+      />
+      <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
+      <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
+    </tui-block-status>
+  }
+
+</div>

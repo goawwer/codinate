@@ -2,6 +2,12 @@ export interface ProjectMember {
   id: string;
   name: string;
   surname: string;
+  role: string;
+}
+
+export interface ProjectLink {
+  title: string;
+  url: string;
 }
 
 export interface Project {
@@ -11,6 +17,7 @@ export interface Project {
   projectName: string;
   projectDescription: string;
   projectPictureName: string;
+  links: ProjectLink[];
   archivedAt: string | null;
   createdAt: string;
   updatedAt: string;

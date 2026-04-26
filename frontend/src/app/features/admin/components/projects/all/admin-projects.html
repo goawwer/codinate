@@ -67,7 +67,6 @@
           {{ 'models.project.' + col.key | translate }}
         </th>
       }
-      <th tuiTh [style.width.rem]="6">{{ 'generic.actions.default' | translate }}</th>
     </tr>
   </thead>
 
@@ -122,21 +121,6 @@
             }
           </td>
         }
-        <td tuiTd>
-          <div tuiStatus>
-            <button
-              appearance="action"
-              iconStart="@tui.pencil"
-              size="m"
-              tuiIconButton
-              tuiHintAppearance="primary-tooltip"
-              tuiHintDirection="bottom"
-              [tuiHint]="'admin.dashboard.projects.hints.edit' | translate"
-              type="button"
-              (click)="openEditDialog(project)"
-            ></button>
-          </div>
-        </td>
       </tr>
     }
   </tbody>

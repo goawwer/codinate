@@ -24,12 +24,25 @@ export type AvatarSize = TuiSizeXS | TuiSizeXXL;
         <tui-avatar [size]="size" [src]="src()" />
       }
     } @else if (entityType === 'users') {
-      <tui-avatar [size]="size" [src]="letters()" [style.background]="color()" />
-    } @else {
+      <tui-avatar
+        [size]="size"
+        [src]="letters()"
+        [style.background]="color()"
+        [style.color]="'var(--app-avatar-leter-color)'"
+      />
+    } @else if (isAvatar) {
       <tui-icon
         icon="@tui.image"
         class="text-(--tui-text-tertiary) m-auto"
         style="font-size: {{ this.fontSize }}; padding: 0"
+      />
+    } @else {
+      <tui-avatar
+        [size]="size"
+        [src]="letters()"
+        [style.background]="color()"
+        [style.color]="'var(--app-avatar-leter-color)'"
+        [round]="isRound"
       />
     }
   `,
@@ -42,6 +55,7 @@ export class AppPicture {
   @Input() fontSize = '';
   @Input() entityType = '';
   @Input() isAvatar = false;
+  @Input() isRound = true;
 
   private readonly apiConfig = inject(API_CONFIG);
 

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { Project } from '../types/model/project.model';
+import { Project, ProjectLink } from '../types/model/project.model';
 import { CreateProjectInput, UpdateProjectInput } from '../types/model/project-dashboard.model';
 
 @Injectable({ providedIn: 'root' })
@@ -11,6 +11,14 @@ export class ProjectApiService {
 
   getAll(): Observable<Project[]> {
     return this.httpClient.get<Project[]>(`${this.baseURL}`);
+  }
+
+  getById(id: number): Observable<Project> {
+    return this.httpClient.get<Project>(`${this.baseURL}/${id}`);
+  }
+
+  updateLinks(id: number, links: ProjectLink[]): Observable<void> {
+    return this.httpClient.patch<void>(`${this.baseURL}/${id}/links`, { links });
   }
 
   create(body: CreateProjectInput, file?: File): Observable<number> {

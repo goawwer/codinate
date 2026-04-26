@@ -11,7 +11,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { forkJoin, filter, of, switchMap } from 'rxjs';
 import { TuiEditorTool, provideTuiEditor } from '@taiga-ui/editor';
-import { EDITOR_RU_PROVIDER } from '../editor-i18n';
+import { EDITOR_RU_PROVIDER } from '../../../common/editor/editor-i18n';
 import { TaskCoreService } from '../service/task-core.service';
 import { TaskFileService } from '../service/file.service';
 import { TaskDetailed, UpdateTaskInput } from '../types/task.model';
@@ -133,6 +133,8 @@ export class Detailed implements OnInit {
     if (!task) return false;
     return !task.closedAt || task.closedAt.startsWith('0001');
   });
+
+  protected readonly isClosed = computed(() => !this.canClose());
 
   protected readonly form = new FormGroup({
     title: new FormControl('', { nonNullable: true }),
@@ -292,6 +294,19 @@ export class Detailed implements OnInit {
       },
       error: () => {
         this.alert.error(this.translate.instant('cmd.tasks.errors.closeFailed'));
+      },
+    });
+  }
+
+  protected reopenTask(): void {
+    this.taskService.reopen(this.taskId).subscribe({
+      next: () => {
+        this.isEditing.set(false);
+        this.alert.success(this.translate.instant('cmd.tasks.success.reopened'));
+        this.taskService.getById(this.taskId).subscribe((task) => this.task.set(task));
+      },
+      error: () => {
+        this.alert.error(this.translate.instant('cmd.tasks.errors.reopenFailed'));
       },
     });
   }

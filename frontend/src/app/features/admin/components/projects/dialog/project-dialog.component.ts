@@ -155,7 +155,7 @@ export class ProjectDialogComponent {
       next: () => {
         this.members.update((list) => [
           ...list,
-          { id: member.id, name: member.name, surname: member.surname },
+          { id: member.id, name: member.name, surname: member.surname, role: member.role },
         ]);
         this.memberToAdd.reset();
         this.selectedMember.set(null);
@@ -248,6 +248,7 @@ export class ProjectDialogComponent {
       this.store.updateProject({ id: this.project!.id, input, file: file ?? undefined });
     } else {
       const input: CreateProjectInput = {
+        authorId: this.userStore.user()!.id,
         projectName: value.projectName,
         projectDescription: value.projectDescription,
         projectPictureName: '',

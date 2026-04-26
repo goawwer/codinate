@@ -104,7 +104,7 @@ func (db databaseWrapper) NamedQueryContext(ctx context.Context, query string, a
 
 func (db databaseWrapper) GetContext(ctx context.Context, dst any, query string, args ...any) error {
 	start := time.Now()
-	err := db.GetContext(ctx, dst, query, args...)
+	err := db.DB.GetContext(ctx, dst, query, args...)
 	duration := time.Since(start)
 
 	db.logIfNeeded("GetContext", query, duration, err)

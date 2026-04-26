@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS projects(
     author_id UUID NOT NULL REFERENCES users(id),
     name VARCHAR(200) NOT NULL UNIQUE,
     description TEXT,
+    links JSONB NOT NULL DEFAULT '[]',
     picture_name TEXT,
     archived_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT current_timestamp,

@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { filter } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { AppDialogService } from '../../../../../common/dialogs/dialog.service';
@@ -86,16 +93,6 @@ export class AdminProjects implements OnInit {
         label: this.translate.instant('admin.dashboard.projects.dialogs.createTitle'),
         size: 'l',
         data: { project: null },
-      })
-      .subscribe();
-  }
-
-  protected openEditDialog(project: Project): void {
-    this.dialogs
-      .component<ProjectDialogComponent, void, ProjectDialogData>(ProjectDialogComponent, {
-        label: this.translate.instant('admin.dashboard.projects.dialogs.editTitle'),
-        size: 'l',
-        data: { project },
       })
       .subscribe();
   }

@@ -1,4 +1,5 @@
 export interface CreateProjectInput {
+  authorId: string;
   projectName: string;
   projectDescription: string;
   projectPictureName: string;

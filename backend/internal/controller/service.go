@@ -281,8 +281,31 @@ func (s *CoreService) bindUrlParamsRecursive(target any, prefix string) error {
 			}
 			if vals != nil {
 				sliceVal := reflect.MakeSlice(field.Type(), len(vals), len(vals))
+				elemKind := field.Type().Elem().Kind()
 				for idx, valStr := range vals {
-					sliceVal.Index(idx).Set(reflect.ValueOf(valStr).Convert(field.Type().Elem()))
+					elem := sliceVal.Index(idx)
+					switch elemKind {
+					case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+						iv, convErr := strconv.ParseInt(valStr, 10, 64)
+						if convErr != nil {
+							return fmt.Errorf("param '%s[%d]' invalid int: %w", fullKey, idx, convErr)
+						}
+						elem.SetInt(iv)
+					case reflect.Float32, reflect.Float64:
+						fv, convErr := strconv.ParseFloat(valStr, 64)
+						if convErr != nil {
+							return fmt.Errorf("param '%s[%d]' invalid float: %w", fullKey, idx, convErr)
+						}
+						elem.SetFloat(fv)
+					case reflect.Bool:
+						bv, convErr := strconv.ParseBool(valStr)
+						if convErr != nil {
+							return fmt.Errorf("param '%s[%d]' invalid bool: %w", fullKey, idx, convErr)
+						}
+						elem.SetBool(bv)
+					default:
+						elem.Set(reflect.ValueOf(valStr).Convert(field.Type().Elem()))
+					}
 				}
 				field.Set(sliceVal)
 			}

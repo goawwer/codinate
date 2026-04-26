@@ -11,10 +11,15 @@ type Row struct {
 	AutorName     string `db:"author_name" json:"authorName"`
 	AuthorSurname string `db:"author_surname" json:"authorSurname"`
 	Core
+	Links      ProjectLinks        `db:"links" json:"links"`
 	ArchivedAt *time.Time          `db:"archived_at" json:"archivedAt"`
 	CreatedAt  time.Time           `db:"created_at" json:"createdAt"`
 	UpdatedAt  time.Time           `db:"updated_at" json:"updatedAt"`
 	Members    shared.MembersShort `db:"members" json:"members"`
+}
+
+type UpdateLinksInput struct {
+	Links ProjectLinks `json:"links"`
 }
 
 type Core struct {

@@ -15,7 +15,9 @@ import (
 type ProjectRepo interface {
 	Create(ctx context.Context, input project.CreateProjectInput) (int, error)
 	GetAll(ctx context.Context) ([]project.Row, error)
+	GetById(ctx context.Context, id int) (project.Row, error)
 	Update(ctx context.Context, input project.UpdateProjectInput, id int) error
+	UpdateLinks(ctx context.Context, id int, links project.ProjectLinks) error
 	RemoveMember(ctx context.Context, projectId int, userId uuid.UUID) error
 	AddMember(ctx context.Context, projectId int, userId uuid.UUID) error
 	DeleteBy(ctx context.Context, projectId int) error
@@ -39,17 +41,18 @@ func GetProjectRepo() ProjectRepo {
 
 func (r *projectRepoImpl) GetAll(ctx context.Context) ([]project.Row, error) {
 	var res []project.Row
-
 	err := r.SelectContext(ctx, &res, `
 		SELECT
 			p.id,
 			author.name AS author_name,
 			author.surname AS author_surname,
-			p.name, p.description, p.picture_name, p.archived_at, p.created_at, p.updated_at,
+			p.name, p.description, p.picture_name,
+			COALESCE(p.links, '[]'::jsonb) AS links,
+			p.archived_at, p.created_at, p.updated_at,
 			COALESCE(
 				json_agg(
 					json_build_object(
-						'id', 	   mu.id,
+						'id',      mu.id,
 						'name',    mu.name,
 						'surname', mu.surname,
 						'role',    er.name
@@ -62,13 +65,64 @@ func (r *projectRepoImpl) GetAll(ctx context.Context) ([]project.Row, error) {
 		LEFT JOIN project_members pm ON pm.project_id = p.id
 		LEFT JOIN users mu ON mu.id = pm.user_id
 		LEFT JOIN employee_roles er ON mu.role_id = er.id
+
 		GROUP BY
 			p.id, author.name, author.surname, p.name,
-			p.description, p.picture_name,
+			p.description, p.picture_name, p.links,
 			p.archived_at, p.created_at, p.updated_at
 	`)
 
 	return res, err
+}
+
+func (r *projectRepoImpl) GetById(ctx context.Context, id int) (project.Row, error) {
+	var res project.Row
+
+	err := r.GetContext(ctx, &res, `
+		SELECT
+			p.id,
+			author.name AS author_name,
+			author.surname AS author_surname,
+			p.name, p.description, p.picture_name,
+			COALESCE(p.links, '[]'::jsonb) AS links,
+			p.archived_at, p.created_at, p.updated_at,
+			COALESCE(
+				json_agg(
+					json_build_object(
+						'id',      mu.id,
+						'name',    mu.name,
+						'surname', mu.surname,
+						'role',    er.name
+					)
+				) FILTER (WHERE mu.id IS NOT NULL),
+				'[]'::json
+			) AS members
+		FROM projects p
+		LEFT JOIN users author ON p.author_id = author.id
+		LEFT JOIN project_members pm ON pm.project_id = p.id
+		LEFT JOIN users mu ON mu.id = pm.user_id
+		LEFT JOIN employee_roles er ON mu.role_id = er.id
+
+		WHERE p.id = $1
+		GROUP BY
+			p.id, author.name, author.surname, p.name,
+			p.description, p.picture_name, p.links,
+			p.archived_at, p.created_at, p.updated_at
+	`, id)
+
+	return res, err
+}
+
+func (r *projectRepoImpl) UpdateLinks(ctx context.Context, id int, links project.ProjectLinks) error {
+	val, err := links.Value()
+	if err != nil {
+		return err
+	}
+	_, err = r.ExecContext(ctx,
+		`UPDATE projects SET links = $1, updated_at = current_timestamp WHERE id = $2`,
+		val, id,
+	)
+	return err
 }
 
 func (r *projectRepoImpl) Create(ctx context.Context, input project.CreateProjectInput) (int, error) {
@@ -87,7 +141,7 @@ func (r *projectRepoImpl) Create(ctx context.Context, input project.CreateProjec
 		if len(input.MembersIds) > 0 {
 			if _, err := tx.ExecContext(ctx, `
                 INSERT INTO project_members (project_id, user_id)
-                SELECT $1, unnest($2::uuid[])
+                VALUES ($1, unnest($2::uuid[]))
             `, projectId, pq.Array(input.MembersIds)); err != nil {
 				return err
 			}

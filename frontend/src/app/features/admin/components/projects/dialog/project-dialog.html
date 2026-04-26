@@ -12,7 +12,7 @@
   @switch (activeTab()) {
     @case (0) {
       <div class="avatar-section flex flex-col items-center gap-3 pb-5">
-        <div class="w-28 h-28 rounded-full overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
+        <div class="w-25 h-25 rounded-full overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
           @if (previewUrl(); as url) {
             <img [src]="url" alt="Preview" class="w-full h-full object-cover" />
           } @else {
@@ -20,6 +20,7 @@
               [name]="project!.projectName"
               entityType="projects"
               [pictureName]="project!.projectPictureName"
+              size="xxl"
             />
           }
         </div>
@@ -112,7 +113,7 @@
       }
 
       @if (!members().length) {
-        <p class="text-sm text-center opacity-50 py-4">{{ 'models.project.noMembers' | translate }}</p>
+        <p class="text-sm text-center opacity-50 py-4">{{ 'generic.statuses.empty' | translate }}</p>
       }
     }
 

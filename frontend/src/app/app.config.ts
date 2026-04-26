@@ -7,6 +7,8 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
+import { TUI_LANGUAGE, TUI_RUSSIAN_LANGUAGE } from '@taiga-ui/i18n';
+import { of } from 'rxjs';
 import { APP_SIZE } from './core/declarations/tokens/size.token';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -39,5 +41,6 @@ export const appConfig: ApplicationConfig = {
     }),
     provideEventPlugins(),
     { provide: APP_SIZE, useValue: 'm' },
+    { provide: TUI_LANGUAGE, useValue: of(TUI_RUSSIAN_LANGUAGE) },
   ],
 };

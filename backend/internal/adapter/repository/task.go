@@ -25,6 +25,7 @@ type TaskRepo interface {
 	AttachFilesToTask(ctx context.Context, taskId uuid.UUID, fileIds []uuid.UUID) error
 	DetachFileFromTask(ctx context.Context, taskId, fileId uuid.UUID) error
 	CloseTaskBy(ctx context.Context, id uuid.UUID) error
+	ReopenTaskBy(ctx context.Context, id uuid.UUID) error
 	DeleteTaskBy(ctx context.Context, id uuid.UUID) error
 
 	// Priorities
@@ -60,9 +61,16 @@ func (r *taskRepoImpl) GetTasksRows(ctx context.Context, f *task.Filters) ([]tas
 	var res []task.Row
 
 	customNames := map[string]string{
-		"authorId":  "t.author_id",
-		"updatedAt": "t.updated_at",
-		"createdAt": "t.updated_at",
+		"authorId":   "t.author_id",
+		"updatedAt":  "t.updated_at",
+		"createdAt":  "t.updated_at",
+		"projectId":  "t.project_id",
+		"releaseId":  "t.release_id",
+		"categoryId": "t.category_id",
+		"priorityId": "t.priority_id",
+		"statusId":   "t.status_id",
+		"assigneeId": "t.assignee_id",
+		"title":      "t.title",
 	}
 
 	searchCol, err := util.GetDBColumn(model.Task{}, f.SearchBy.Column, customNames)
@@ -94,12 +102,15 @@ func (r *taskRepoImpl) GetTasksRows(ctx context.Context, f *task.Filters) ([]tas
 			FROM tasks t
 			LEFT JOIN users u ON t.assignee_id = u.id
 			LEFT JOIN projects p ON t.project_id = p.id
-			LEFT JOIN project_releases pr ON p.id = pr.project_id
+			LEFT JOIN project_releases pr ON t.release_id = pr.id
 			LEFT JOIN task_categories tc ON t.category_id = tc.id
 			LEFT JOIN task_priorities tp ON t.priority_id = tp.id
 			LEFT JOIN task_statuses ts ON t.status_id = ts.id
 		`+
 		qb.In(util.GetDBColumnsFiltersValuesMap(customNames, model.Task{}, f)).
+			FilterWithOperator("t.due_at::TIMESTAMP", f.DateRange.From, ">=").
+			FilterWithOperator("t.due_at::TIMESTAMP", f.DateRange.To, "<").
+			Eq("t.identifier", f.Identifier).
 			Like(searchCol, f.SearchBy.Value).
 			Order(orderCol, f.SortBy.Direction, "t.updated_at", "DESC").
 			Limit(f.Paging.GetOffset(), f.Paging.GetLimit()).
@@ -277,6 +288,15 @@ func (r *taskRepoImpl) UpdateTaskBy(ctx context.Context, newTask model.Task, id 
 func (r *taskRepoImpl) CloseTaskBy(ctx context.Context, id uuid.UUID) error {
 	_, err := r.ExecContext(ctx, `
 		UPDATE tasks SET closed_at = now()
+		WHERE id = $1
+	`, id)
+
+	return err
+}
+
+func (r *taskRepoImpl) ReopenTaskBy(ctx context.Context, id uuid.UUID) error {
+	_, err := r.ExecContext(ctx, `
+		UPDATE tasks SET closed_at = '0001-01-01 00:00:00'
 		WHERE id = $1
 	`, id)
 

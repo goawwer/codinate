@@ -114,7 +114,13 @@ export class UserTasks implements OnInit {
     }
 
     if (search?.trim()) {
-      params = params.set('searchBy', 'title').set('searchValue', search.trim());
+      const trimmed = search.trim();
+      if (trimmed.startsWith('#')) {
+        const id = parseInt(trimmed.slice(1), 10);
+        if (!isNaN(id)) params = params.set('identifier', id);
+      } else {
+        params = params.set('searchBy', 'title').set('searchValue', trimmed);
+      }
     }
     if (sortOrder) {
       params = params.set('orderBy', 'updatedAt').set('order', sortOrder);

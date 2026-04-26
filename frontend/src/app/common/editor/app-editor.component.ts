@@ -18,7 +18,7 @@ import {
   TuiEditorTool,
 } from '@taiga-ui/editor';
 import { APP_EDITOR_IMPORTS } from './app-editor.imports';
-import { EDITOR_RU_PROVIDER } from '../../features/task/editor-i18n';
+import { EDITOR_RU_PROVIDER } from './editor-i18n';
 import { EditorUploadService, editorFileLoader, editorImageLoader } from './editor-upload.service';
 
 @Component({

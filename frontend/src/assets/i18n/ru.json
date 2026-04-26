@@ -23,14 +23,18 @@
       "next": "Далее",
       "back": "Назад",
       "assign": "Назначить",
-      "send": "Отправить"
+      "send": "Отправить",
+      "show": "Показать ещё {{ n }}",
+      "showLess": "Скрыть"
     },
     "statuses": {
       "active": "Активен",
       "disabled": "Не активен",
       "notFound": "Ничего не найдено",
       "notFoundDetails": "Пожалуйста попробуйте другие опции",
-      "empty": "Пока ничего нет"
+      "empty": "Пока ничего нет",
+      "updated": "Обновлён",
+      "created": "Создан"
     },
     "filters": {
       "all": "Все"
@@ -53,7 +57,9 @@
       "priority": "Приоритет",
       "project": "Проект",
       "dateRange": "Диапазон дат",
-      "sort": "Сортировка"
+      "sort": "Сортировка",
+      "info": "Информация",
+      "progress": "Прогресс"
     },
     "tabs": {
       "general": "Основное",
@@ -105,6 +111,7 @@
   },
   "models": {
     "team": {
+      "title": "Проект",
       "name": "Название",
       "description": "Описание",
       "pictureName": "Изображение",
@@ -115,6 +122,10 @@
       "changePicture": "Изменить изображение"
     },
     "project": {
+      "title": {
+        "default": "Проект",
+        "plural": "Проекты"
+      },
       "projectName": "Название",
       "projectDescription": "Описание",
       "projectPictureName": "Изображение",
@@ -123,7 +134,11 @@
       "noAvailableMembers": "Все пользователи уже являются участниками",
       "archivedAt": "Архивирован",
       "createdAt": "Создан",
-      "updatedAt": "Обновлён"
+      "updatedAt": "Обновлён",
+      "links": "Полезные ссылки",
+      "detailed": {
+        "recent": "Недавнее"
+      }
     },
     "user": {
       "name": "Имя",
@@ -183,6 +198,14 @@
         "createdEmptySub": "Всё впереди!",
         "historyEmptyLabel": "Ваша история задач пуста",
         "historyEmptySub": "История только начинается"
+      }
+    },
+    "release": {
+      "statuses": {
+        "active": "Активный",
+        "finished": "Завершён",
+        "archived": "Архивный",
+        "closed": "Закрыт"
       }
     }
   },
@@ -315,13 +338,15 @@
       "success": {
         "updated": "Задача успешно обновлена",
         "deleted": "Задача успешно удалена",
-        "closed": "Задача успешно закрыта"
+        "closed": "Задача успешно закрыта",
+        "reopened": "Задача успешно переоткрыта"
       },
       "errors": {
         "updateFailed": "Не удалось обновить задачу",
         "deleteFailed": "Не удалось удалить задачу",
         "createFailed": "Не удалось создать задачу",
-        "closeFailed": "Не удалось закрыть задачу"
+        "closeFailed": "Не удалось закрыть задачу",
+        "reopenFailed": "Не удалось переоткрыть задачу"
       },
       "dialogs": {
         "deleteTitle": "Удалить задачу",
