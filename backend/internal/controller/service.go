@@ -122,10 +122,18 @@ func (s *CoreService) GetSearching() (string, string) {
 	return by, v
 }
 
+func (s *CoreService) GetDateRange() (string, string) {
+	from, _ := s.GetUrlParamAsString("from")
+	to, _ := s.GetUrlParamAsString("to")
+
+	return from, to
+}
+
 func (s *CoreService) GetBasicSortingAndPagingParams() BasicQueryParams {
 	sortBy, sort := s.GetSorting()
 	pageNumber, pageSize := s.GetPaging()
 	searchBy, searchValue := s.GetSearching()
+	from, to := s.GetDateRange()
 
 	return BasicQueryParams{
 		PageNumber:  pageNumber,
@@ -134,6 +142,8 @@ func (s *CoreService) GetBasicSortingAndPagingParams() BasicQueryParams {
 		Sort:        sort,
 		SearchBy:    searchBy,
 		SearchValue: searchValue,
+		From:        from,
+		To:          to,
 	}
 }
 

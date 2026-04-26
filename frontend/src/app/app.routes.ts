@@ -18,7 +18,7 @@ export const routes: Routes = [
       {
         path: 'main',
         loadChildren: () =>
-          import('./features/main/main.routes').then((m) => m.MAIN_ROUTES),
+          import('./features/main/components/default/main.routes').then((m) => m.MAIN_ROUTES),
       },
       {
         path: 'admin',
@@ -32,6 +32,15 @@ export const routes: Routes = [
       {
         path: 'teams',
         loadChildren: () => import('./features/team/team.routes').then((m) => m.TEAMS_ROUTES),
+      },
+      {
+        path: 'mine',
+        loadChildren: () => import('./features/user/users.routes').then((m) => m.USERS_ROUTES),
+      },
+      {
+        path: 'tasks/:id',
+        loadComponent: () =>
+          import('./features/task/detailed/detailed').then((m) => m.Detailed),
       },
     ],
   },

@@ -24,9 +24,17 @@ func createHandler(serviceType reflect.Type, handlerFn func(s UIService) (any, e
 }
 
 func handleResult(w http.ResponseWriter, result any) {
-	if result == nil || reflect.ValueOf(result).IsNil() {
+	if result == nil {
 		w.WriteHeader(http.StatusOK)
 		return
+	}
+	v := reflect.ValueOf(result)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Slice:
+		if v.IsNil() {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 	}
 
 	if err := json.NewEncoder(w).Encode(result); err != nil {

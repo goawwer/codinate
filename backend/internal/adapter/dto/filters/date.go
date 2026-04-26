@@ -10,8 +10,12 @@ type DateRange struct {
 }
 
 func NewDateRange(dateFrom, dateTo string) *DateRange {
-	dateTimeFrom, _ := time.Parse("2006-01-02T15:04:05-07:00", dateFrom)
-	dateTimeTo, _ := time.Parse("2006-01-02T15:04:05-07:00", dateTo)
+	dateTimeFrom, _ := time.Parse(time.RFC3339Nano, dateFrom)
+	dateTimeTo, _ := time.Parse(time.RFC3339Nano, dateTo)
+
+	if !dateTimeTo.IsZero() {
+		dateTimeTo = dateTimeTo.Add(24 * time.Hour).Add(-1 * time.Millisecond)
+	}
 
 	d := &DateRange{
 		From: dateTimeFrom,

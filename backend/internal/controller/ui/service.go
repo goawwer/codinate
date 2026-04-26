@@ -45,7 +45,7 @@ func (f *FilterService[IN, OUT]) GetResolvedFilters(s UIService, resolver func(*
 	return resolver(&input, s.GetBasicSortingAndPagingParams()), nil
 }
 
-func ParseMultipartPayload[T any](s UIService, fileField, entityType string) (T, string, error) {
+func ParseMultipartPayload[T any](s UIService, fileField, entityType string, entityId ...string) (T, string, error) {
 	var input T
 
 	if err := s.GetRequest().ParseMultipartForm(viper.GetInt64("UPLOADS_MAX_SIZE_MB") << 20); err != nil {
@@ -64,17 +64,19 @@ func ParseMultipartPayload[T any](s UIService, fileField, entityType string) (T,
 	fileId := uuid.New()
 	file, header, err := s.GetRequest().FormFile(fileField)
 	if file != nil {
-		mime := header.Header.Get("Content-Type")
-		var fileName string
-		var saveErr error
-		if mime == "image/jpeg" || mime == "image/png" || mime == "image/gif" {
-			fileName, saveErr = uploads.SaveImageFileOnServer(file, header, entityType, fileId)
+		var (
+			fileName string
+			saveErr  error
+		)
+		if fileField == "avatar" {
+			fileName, saveErr = uploads.SaveAvatar(file, header, entityType, fileId)
 		} else {
-			fileName, saveErr = uploads.SaveFileOnServer(file, header, entityType, fileId)
+			fileName, saveErr = uploads.SaveFile(file, header, entityType, entityId[0], fileId)
 		}
 		if saveErr != nil {
 			return input, "", saveErr
 		}
+
 		return input, fileName, nil
 	}
 

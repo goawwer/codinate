@@ -15,6 +15,8 @@ type QueryFiltersBuilder struct {
 	orderCondition  string
 	limitCondition  string
 	updateCondition []string
+	args            []any
+	paramCount      int
 }
 
 type Filter struct {
@@ -57,12 +59,24 @@ func (qb *QueryFiltersBuilder) Update(params map[string]any) *QueryFiltersBuilde
 			continue
 		}
 
-		qb.updateCondition = append(qb.updateCondition, fmt.Sprintf("%s = '%v'", c, rv.Interface()))
+		qb.paramCount++
+		qb.args = append(qb.args, rv.Interface())
+		qb.updateCondition = append(qb.updateCondition, fmt.Sprintf("%s = $%d", c, qb.paramCount))
 	}
 	return qb
 }
 
+func (qb *QueryFiltersBuilder) Args() []any {
+	return qb.args
+}
+
 func (qb *QueryFiltersBuilder) Eq(column string, value any) *QueryFiltersBuilder {
+	if len(qb.updateCondition) > 0 {
+		qb.paramCount++
+		qb.args = append(qb.args, value)
+		qb.whereConditions = append(qb.whereConditions, fmt.Sprintf("%s = $%d", column, qb.paramCount))
+		return qb
+	}
 	qb.Add(column, Filter{Arg: value, Op: "="})
 	return qb
 }
@@ -76,10 +90,12 @@ func (qb *QueryFiltersBuilder) Eqs(params map[string]any) *QueryFiltersBuilder {
 
 func (qb *QueryFiltersBuilder) In(params map[string]any) *QueryFiltersBuilder {
 	for c, v := range params {
-		qb.Add(c, Filter{
-			Arg: v,
-			Op:  "IN",
-		})
+		if reflect.ValueOf(v).Kind() == reflect.Slice || reflect.ValueOf(v).Kind() == reflect.Array {
+			qb.Add(c, Filter{
+				Arg: v,
+				Op:  "IN",
+			})
+		}
 	}
 
 	return qb

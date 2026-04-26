@@ -1,5 +1,5 @@
-<div class="min-h-screen bg-app-bg">
-  <header class="sticky py-4 bg-app-bg">
+<div class="h-screen flex flex-col overflow-hidden bg-app-bg">
+  <header class="sticky top-0 z-10 py-4 bg-app-bg">
     <div class="mx-auto w-full max-w-362.5 px-4 sm:px-6 lg:px-8">
       <div class="rounded-3xl bg-(--app-grey-100) overflow-hidden">
         <app-navbar></app-navbar>
@@ -16,8 +16,19 @@
               <a tuiTab *tuiItem routerLink="/admin/settings" routerLinkActive>{{ 'admin.subnav.settings' | translate }}</a>
             </tui-tabs-with-more>
           </div>
-        }
-        @if (isMainSection()) {
+        } @else if (isMineSection()) {
+          <div class="bg-(--app-grey-600)/20">
+            <tui-tabs-with-more
+              class="custom"
+              [underline]="false"
+              [activeItemIndex]="activeItemIndex()"
+            >
+              <a tuiTab *tuiItem routerLink="/mine/assigned" routerLinkActive>{{ 'models.task.state.assigned' | translate }}</a>
+              <a tuiTab *tuiItem routerLink="/mine/created" routerLinkActive>{{ 'models.task.state.created' | translate }}</a>
+              <a tuiTab *tuiItem routerLink="/mine/history" routerLinkActive>{{ 'models.task.state.history' | translate }}</a>
+            </tui-tabs-with-more>
+          </div>
+        } @else {
           <div class="bg-(--app-grey-600)/20">
             <tui-tabs-with-more
               class="custom"
@@ -54,7 +65,7 @@
     </div>
   </header>
 
-  <main tuiNavigationMain class="mx-auto w-full max-w-362.5 sm:px-6 lg:px-8">
+  <main tuiNavigationMain class="flex-1 overflow-hidden mx-auto w-full max-w-362.5 sm:px-2">
     <router-outlet></router-outlet>
   </main>
 </div>

@@ -51,7 +51,8 @@ func (r *projectRepoImpl) GetAll(ctx context.Context) ([]project.Row, error) {
 					json_build_object(
 						'id', 	   mu.id,
 						'name',    mu.name,
-						'surname', mu.surname
+						'surname', mu.surname,
+						'role',    er.name
 					)
 				) FILTER (WHERE mu.id IS NOT NULL),
 				'[]'::json
@@ -60,6 +61,7 @@ func (r *projectRepoImpl) GetAll(ctx context.Context) ([]project.Row, error) {
 		LEFT JOIN users author ON p.author_id = author.id
 		LEFT JOIN project_members pm ON pm.project_id = p.id
 		LEFT JOIN users mu ON mu.id = pm.user_id
+		LEFT JOIN employee_roles er ON mu.role_id = er.id
 		GROUP BY
 			p.id, author.name, author.surname, p.name,
 			p.description, p.picture_name,
@@ -104,7 +106,7 @@ func (r *projectRepoImpl) Update(ctx context.Context, input project.UpdateProjec
 		Eq("id", id).
 		Build()
 
-	_, err := r.ExecContext(ctx, "UPDATE projects "+clause)
+	_, err := r.ExecContext(ctx, "UPDATE projects "+clause, qb.Args()...)
 	return err
 }
 
@@ -183,7 +185,7 @@ func (r *projectRepoImpl) UpdateRelease(ctx context.Context, input project.Updat
 		Eq("id", id).
 		Build()
 
-	_, err := r.ExecContext(ctx, "UPDATE projects "+clause)
+	_, err := r.ExecContext(ctx, "UPDATE projects "+clause, qb.Args()...)
 	return err
 }
 

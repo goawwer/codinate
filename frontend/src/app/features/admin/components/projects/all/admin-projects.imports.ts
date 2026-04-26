@@ -6,7 +6,6 @@ import { TuiBlockStatus } from '@taiga-ui/layout';
 import { AppDatePipe } from '../../../../../common/pipes/app-date.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TuiHintDirective } from '@taiga-ui/core';
-import {} from '@taiga-ui/cdk/directives/item';
 
 export const PROJECTSDASHBOARDIMPORTS = [
   AppDatePipe,

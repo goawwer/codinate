@@ -52,7 +52,7 @@ func getAll(s ui.UIService) (any, error) {
 //	@Failure	500	{object}	string	"Internal Server Error"
 //	@Router		/api/projects/create [post]
 func create(s ui.UIService) (any, error) {
-	input, pictureName, err := ui.ParseMultipartPayload[project.CreateProjectInput](s, "picture", "projects")
+	input, pictureName, err := ui.ParseMultipartPayload[project.CreateProjectInput](s, "avatar", "projects")
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func update(s ui.UIService) (any, error) {
 		return nil, err
 	}
 
-	input, pictureName, err := ui.ParseMultipartPayload[project.UpdateProjectInput](s, "picture", "projects")
+	input, pictureName, err := ui.ParseMultipartPayload[project.UpdateProjectInput](s, "avatar", "projects")
 	if err != nil {
 		return nil, err
 	}

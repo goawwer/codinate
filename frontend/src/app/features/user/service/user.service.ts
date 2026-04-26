@@ -7,6 +7,7 @@ import { CreateUserInput, UpdateUserInput, UserFilters } from '../types/model/da
 @Injectable({ providedIn: 'root' })
 export class UserApiService {
   private readonly baseURL = '/api/users';
+  private readonly currentURL = '/api/current';
   private readonly httpClient = inject(HttpClient);
 
   getAll(filters: UserFilters = {}): Observable<User[]> {
@@ -15,6 +16,10 @@ export class UserApiService {
       params = params.set('disabled', String(filters.disabled));
     }
     return this.httpClient.get<User[]>(`${this.baseURL}/all`, { params });
+  }
+
+  getById(id: string): Observable<User> {
+    return this.httpClient.get<User>(`${this.baseURL}/${id}`);
   }
 
   create(body: CreateUserInput): Observable<void> {
@@ -31,5 +36,9 @@ export class UserApiService {
 
   deleteMany(ids: string[]): Observable<void> {
     return this.httpClient.delete<void>(`${this.baseURL}/delete`, { body: { ids } });
+  }
+
+  currentUser(): Observable<User> {
+    return this.httpClient.get<User>(`${this.currentURL}/user`);
   }
 }

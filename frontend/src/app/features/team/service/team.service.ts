@@ -15,14 +15,14 @@ export class TeamApiService {
 
   create(body: CreateTeamInput, file?: File): Observable<void> {
     const formData = new FormData();
-    if (file) formData.append('picture', file);
+    if (file) formData.append('avatar', file);
     formData.append('payload', JSON.stringify(body));
     return this.httpClient.post<void>(`${this.baseURL}/add`, formData);
   }
 
   update(id: number, body: UpdateTeamInput, file?: File): Observable<void> {
     const formData = new FormData();
-    if (file) formData.append('picture', file);
+    if (file) formData.append('avatar', file);
     formData.append('payload', JSON.stringify(body));
     return this.httpClient.patch<void>(`${this.baseURL}/${id}/update`, formData);
   }

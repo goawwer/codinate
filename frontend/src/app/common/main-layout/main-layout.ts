@@ -15,6 +15,7 @@ import { TuiItem } from '@taiga-ui/cdk/directives/item';
 
 const ADMIN_ROUTES = ['/admin/users', '/admin/teams', '/admin/projects', '/admin/settings'];
 const MAIN_ROUTES = ['/main/activity'];
+const MINE_ROUTES = ['/mine/assigned', '/mine/created', '/mine/history'];
 
 @Component({
   selector: 'app-main-layout',
@@ -54,6 +55,8 @@ export class MainLayoutComponent implements OnInit {
     const url = this.currentUrl();
     const adminIdx = ADMIN_ROUTES.findIndex((r) => url.startsWith(r));
     if (adminIdx !== -1) return adminIdx;
+    const mineIdx = MINE_ROUTES.findIndex((r) => url.startsWith(r));
+    if (mineIdx !== -1) return mineIdx;
     const mainIdx = MAIN_ROUTES.findIndex((r) => url.startsWith(r));
     return mainIdx !== -1 ? mainIdx : 0;
   });
@@ -70,6 +73,10 @@ export class MainLayoutComponent implements OnInit {
   protected isMainSection(): boolean {
     const url = this.currentUrl();
     return url.startsWith('/main') || url.startsWith('/teams') || url.startsWith('/projects');
+  }
+
+  protected isMineSection(): boolean {
+    return this.currentUrl().startsWith('/mine');
   }
 
   protected isAdminSection(): boolean {

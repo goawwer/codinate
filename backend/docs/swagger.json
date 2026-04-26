@@ -205,20 +205,84 @@
                 }
             }
         },
-        "/api/files/tasks/{entityType}/{entityId}/{id}": {
+        "/api/files/{entityType}/{entityId}/upload": {
+            "post": {
+                "description": "Uploads a file for any entity (tasks, comments, posts). Accepts any file type. Returns 413 if the file exceeds the size limit.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Upload entity file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity type (tasks, comments, posts)",
+                        "name": "entityType",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Entity UUID",
+                        "name": "entityId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/file.fileUploadResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "413": {
+                        "description": "Request Entity Too Large",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/files/{entityType}/{entityId}/{fileId}": {
             "get": {
-                "description": "Serves a file attachment for a task entity",
+                "description": "Serves a file for any entity (tasks, comments, posts)",
                 "produces": [
                     "application/octet-stream"
                 ],
                 "tags": [
                     "files"
                 ],
-                "summary": "Get task file",
+                "summary": "Get entity file",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Entity type (e.g. tasks)",
+                        "description": "Entity type",
                         "name": "entityType",
                         "in": "path",
                         "required": true
@@ -232,8 +296,49 @@
                     },
                     {
                         "type": "string",
-                        "description": "File ID",
-                        "name": "id",
+                        "description": "File UUID",
+                        "name": "fileId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a file for any entity and removes its DB record",
+                "tags": [
+                    "files"
+                ],
+                "summary": "Remove entity file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity type",
+                        "name": "entityType",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Entity UUID",
+                        "name": "entityId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "File UUID",
+                        "name": "fileId",
                         "in": "path",
                         "required": true
                     }
@@ -244,12 +349,6 @@
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "type": "string"
                         }
@@ -1085,6 +1184,81 @@
                 }
             }
         },
+        "/api/tasks": {
+            "get": {
+                "description": "Returns a list of all tasks",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get all tasks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/task.Row"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/add": {
+            "post": {
+                "description": "Creates a new task, identifier is auto-generated from the release ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Create task",
+                "parameters": [
+                    {
+                        "description": "Task data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/task.CreateTaskInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/shared.IdOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/tasks/categories/{id}/delete": {
             "delete": {
                 "description": "Deletes a task category by ID",
@@ -1151,6 +1325,179 @@
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/shared.NameInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/{id}": {
+            "get": {
+                "description": "Returns detailed information about a task",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get task by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/task.RowDetailed"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/{id}/close": {
+            "post": {
+                "description": "Marks a task as closed by setting its closed_at timestamp",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Close task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/{id}/delete": {
+            "delete": {
+                "description": "Deletes a task by ID, only allowed for the task author or admins",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Delete task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/{id}/update": {
+            "patch": {
+                "description": "Updates fields of an existing task",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Update task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Fields to update",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/task.UpdateTaskInput"
                         }
                     }
                 ],
@@ -2012,7 +2359,7 @@
                 }
             }
         },
-        "/pictures/{entity_type}": {
+        "/{entity_type}": {
             "get": {
                 "description": "Serves a picture file for a given entity type (e.g. teams, projects)",
                 "produces": [
@@ -2084,6 +2431,23 @@
                 "UserPermissionRole",
                 "NoPermissionRole"
             ]
+        },
+        "file.fileUploadResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
         },
         "project.CreateReleaseInput": {
             "type": "object",
@@ -2160,6 +2524,14 @@
                 }
             }
         },
+        "shared.IdOutput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
         "shared.MemberShort": {
             "type": "object",
             "properties": {
@@ -2167,6 +2539,9 @@
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "role": {
                     "type": "string"
                 },
                 "surname": {
@@ -2178,6 +2553,258 @@
             "type": "object",
             "properties": {
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "task.AttachedFileInfo": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "task.AttachedFileInput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "task.CreateTaskInput": {
+            "type": "object",
+            "properties": {
+                "assigneeId": {
+                    "type": "string"
+                },
+                "attachedFiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/task.AttachedFileInput"
+                    }
+                },
+                "authorId": {
+                    "type": "string"
+                },
+                "categoryId": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "dueAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "priorityId": {
+                    "type": "integer"
+                },
+                "projectId": {
+                    "type": "integer"
+                },
+                "releaseId": {
+                    "type": "integer"
+                },
+                "statusId": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "task.Row": {
+            "type": "object",
+            "properties": {
+                "assigneeUsername": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "closedAt": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "dueAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "identifier": {
+                    "type": "integer"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "projectName": {
+                    "type": "string"
+                },
+                "projectPicture": {
+                    "type": "string"
+                },
+                "projectRelease": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "task.RowDetailed": {
+            "type": "object",
+            "properties": {
+                "assigneeId": {
+                    "type": "string"
+                },
+                "assigneeName": {
+                    "type": "string"
+                },
+                "assigneeSurname": {
+                    "type": "string"
+                },
+                "assigneeUsername": {
+                    "type": "string"
+                },
+                "attachedFiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/task.AttachedFileInfo"
+                    }
+                },
+                "authorId": {
+                    "type": "string"
+                },
+                "authorName": {
+                    "type": "string"
+                },
+                "authorSurname": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "categoryId": {
+                    "type": "integer"
+                },
+                "closedAt": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "dueAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "identifier": {
+                    "type": "integer"
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/shared.MemberShort"
+                    }
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "projectId": {
+                    "type": "integer"
+                },
+                "projectName": {
+                    "type": "string"
+                },
+                "projectPicture": {
+                    "type": "string"
+                },
+                "projectRelease": {
+                    "type": "string"
+                },
+                "releaseId": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "task.UpdateTaskInput": {
+            "type": "object",
+            "properties": {
+                "assigneeId": {
+                    "type": "string"
+                },
+                "attachedFiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/task.AttachedFileInput"
+                    }
+                },
+                "authorId": {
+                    "type": "string"
+                },
+                "categoryId": {
+                    "type": "integer"
+                },
+                "closedAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "dueAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "priorityId": {
+                    "type": "integer"
+                },
+                "projectId": {
+                    "type": "integer"
+                },
+                "releaseId": {
+                    "type": "integer"
+                },
+                "statusId": {
+                    "type": "integer"
+                },
+                "title": {
                     "type": "string"
                 }
             }
