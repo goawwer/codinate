@@ -43,7 +43,14 @@ export interface TaskDetailed extends Task {
   updatedAt: string;
 }
 
+export interface AttachedFileInput {
+  id: string;
+  name: string;
+  size: number;
+}
+
 export interface CreateTaskInput {
+  id: string;
   authorId: string;
   assigneeId: string;
   projectId: number;
@@ -54,6 +61,7 @@ export interface CreateTaskInput {
   title: string;
   description: string;
   dueAt: string;
+  attachedFiles: AttachedFileInput[];
 }
 
 export interface UpdateTaskInput extends Partial<CreateTaskInput> {

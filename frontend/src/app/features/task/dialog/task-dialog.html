@@ -8,92 +8,91 @@
     </button>
   </tui-stepper>
 
-  @switch (step()) {
-    @case (0) {
-      <div class="task-dialog-grid">
-        <tui-textfield class="col-span-2">
-          <label tuiLabel>{{ 'models.task.fields.title' | translate }}</label>
-          <input tuiTextfield formControlName="title" autocomplete="off" />
+  <div [hidden]="step() !== 0">
+    <div class="task-dialog-grid">
+      <tui-textfield class="col-span-2">
+        <label tuiLabel>{{ 'models.task.fields.title' | translate }}</label>
+        <input tuiTextfield formControlName="title" autocomplete="off" />
+      </tui-textfield>
+      <tui-error class="col-span-2" formControlName="title" [error]="[] | tuiFieldError | async" />
+
+      <div class="flex flex-col gap-1">
+        <tui-textfield tuiChevron [stringify]="stringifyProject">
+          <label tuiLabel>{{ 'generic.titles.project' | translate }}</label>
+          <input tuiSelect formControlName="project" />
+          <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="projects()" [emptyContent]="'generic.statuses.notFound' | translate" />
         </tui-textfield>
-        <tui-error class="col-span-2" formControlName="title" [error]="[] | tuiFieldError | async" />
-
-        <div class="flex flex-col gap-1">
-          <tui-textfield tuiChevron [stringify]="stringifyProject">
-            <label tuiLabel>{{ 'generic.titles.project' | translate }}</label>
-            <input tuiSelect formControlName="project" />
-            <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="projects()" [emptyContent]="'generic.statuses.notFound' | translate" />
-          </tui-textfield>
-          <tui-error formControlName="project" [error]="[] | tuiFieldError | async" />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <tui-textfield tuiChevron [stringify]="stringifyCategory">
-            <label tuiLabel>{{ 'models.task.fields.category' | translate }}</label>
-            <input tuiSelect formControlName="category" />
-            <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="categories()" [emptyContent]="'generic.statuses.notFound' | translate" />
-          </tui-textfield>
-          <tui-error class="p-1" formControlName="category" [error]="[] | tuiFieldError | async" />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <tui-textfield tuiChevron [stringify]="stringifyPriority" >
-            <label tuiLabel>{{ 'generic.titles.priority' | translate }}</label>
-            <input tuiSelect formControlName="priority" />
-            <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="priorities()" [emptyContent]="'generic.statuses.notFound' | translate" />
-          </tui-textfield>
-          <tui-error class="p-1" formControlName="priority" [error]="[] | tuiFieldError | async" />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <tui-textfield tuiChevron [stringify]="stringifyUser">
-            <label tuiLabel>{{ 'generic.actions.assign' | translate }}</label>
-            <input tuiSelect formControlName="assignee" />
-            <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="userStore.users()" [emptyContent]="'generic.statuses.notFound' | translate"  />
-          </tui-textfield>
-          <tui-error class="p-1" formControlName="assignee" [error]="[] | tuiFieldError | async" />
-        </div>
-        <div class="task-dialog-textarea-field">
-          <app-editor
-            formControlName="description"
-            [placeholder]="'models.task.fields.description' | translate"
-            entityType="tasks"
-          />
-          @if (pendingFiles().length) {
-            <div class="pending-chips">
-              @for (item of pendingFiles(); track item.blobUrl) {
-                <div class="pending-chip">
-                  @if (isImage(item.type)) {
-                    <img [src]="item.blobUrl" class="pending-chip-thumb" [alt]="item.name" />
-                  } @else {
-                    <tui-icon icon="@tui.file" class="pending-chip-icon" />
-                  }
-                  <span class="pending-chip-name" [title]="item.name">{{ item.name }}</span>
-                  <button
-                    tuiIconButton
-                    appearance="ghost"
-                    type="button"
-                    size="xs"
-                    iconStart="@tui.x"
-                    (click)="removeFile(item.blobUrl)"
-                  ></button>
-                </div>
-              }
-            </div>
-          }
-        </div>
+        <tui-error formControlName="project" [error]="[] | tuiFieldError | async" />
       </div>
 
-      <footer class="task-dialog-footer" style="margin-top: auto">
-        <button tuiButton appearance="flat" type="button" (click)="context.completeWith(false)">
-          {{ 'generic.actions.cancel' | translate }}
-        </button>
-        <button tuiButton class="btn-primary" type="button" (click)="next()">
-          {{ 'generic.actions.next' | translate }}
-        </button>
-      </footer>
-    }
+      <div class="flex flex-col gap-1">
+        <tui-textfield tuiChevron [stringify]="stringifyCategory">
+          <label tuiLabel>{{ 'models.task.fields.category' | translate }}</label>
+          <input tuiSelect formControlName="category" />
+          <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="categories()" [emptyContent]="'generic.statuses.notFound' | translate" />
+        </tui-textfield>
+        <tui-error class="p-1" formControlName="category" [error]="[] | tuiFieldError | async" />
+      </div>
 
-    @case (1) {
+      <div class="flex flex-col gap-1">
+        <tui-textfield tuiChevron [stringify]="stringifyPriority" >
+          <label tuiLabel>{{ 'generic.titles.priority' | translate }}</label>
+          <input tuiSelect formControlName="priority" />
+          <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="priorities()" [emptyContent]="'generic.statuses.notFound' | translate" />
+        </tui-textfield>
+        <tui-error class="p-1" formControlName="priority" [error]="[] | tuiFieldError | async" />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <tui-textfield tuiChevron [stringify]="stringifyUser">
+          <label tuiLabel>{{ 'generic.actions.assign' | translate }}</label>
+          <input tuiSelect formControlName="assignee" />
+          <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="userStore.users()" [emptyContent]="'generic.statuses.notFound' | translate"  />
+        </tui-textfield>
+        <tui-error class="p-1" formControlName="assignee" [error]="[] | tuiFieldError | async" />
+      </div>
+      <div class="task-dialog-textarea-field">
+        <app-editor
+          formControlName="description"
+          [placeholder]="'models.task.fields.description' | translate"
+          entityType="tasks"
+        />
+        @if (pendingFiles().length) {
+          <div class="pending-chips">
+            @for (item of pendingFiles(); track item.blobUrl) {
+              <div class="pending-chip">
+                @if (isImage(item.type)) {
+                  <img [src]="item.blobUrl" class="pending-chip-thumb" [alt]="item.name" />
+                } @else {
+                  <tui-icon icon="@tui.file" class="pending-chip-icon" />
+                }
+                <span class="pending-chip-name" [title]="item.name">{{ item.name }}</span>
+                <button
+                  tuiIconButton
+                  appearance="ghost"
+                  type="button"
+                  size="xs"
+                  iconStart="@tui.x"
+                  (click)="removeFile(item.blobUrl)"
+                ></button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <footer class="task-dialog-footer" style="margin-top: auto">
+      <button tuiButton appearance="flat" type="button" (click)="context.completeWith(false)">
+        {{ 'generic.actions.cancel' | translate }}
+      </button>
+      <button tuiButton class="btn-primary" type="button" (click)="next()">
+        {{ 'generic.actions.next' | translate }}
+      </button>
+    </footer>
+  </div>
+
+    <div [hidden]="step() !== 1">
       <div class="task-dialog-details">
         <div class="flex flex-col gap-1">
           <tui-textfield tuiChevron [stringify]="stringifyRelease">
@@ -134,6 +133,5 @@
           {{ 'generic.actions.add' | translate }}
         </button>
       </footer>
-    }
-  }
+    </div>
 </div>

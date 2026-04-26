@@ -281,11 +281,17 @@
           </div>
         </div>
 
-        <div class="widget">
-          <div class="widget-header">
-            <tui-icon icon="@tui.paperclip" />
-            <span>{{ 'models.task.fields.attachments' | translate }}</span>
+        <div class="info-card">
+          <div class="info-card-header" (click)="toggleFiles()">
+            <div class="info-card-title">
+              <tui-icon icon="@tui.paperclip"  />
+              <span>{{ 'models.task.fields.attachments' | translate }}</span>
+            </div>
+            <tui-icon [icon]="attachedFilesExpanded() ? '@tui.chevron-up' : '@tui.chevron-down'" />
           </div>
+        </div>
+
+        @if (attachedFilesExpanded()) {
           <div class="widget-body">
             @for (file of visibleAttachedFiles(); track file.id) {
               <div class="attachment-row">
@@ -319,7 +325,7 @@
               <span class="attachment-row-empty">{{ 'generic.statuses.empty' | translate }}</span>
             }
           </div>
-        </div>
+        }
 
         <div class="info-card">
           <div class="info-card-header" (click)="toggleInfo()">

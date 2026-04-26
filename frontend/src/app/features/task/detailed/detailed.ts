@@ -59,6 +59,7 @@ export class Detailed implements OnInit {
   protected readonly isSaving = signal(false);
   protected readonly isDeleting = signal(false);
   protected readonly infoExpanded = signal(false);
+  protected readonly attachedFilesExpanded = signal(false);
   protected readonly deleteConfirmPending = signal(false);
   protected readonly isEditing = signal(false);
   protected readonly statuses = signal<TaskStatus[]>([]);
@@ -293,6 +294,10 @@ export class Detailed implements OnInit {
         this.alert.error(this.translate.instant('cmd.tasks.errors.closeFailed'));
       },
     });
+  }
+
+  protected toggleFiles(): void {
+    this.attachedFilesExpanded.update((v) => !v);
   }
 
   protected toggleInfo(): void {

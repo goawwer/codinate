@@ -13,6 +13,12 @@ type AttachedFileInfo struct {
 	Name string `json:"name"`
 }
 
+type AttachedFileInput struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+	Size int64  `json:"size"`
+}
+
 type AttachedFiles []AttachedFileInfo
 
 func (a *AttachedFiles) Scan(src any) error {

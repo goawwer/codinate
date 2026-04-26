@@ -15,13 +15,11 @@ import (
 
 type service struct{}
 
-func (s *service) uploadFile(ctx context.Context, uploaderId uuid.UUID, entityType, entityId, baseURL string, file multipart.File, header *multipart.FileHeader) (*fileUploadResponse, error) {
+func (s *service) uploadFile(ctx context.Context, fileId, uploaderId uuid.UUID, entityType, entityId, baseURL string, file multipart.File, header *multipart.FileHeader) (*fileUploadResponse, error) {
 	entityUUID, err := uuid.Parse(entityId)
 	if err != nil {
 		return nil, fmt.Errorf("invalid entity id")
 	}
-
-	fileId := uuid.New()
 
 	if _, err := uploads.SaveFile(file, header, entityType, entityId, fileId); err != nil {
 		return nil, err

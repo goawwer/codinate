@@ -30,6 +30,7 @@ import {
   PendingFile,
 } from '../../../common/editor/pending-editor-uploads.service';
 import { signal } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-task-dialog',
@@ -54,6 +55,7 @@ export class TaskDialogComponent implements OnDestroy {
   private readonly prioritiesService = inject(TaskPrioritiesService);
   private readonly projectsService = inject(ProjectApiService);
   private readonly categoriesService = inject(TaskCategoriesService);
+  private readonly router = inject(Router);
   private readonly releaseService = inject(ReleaseService);
   protected readonly userStore = inject(UserStore);
   private readonly alert = inject(AlertService);
@@ -167,40 +169,53 @@ export class TaskDialogComponent implements OnDestroy {
     const authorId = this.userStore.user()?.id;
     if (!authorId) return;
 
+    if (this.isSubmitting()) return;
+
+    const taskId = crypto.randomUUID();
+
     const v = this.form.getRawValue();
+    const rawDescription = v.description;
+
+    const pendingFiles = this.pendingUploads.pending();
+
     const dueAt = v.dueAt ? new Date(v.dueAt).toISOString() : new Date(0).toISOString();
 
-    const input: CreateTaskInput = {
-      authorId,
-      assigneeId: v.assignee!.id,
-      projectId: v.project!.id,
-      releaseId: v.release!.id,
-      categoryId: v.category!.id,
-      priorityId: v.priority!.id,
-      statusId: v.status!.id,
-      title: v.title,
-      description: v.description,
-      dueAt,
-    };
-
     this.isSubmitting.set(true);
-    this.taskService
-      .add(input)
+
+    this.pendingUploads
+      .flush('tasks', taskId, rawDescription)
       .pipe(
-        switchMap(({ id }) =>
-          this.pendingUploads.flush('tasks', id, input.description).pipe(
-            switchMap((updatedDesc) =>
-              updatedDesc !== input.description
-                ? this.taskService.update(id, { description: updatedDesc })
-                : of(null),
-            ),
-          ),
-        ),
+        switchMap((description) => {
+          const input: CreateTaskInput = {
+            id: taskId,
+
+            authorId,
+            assigneeId: v.assignee!.id,
+            projectId: v.project!.id,
+            releaseId: v.release!.id,
+            categoryId: v.category!.id,
+            priorityId: v.priority!.id,
+            statusId: v.status!.id,
+
+            title: v.title,
+            description,
+            dueAt,
+
+            attachedFiles: pendingFiles.map((file) => ({
+              id: file.fileId,
+              name: file.name,
+              size: file.size,
+            })),
+          };
+
+          return this.taskService.add(input);
+        }),
       )
       .subscribe({
         next: () => {
           this.isSubmitting.set(false);
           this.context.completeWith(true);
+          this.router.navigate(['/tasks', taskId]);
         },
         error: () => {
           this.isSubmitting.set(false);

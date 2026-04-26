@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/goawwer/codinate/internal/adapter/dto/filters"
-	"github.com/goawwer/codinate/internal/adapter/dto/shared"
 	"github.com/goawwer/codinate/internal/adapter/dto/task"
 	"github.com/goawwer/codinate/internal/adapter/model"
 	"github.com/goawwer/codinate/internal/adapter/model/enum"
 	"github.com/goawwer/codinate/internal/adapter/repository"
+	"github.com/goawwer/codinate/pkg/util"
 	"github.com/google/uuid"
 )
 
@@ -26,29 +26,36 @@ func (s *service) getAllTasks(ctx context.Context, f *task.Filters) ([]task.Row,
 	return repository.GetTaskRepo().GetTasksRows(ctx, f)
 }
 
-func (s *service) addTask(ctx context.Context, input task.CreateTaskInput) (shared.IdOutput, error) {
+func (s *service) addTask(ctx context.Context, input task.CreateTaskInput) (uuid.UUID, error) {
 	dueAt := filters.ResolveDateTime(input.DueAt)
 
 	nextSeq, err := repository.GetTaskRepo().GetNextTaskIdentifier(ctx, input.ReleaseId)
 	if err != nil {
-		return shared.IdOutput{}, err
+		return uuid.Nil, err
 	}
 
 	identifier := releasePrefix(input.ReleaseId)*1000 + nextSeq
 
+	attachedFileIds, err := util.ParseAttachedFileIds(input.AttachedFiles)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
 	return repository.GetTaskRepo().AddNewTask(ctx, model.Task{
-		AuthorId:     uuid.MustParse(input.AuthorId),
-		AssigneeId:   uuid.MustParse(input.AssigneeId),
-		ProjectId:    input.ProjectId,
-		ReleaseId:    input.ReleaseId,
-		CategoryId:   input.CategoryId,
-		PriotiryId:   input.PriorityId,
-		StatusId:     input.StatusId,
-		Identifier:   identifier,
-		Title:        input.Title,
-		Description:  input.Description,
-		DueAt:        dueAt,
-		Participants: uniqueUUIDs(uuid.MustParse(input.AuthorId), uuid.MustParse(input.AssigneeId)),
+		Id:               uuid.MustParse(input.Id),
+		AuthorId:         uuid.MustParse(input.AuthorId),
+		AssigneeId:       uuid.MustParse(input.AssigneeId),
+		ProjectId:        input.ProjectId,
+		ReleaseId:        input.ReleaseId,
+		CategoryId:       input.CategoryId,
+		PriotiryId:       input.PriorityId,
+		StatusId:         input.StatusId,
+		Identifier:       identifier,
+		Title:            input.Title,
+		Description:      input.Description,
+		DueAt:            dueAt,
+		AttachedFilesIds: attachedFileIds,
+		Participants:     uniqueUUIDs(uuid.MustParse(input.AuthorId), uuid.MustParse(input.AssigneeId)),
 	})
 }
 

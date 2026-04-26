@@ -6,5 +6,5 @@ type IdWithName struct {
 }
 
 type IdOutput struct {
-	Id any `db:"id" json:"id"`
+	Id string `db:"id" json:"id"`
 }

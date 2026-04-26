@@ -9,7 +9,11 @@ export class TaskFileService {
   private readonly baseURL = '/api/files';
   private readonly http = inject(HttpClient);
 
-  upload(entityType: string, entityId: string, file: File): Observable<TaskFile & { size: number; url: string }> {
+  upload(
+    entityType: string,
+    entityId: string,
+    file: File,
+  ): Observable<TaskFile & { size: number; url: string }> {
     const form = new FormData();
     form.append('file', file);
     return this.http.post<TaskFile & { size: number; url: string }>(

@@ -19,7 +19,7 @@ type TaskRepo interface {
 	GetTasksRows(ctx context.Context, f *task.Filters) ([]task.Row, error)
 	GetTaskBy(ctx context.Context, id uuid.UUID) (task.RowDetailed, error)
 	GetTaskAuthorId(ctx context.Context, taskId uuid.UUID) (uuid.UUID, error)
-	AddNewTask(ctx context.Context, input model.Task) (shared.IdOutput, error)
+	AddNewTask(ctx context.Context, input model.Task) (uuid.UUID, error)
 	GetNextTaskIdentifier(ctx context.Context, releaseId int) (int, error)
 	UpdateTaskBy(ctx context.Context, newTask model.Task, id uuid.UUID) error
 	AttachFilesToTask(ctx context.Context, taskId uuid.UUID, fileIds []uuid.UUID) error
@@ -192,44 +192,31 @@ func (r *taskRepoImpl) GetTaskAuthorId(ctx context.Context, taskId uuid.UUID) (u
 	return authorId, err
 }
 
-func (r *taskRepoImpl) AddNewTask(ctx context.Context, input model.Task) (shared.IdOutput, error) {
-	var out shared.IdOutput
-
-	var attachedFiles interface{}
-	if len(input.AttachedFilesIds) > 0 {
-		strIds := make([]string, len(input.AttachedFilesIds))
-		for i, id := range input.AttachedFilesIds {
-			strIds[i] = id.String()
-		}
-		attachedFiles = pq.Array(strIds)
-	}
-
+func (r *taskRepoImpl) AddNewTask(ctx context.Context, input model.Task) (uuid.UUID, error) {
 	err := r.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
-		err := tx.QueryRowContext(ctx, `
+		if _, err := tx.ExecContext(ctx, `
 			INSERT INTO tasks (
-				author_id, assignee_id, project_id,
+				id, author_id, assignee_id, project_id,
 				release_id, category_id, priority_id,
 				status_id, identifier, title, description, due_at, attached_files_ids
 			)
 			VALUES (
-				$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::text[]::uuid[]
+				$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::uuid[]
 			)
-			RETURNING id
 		`,
-			input.AuthorId, input.AssigneeId, input.ProjectId,
+			input.Id, input.AuthorId, input.AssigneeId, input.ProjectId,
 			input.ReleaseId, input.CategoryId, input.PriotiryId,
 			input.StatusId, input.Identifier, input.Title, input.Description, input.DueAt,
-			attachedFiles,
-		).Scan(&out.Id)
-		if err != nil {
+			pq.Array(input.AttachedFilesIds),
+		); err != nil {
 			return err
 		}
 
 		for _, userID := range input.Participants {
-			_, err = tx.ExecContext(ctx, `
+			_, err := tx.ExecContext(ctx, `
         		INSERT INTO task_participants (task_id, user_id, role_id)
           		VALUES ($1, $2, (SELECT u.role_id FROM users u WHERE u.id = $2))
-            `, out.Id, userID)
+            `, input.Id, userID)
 			if err != nil {
 				return err
 			}
@@ -238,7 +225,7 @@ func (r *taskRepoImpl) AddNewTask(ctx context.Context, input model.Task) (shared
 		return nil
 	})
 
-	return out, err
+	return input.Id, err
 }
 
 func (r *taskRepoImpl) AttachFilesToTask(ctx context.Context, taskId uuid.UUID, fileIds []uuid.UUID) error {

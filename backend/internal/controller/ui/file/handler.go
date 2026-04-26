@@ -9,6 +9,7 @@ import (
 	"github.com/goawwer/codinate/internal/adapter/model/enum"
 	"github.com/goawwer/codinate/internal/controller/ui"
 	"github.com/goawwer/codinate/internal/service/uploads"
+	"github.com/google/uuid"
 	"github.com/spf13/viper"
 )
 
@@ -34,6 +35,8 @@ func Register() {
 //	@Failure	500	{object}	string
 //	@Router		/api/files/{entityType}/{entityId}/upload [post]
 func upload(s ui.UIService) (any, error) {
+	var fileId uuid.UUID
+
 	entityType, err := s.GetPathParameterAsString("entityType")
 	if err != nil {
 		return nil, err
@@ -53,6 +56,16 @@ func upload(s ui.UIService) (any, error) {
 		return nil, ui.NewHttpCodeError(nil, http.StatusBadRequest, "invalid multipart form")
 	}
 
+	fileIdRaw := s.GetRequest().FormValue("fileId")
+	if fileIdRaw != "" {
+		fileId, err = uuid.Parse(fileIdRaw)
+		if err != nil {
+			return nil, ui.NewHttpCodeError(nil, http.StatusBadRequest, "invalid file id")
+		}
+	} else {
+		fileId = uuid.New()
+	}
+
 	file, header, err := s.GetRequest().FormFile("file")
 	if err != nil {
 		return nil, ui.NewHttpCodeError(nil, http.StatusBadRequest, "missing file field")
@@ -65,7 +78,7 @@ func upload(s ui.UIService) (any, error) {
 	}
 	baseURL := fmt.Sprintf("%s://%s", scheme, req.Host)
 
-	resp, err := s.GetService().(*service).uploadFile(req.Context(), currentUser.Id, entityType, entityId, baseURL, file, header)
+	resp, err := s.GetService().(*service).uploadFile(req.Context(), fileId, currentUser.Id, entityType, entityId, baseURL, file, header)
 	if err != nil {
 		if errors.Is(err, uploads.ErrFileTooLarge) {
 			return nil, ui.NewHttpCodeError(nil, http.StatusRequestEntityTooLarge, err.Error())
