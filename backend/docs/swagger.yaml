@@ -18,6 +18,17 @@ definitions:
     - AdminPermissionRole
     - UserPermissionRole
     - NoPermissionRole
+  file.fileUploadResponse:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      size:
+        type: integer
+      url:
+        type: string
+    type: object
   project.CreateReleaseInput:
     properties:
       description:
@@ -67,11 +78,18 @@ definitions:
       updateAt:
         type: string
     type: object
+  shared.IdOutput:
+    properties:
+      id:
+        type: string
+    type: object
   shared.MemberShort:
     properties:
       id:
         type: string
       name:
+        type: string
+      role:
         type: string
       surname:
         type: string
@@ -79,6 +97,172 @@ definitions:
   shared.NameInput:
     properties:
       name:
+        type: string
+    type: object
+  task.AttachedFileInfo:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  task.AttachedFileInput:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      size:
+        type: integer
+    type: object
+  task.CreateTaskInput:
+    properties:
+      assigneeId:
+        type: string
+      attachedFiles:
+        items:
+          $ref: '#/definitions/task.AttachedFileInput'
+        type: array
+      authorId:
+        type: string
+      categoryId:
+        type: integer
+      description:
+        type: string
+      dueAt:
+        type: string
+      id:
+        type: string
+      priorityId:
+        type: integer
+      projectId:
+        type: integer
+      releaseId:
+        type: integer
+      statusId:
+        type: integer
+      title:
+        type: string
+    type: object
+  task.Row:
+    properties:
+      assigneeUsername:
+        type: string
+      category:
+        type: string
+      closedAt:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      dueAt:
+        type: string
+      id:
+        type: string
+      identifier:
+        type: integer
+      priority:
+        type: string
+      projectName:
+        type: string
+      projectPicture:
+        type: string
+      projectRelease:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  task.RowDetailed:
+    properties:
+      assigneeId:
+        type: string
+      assigneeName:
+        type: string
+      assigneeSurname:
+        type: string
+      assigneeUsername:
+        type: string
+      attachedFiles:
+        items:
+          $ref: '#/definitions/task.AttachedFileInfo'
+        type: array
+      authorId:
+        type: string
+      authorName:
+        type: string
+      authorSurname:
+        type: string
+      category:
+        type: string
+      categoryId:
+        type: integer
+      closedAt:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      dueAt:
+        type: string
+      id:
+        type: string
+      identifier:
+        type: integer
+      members:
+        items:
+          $ref: '#/definitions/shared.MemberShort'
+        type: array
+      priority:
+        type: string
+      projectId:
+        type: integer
+      projectName:
+        type: string
+      projectPicture:
+        type: string
+      projectRelease:
+        type: string
+      releaseId:
+        type: integer
+      status:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  task.UpdateTaskInput:
+    properties:
+      assigneeId:
+        type: string
+      attachedFiles:
+        items:
+          $ref: '#/definitions/task.AttachedFileInput'
+        type: array
+      authorId:
+        type: string
+      categoryId:
+        type: integer
+      closedAt:
+        type: string
+      description:
+        type: string
+      dueAt:
+        type: string
+      id:
+        type: string
+      priorityId:
+        type: integer
+      projectId:
+        type: integer
+      releaseId:
+        type: integer
+      statusId:
+        type: integer
+      title:
         type: string
     type: object
   team.Row:
@@ -175,6 +359,36 @@ definitions:
 info:
   contact: {}
 paths:
+  /{entity_type}:
+    get:
+      description: Serves a picture file for a given entity type (e.g. teams, projects)
+      parameters:
+      - description: Entity type (e.g. teams, projects)
+        in: path
+        name: entity_type
+        required: true
+        type: string
+      - description: Picture filename
+        in: query
+        name: filename
+        required: true
+        type: string
+      produces:
+      - image/*
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get entity picture
+      tags:
+      - pictures
   /api/current/user:
     get:
       consumes:
@@ -307,11 +521,11 @@ paths:
       summary: Update role
       tags:
       - roles
-  /api/files/tasks/{entityType}/{entityId}/{id}:
-    get:
-      description: Serves a file attachment for a task entity
+  /api/files/{entityType}/{entityId}/{fileId}:
+    delete:
+      description: Deletes a file for any entity and removes its DB record
       parameters:
-      - description: Entity type (e.g. tasks)
+      - description: Entity type
         in: path
         name: entityType
         required: true
@@ -321,13 +535,11 @@ paths:
         name: entityId
         required: true
         type: string
-      - description: File ID
+      - description: File UUID
         in: path
-        name: id
+        name: fileId
         required: true
         type: string
-      produces:
-      - application/octet-stream
       responses:
         "200":
           description: OK
@@ -335,15 +547,85 @@ paths:
           description: Bad Request
           schema:
             type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Remove entity file
+      tags:
+      - files
+    get:
+      description: Serves a file for any entity (tasks, comments, posts)
+      parameters:
+      - description: Entity type
+        in: path
+        name: entityType
+        required: true
+        type: string
+      - description: Entity UUID
+        in: path
+        name: entityId
+        required: true
+        type: string
+      - description: File UUID
+        in: path
+        name: fileId
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
         "404":
           description: Not Found
+          schema:
+            type: string
+      summary: Get entity file
+      tags:
+      - files
+  /api/files/{entityType}/{entityId}/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a file for any entity (tasks, comments, posts). Accepts
+        any file type. Returns 413 if the file exceeds the size limit.
+      parameters:
+      - description: Entity type (tasks, comments, posts)
+        in: path
+        name: entityType
+        required: true
+        type: string
+      - description: Entity UUID
+        in: path
+        name: entityId
+        required: true
+        type: string
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/file.fileUploadResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "413":
+          description: Request Entity Too Large
           schema:
             type: string
         "500":
           description: Internal Server Error
           schema:
             type: string
-      summary: Get task file
+      summary: Upload entity file
       tags:
       - files
   /api/projects:
@@ -885,6 +1167,139 @@ paths:
       summary: Update status
       tags:
       - task/status
+  /api/tasks:
+    get:
+      description: Returns a list of all tasks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/task.Row'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all tasks
+      tags:
+      - tasks
+  /api/tasks/{id}:
+    get:
+      description: Returns detailed information about a task
+      parameters:
+      - description: Task UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/task.RowDetailed'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get task by ID
+      tags:
+      - tasks
+  /api/tasks/{id}/close:
+    post:
+      description: Marks a task as closed by setting its closed_at timestamp
+      parameters:
+      - description: Task UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Close task
+      tags:
+      - tasks
+  /api/tasks/{id}/delete:
+    delete:
+      description: Deletes a task by ID, only allowed for the task author or admins
+      parameters:
+      - description: Task UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete task
+      tags:
+      - tasks
+  /api/tasks/{id}/update:
+    patch:
+      consumes:
+      - application/json
+      description: Updates fields of an existing task
+      parameters:
+      - description: Task UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/task.UpdateTaskInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update task
+      tags:
+      - tasks
   /api/tasks/{project_id}/categories:
     get:
       description: Returns all task categories for a given project
@@ -943,6 +1358,37 @@ paths:
       summary: Add task category
       tags:
       - categories
+  /api/tasks/add:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new task, identifier is auto-generated from the release
+        ID
+      parameters:
+      - description: Task data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/task.CreateTaskInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.IdOutput'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create task
+      tags:
+      - tasks
   /api/tasks/categories/{id}/delete:
     delete:
       description: Deletes a task category by ID
@@ -1493,34 +1939,4 @@ paths:
       summary: Refresh
       tags:
       - auth
-  /pictures/{entity_type}:
-    get:
-      description: Serves a picture file for a given entity type (e.g. teams, projects)
-      parameters:
-      - description: Entity type (e.g. teams, projects)
-        in: path
-        name: entity_type
-        required: true
-        type: string
-      - description: Picture filename
-        in: query
-        name: filename
-        required: true
-        type: string
-      produces:
-      - image/*
-      responses:
-        "200":
-          description: OK
-        "404":
-          description: Not Found
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Get entity picture
-      tags:
-      - pictures
 swagger: "2.0"
