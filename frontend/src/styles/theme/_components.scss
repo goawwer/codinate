@@ -40,6 +40,11 @@
   border-inline-start: none !important;
 }
 
+tui-badge,
+[tuiBadge] {
+  color: var(--app-fg) !important;
+}
+
 [data-size='fullscreen'] > .t-content {
   padding: 3rem 5rem !important;
 }

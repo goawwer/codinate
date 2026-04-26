@@ -23,14 +23,18 @@
       "next": "Next",
       "back": "Back",
       "assign": "Assign",
-      "send": "Send"
+      "send": "Send",
+      "show": "Show {{ n }} more",
+      "showLess": "Show less"
     },
     "statuses": {
       "active": "Active",
       "disabled": "Disabled",
       "notFound": "Not found",
       "notFoundDetails": "Please try another options",
-      "empty": "Nothing here yet"
+      "empty": "Nothing here yet",
+      "updated": "Updated",
+      "created": "Created"
     },
     "permissions": {
       "owner": "Owner",
@@ -50,7 +54,9 @@
       "priority": "Priority",
       "project": "Project",
       "dateRange": "Date range",
-      "sort": "Sort"
+      "sort": "Sort",
+      "info": "Info",
+      "progress": "Progress"
     },
     "tabs": {
       "general": "General",
@@ -112,6 +118,10 @@
       "changePicture": "Change picture"
     },
     "project": {
+      "title": {
+        "default": "Project",
+        "plural": "Projects"
+      },
       "projectName": "Name",
       "projectDescription": "Description",
       "projectPictureName": "Picture",
@@ -120,7 +130,11 @@
       "noAvailableMembers": "All users are already members",
       "archivedAt": "Archived at",
       "createdAt": "Created at",
-      "updatedAt": "Updated at"
+      "updatedAt": "Updated at",
+      "links": "Links",
+      "detailed": {
+        "recent": "Recent"
+      }
     },
     "user": {
       "name": "Name",
@@ -180,6 +194,14 @@
         "createdEmptySub": "Everything is ahead!",
         "historyEmptyLabel": "Your tasks history is empty",
         "historyEmptySub": "Histore just have started"
+      }
+    },
+    "release": {
+      "statuses": {
+        "active": "Active",
+        "finished": "Finished",
+        "archived": "Archived",
+        "closed": "Closed"
       }
     }
   },
@@ -311,13 +333,15 @@
       "success": {
         "updated": "Task updated successfully",
         "deleted": "Task deleted successfully",
-        "closed": "Task closed successfully"
+        "closed": "Task closed successfully",
+        "reopened": "Task reopened successfully"
       },
       "errors": {
         "updateFailed": "Failed to update task",
         "deleteFailed": "Failed to delete task",
         "createFailed": "Failed to create task",
-        "closeFailed": "Failed to close task"
+        "closeFailed": "Failed to close task",
+        "reopenFailed": "Failed to reopen task"
       },
       "dialogs": {
         "deleteTitle": "Delete task",

@@ -11,8 +11,10 @@ import (
 
 func Register() {
 	ui.RegisterGet("/projects", enum.AnyUser, reflect.TypeOf(service{}), getAll)
+	ui.RegisterGet("/projects/{id}", enum.AnyUser, reflect.TypeOf(service{}), getById)
 	ui.RegisterPost("/projects/create", enum.AtLeastAdmin, reflect.TypeOf(service{}), create)
 	ui.RegisterPatch("/projects/{id}/update", enum.AtLeastAdmin, reflect.TypeOf(service{}), update)
+	ui.RegisterPatch("/projects/{id}/links", enum.AtLeastAdmin, reflect.TypeOf(service{}), updateLinks)
 	ui.RegisterDelete("/projects/{id}/delete", enum.AtLeastOwner, reflect.TypeOf(service{}), delete)
 	ui.RegisterDelete("/projects/{project_id}/delete/{member_id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), removeMember)
 	ui.RegisterDelete("/projects/{project_id}/delete/picture", enum.AtLeastAdmin, reflect.TypeOf(service{}), removePicture)
@@ -23,6 +25,52 @@ func Register() {
 	ui.RegisterPost("/projects/releases/{project_id}/add", enum.AtLeastAdmin, reflect.TypeOf(service{}), addRelease)
 	ui.RegisterPatch("/projects/releases/{id}/update", enum.AtLeastAdmin, reflect.TypeOf(service{}), updateRelease)
 	ui.RegisterDelete("/projects/releases/{id}/delete", enum.AtLeastAdmin, reflect.TypeOf(service{}), deleteRelease)
+}
+
+// getById
+//
+//	@Tags		projects
+//	@Summary	Get project by ID
+//	@Description	Returns a single project with its members and links
+//	@Produce	json
+//	@Param		id	path		int	true	"Project ID"
+//	@Success	200	{object}	project.Row
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/projects/{id} [get]
+func getById(s ui.UIService) (any, error) {
+	id, err := s.GetPathParamAsInt("id")
+	if err != nil {
+		return nil, err
+	}
+	return s.GetService().(*service).getById(s.GetRequest().Context(), id)
+}
+
+// updateLinks
+//
+//	@Tags		projects
+//	@Summary	Update project links
+//	@Description	Replaces the quick-access links for a project
+//	@Accept		json
+//	@Produce	json
+//	@Param		id		path		int						true	"Project ID"
+//	@Param		payload	body		project.UpdateLinksInput	true	"Links array"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/projects/{id}/links [patch]
+func updateLinks(s ui.UIService) (any, error) {
+	id, err := s.GetPathParamAsInt("id")
+	if err != nil {
+		return nil, err
+	}
+
+	var input project.UpdateLinksInput
+	if err := s.GetBodyAs(&input); err != nil {
+		return nil, err
+	}
+
+	return nil, s.GetService().(*service).updateLinks(s.GetRequest().Context(), id, input)
 }
 
 // getAll

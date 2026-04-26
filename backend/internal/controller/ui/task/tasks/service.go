@@ -77,11 +77,16 @@ func (s *service) updateTask(ctx context.Context, input task.UpdateTaskInput, id
 		Description: input.Description,
 		DueAt:       dueAt,
 		ClosedAt:    closedAt,
+		UpdatedAt:   time.Now(),
 	}, id)
 }
 
 func (s *service) closeTask(ctx context.Context, id uuid.UUID) error {
 	return repository.GetTaskRepo().CloseTaskBy(ctx, id)
+}
+
+func (s *service) reopenTask(ctx context.Context, id uuid.UUID) error {
+	return repository.GetTaskRepo().ReopenTaskBy(ctx, id)
 }
 
 func (s *service) deleteTask(ctx context.Context, taskId, userId uuid.UUID, userRole enum.PermissionRole) error {

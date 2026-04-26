@@ -30,7 +30,15 @@
 
                 <div class="flex flex-col flex-1 gap-2 pl-4">
                   <div class="flex justify-between items-center">
-                    <span class="task-identifier">#{{ t.identifier }}</span>
+                    <div class="flex items-center gap-2">
+                      <span class="task-identifier">#{{ t.identifier }}</span>
+                      @if (isClosed()) {
+                        <tui-badge appearance="success" size="s">
+                          <tui-icon icon="@tui.circle-check" />
+                          {{ 'models.task.detailed.closedAt' | translate }}
+                        </tui-badge>
+                      }
+                    </div>
                     <div class="flex items-center gap-1">
                       @if (isEditing()) {
                       <div class="action-bar">
@@ -44,16 +52,28 @@
                           (click)="save()"
                         >
                         </button>
-                        <button
-                          tuiIconButton
-                          appearance="ghost"
-                          type="button"
-                          size="xs"
-                          iconStart="@tui.circle-check"
-                          [disabled]="!canClose()"
-                          (click)="closeTask()"
-                        >
-                        </button>
+                        @if (isClosed()) {
+                          <button
+                            tuiIconButton
+                            appearance="ghost"
+                            type="button"
+                            size="xs"
+                            iconStart="@tui.rotate-ccw"
+                            (click)="reopenTask()"
+                          >
+                          </button>
+                        } @else {
+                          <button
+                            tuiIconButton
+                            appearance="ghost"
+                            type="button"
+                            size="xs"
+                            iconStart="@tui.circle-check"
+                            [disabled]="!canClose()"
+                            (click)="closeTask()"
+                          >
+                          </button>
+                        }
                         <button
                           tuiIconButton
                           appearance="ghost"
@@ -366,8 +386,6 @@
         }
       </div>
     </div>
-
-
   } @else {
     <tui-block-status>
       <h4>{{ 'generic.statuses.notFound' | translate }}</h4>

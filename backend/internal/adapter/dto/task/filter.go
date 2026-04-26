@@ -13,6 +13,7 @@ type FiltersInput struct {
 	StatusId   []int    `json:"statusId"`
 	AssigneeId []string `json:"assigneeId"`
 	AuthorId   []string `json:"authorId"`
+	Identifier int      `json:"identifier"`
 }
 
 type Filters struct {
@@ -27,6 +28,7 @@ type Filters struct {
 	StatusId   []int    `json:"statusId"`
 	AssigneeId []string `json:"assigneeId"`
 	AuthorId   []string `json:"authorId"`
+	Identifier int      `json:"identifier"`
 }
 
 func (in *FiltersInput) ResolveFilters(basic controller.BasicQueryParams) *Filters {
@@ -42,5 +44,6 @@ func (in *FiltersInput) ResolveFilters(basic controller.BasicQueryParams) *Filte
 		StatusId:   in.StatusId,
 		AssigneeId: in.AssigneeId,
 		AuthorId:   in.AuthorId,
+		Identifier: in.Identifier,
 	}
 }

@@ -125,7 +125,7 @@
           </ng-template>
 
           <button
-            appearance="flat"
+            appearance="action"
             iconStart="@tui.rotate-cw"
             size="xs"
             tuiButton
@@ -152,7 +152,7 @@
               <div class="feed-card-header">
                 <span class="feed-card-identifier">#{{ item.identifier }}</span>
                 <div class="feed-card-badges">
-                  <tui-badge size="s">{{ item.status }}</tui-badge>
+                  <tui-badge size="s" appearance="neutral">{{ item.status }}</tui-badge>
                   <tui-badge size="s" appearance="neutral">{{ item.priority }}</tui-badge>
                   <tui-badge size="s" appearance="neutral">{{ item.category }}</tui-badge>
                 </div>

@@ -28,6 +28,10 @@ export class TaskCoreService {
     return this.http.post<void>(`${this.baseURL}/${id}/close`, {});
   }
 
+  reopen(id: string): Observable<void> {
+    return this.http.post<void>(`${this.baseURL}/${id}/reopen`, {});
+  }
+
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseURL}/${id}/delete`);
   }

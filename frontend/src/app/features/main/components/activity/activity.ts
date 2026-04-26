@@ -175,7 +175,13 @@ export class MainActivityComponent implements OnInit {
     let params = new HttpParams();
 
     if (search?.trim()) {
-      params = params.set('searchBy', 'title').set('searchValue', search.trim());
+      const trimmed = search.trim();
+      if (trimmed.startsWith('#')) {
+        const id = parseInt(trimmed.slice(1), 10);
+        if (!isNaN(id)) params = params.set('identifier', id);
+      } else {
+        params = params.set('searchBy', 'title').set('searchValue', trimmed);
+      }
     }
     if (statusIds?.length) {
       params = params.set('statusId', statusIds.map((s) => s.id).join(','));

@@ -17,6 +17,14 @@ func (s *service) all(ctx context.Context) ([]project.Row, error) {
 	return repository.GetProjectRepo().GetAll(ctx)
 }
 
+func (s *service) getById(ctx context.Context, id int) (project.Row, error) {
+	return repository.GetProjectRepo().GetById(ctx, id)
+}
+
+func (s *service) updateLinks(ctx context.Context, id int, input project.UpdateLinksInput) error {
+	return repository.GetProjectRepo().UpdateLinks(ctx, id, input.Links)
+}
+
 func (s *service) addNewProject(ctx context.Context, input project.CreateProjectInput) (int, error) {
 	return repository.GetProjectRepo().Create(ctx, input)
 }

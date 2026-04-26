@@ -15,6 +15,7 @@ func Register() {
 	ui.RegisterPost("/tasks/add", enum.AnyUser, reflect.TypeOf(service{}), add)
 	ui.RegisterPatch("/tasks/{id}/update", enum.AnyUser, reflect.TypeOf(service{}), update)
 	ui.RegisterPost("/tasks/{id}/close", enum.AnyUser, reflect.TypeOf(service{}), close)
+	ui.RegisterPost("/tasks/{id}/reopen", enum.AnyUser, reflect.TypeOf(service{}), reopen)
 	ui.RegisterDelete("/tasks/{id}/delete", enum.AnyUser, reflect.TypeOf(service{}), deleteById)
 }
 
@@ -124,6 +125,26 @@ func close(s ui.UIService) (any, error) {
 	}
 
 	return nil, s.GetService().(*service).closeTask(s.GetRequest().Context(), uuid.MustParse(id))
+}
+
+// reopen
+//
+//	@Tags		tasks
+//	@Summary	Reopen task
+//	@Description	Reopens a closed task by clearing its closed_at timestamp
+//	@Produce	json
+//	@Param		id	path	string	true	"Task UUID"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/tasks/{id}/reopen [post]
+func reopen(s ui.UIService) (any, error) {
+	id, err := s.GetPathParameterAsString("id")
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, s.GetService().(*service).reopenTask(s.GetRequest().Context(), uuid.MustParse(id))
 }
 
 // deleteById

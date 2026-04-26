@@ -40,6 +40,13 @@ definitions:
       title:
         type: string
     type: object
+  project.ProjectLink:
+    properties:
+      title:
+        type: string
+      url:
+        type: string
+    type: object
   project.Row:
     properties:
       archivedAt:
@@ -52,6 +59,10 @@ definitions:
         type: string
       id:
         type: integer
+      links:
+        items:
+          $ref: '#/definitions/project.ProjectLink'
+        type: array
       members:
         items:
           $ref: '#/definitions/shared.MemberShort'
@@ -64,6 +75,13 @@ definitions:
         type: string
       updatedAt:
         type: string
+    type: object
+  project.UpdateLinksInput:
+    properties:
+      links:
+        items:
+          $ref: '#/definitions/project.ProjectLink'
+        type: array
     type: object
   project.UpdateReleaseInput:
     properties:
@@ -647,6 +665,33 @@ paths:
       summary: Get all projects
       tags:
       - projects
+  /api/projects/{id}:
+    get:
+      description: Returns a single project with its members and links
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project.Row'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get project by ID
+      tags:
+      - projects
   /api/projects/{id}/delete:
     delete:
       description: Deletes a project by ID
@@ -670,6 +715,39 @@ paths:
           schema:
             type: string
       summary: Delete project
+      tags:
+      - projects
+  /api/projects/{id}/links:
+    patch:
+      consumes:
+      - application/json
+      description: Replaces the quick-access links for a project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Links array
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/project.UpdateLinksInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update project links
       tags:
       - projects
   /api/projects/{id}/update:
@@ -1265,6 +1343,31 @@ paths:
           schema:
             type: string
       summary: Delete task
+      tags:
+      - tasks
+  /api/tasks/{id}/reopen:
+    post:
+      description: Reopens a closed task by clearing its closed_at timestamp
+      parameters:
+      - description: Task UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Reopen task
       tags:
       - tasks
   /api/tasks/{id}/update:
