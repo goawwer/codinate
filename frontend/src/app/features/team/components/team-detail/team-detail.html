@@ -1,0 +1,121 @@
+<div class="team-page">
+
+  @if (isLoading()) {
+    <tui-loader />
+  } @else if (team(); as t) {
+    <div class="team-header">
+      <div class="flex items-center gap-4">
+        <div class="team-header-picture">
+          <app-picture
+            [name]="t.name"
+            [pictureName]="t.pictureName"
+            entityType="teams"
+            fontSize="3rem"
+            size="xl"
+            [isRound]="false"
+          />
+        </div>
+        <div class="team-header-info">
+          <h1 class="team-name">{{ t.name }}</h1>
+          <div class="team-meta">
+            <span class="meta-item">
+              <span class="text-(--tui-text-tertiary)">
+                {{ 'generic.statuses.createdAccusative' | translate }}:
+              </span>
+              {{ t.createdAt | appDate: 'dd MMMM yyyy' }}
+            </span>
+            <span class="meta-sep">·</span>
+            <span class="meta-item">
+              <span class="text-(--tui-text-tertiary)">
+                {{ 'generic.statuses.updatedAccusative' | translate }}:
+              </span>
+              {{ t.updatedAt | appDate: 'dd MMMM yyyy' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      @if (userStore.isAtLeastAdmin()) {
+        <button
+          appearance="action"
+          iconStart="@tui.settings"
+          size="m"
+          tuiIconButton
+          tuiHintAppearance="primary-tooltip"
+          tuiHintDirection="bottom"
+          [tuiHint]="'admin.dashboard.teams.hints.edit' | translate"
+          type="button"
+          (click)="openEditDialog()"
+        ></button>
+      }
+    </div>
+
+    <div class="main-layout">
+
+      <tui-scrollbar class="main-scroll">
+        <div class="main-col">
+
+          <tui-tabs
+            class="mb-1"
+            [activeItemIndex]="activeTab()"
+            (activeItemIndexChange)="activeTab.set($event)"
+          >
+            <button tuiTab>{{ 'generic.titles.feed' | translate }}</button>
+          </tui-tabs>
+
+          @if (activeTab() === 0) {
+            <tui-block-status>
+              <img
+                alt="{{ 'generic.statuses.empty' | translate }}"
+                src="assets/images/not-found.svg"
+                tuiSlot="top"
+                class="image"
+              />
+              <h4>{{ 'generic.statuses.empty' | translate }}</h4>
+            </tui-block-status>
+          }
+
+        </div>
+      </tui-scrollbar>
+
+      <div class="side-col">
+
+        <div class="widget">
+          <div class="widget-header">
+            <tui-icon icon="@tui.users" />
+            <span>{{ 'models.team.members' | translate }}</span>
+          </div>
+          <div class="widget-body">
+            @for (member of t.members; track member.id) {
+              <div class="participant-row">
+                <div class="participant-avatar">
+                  <app-picture [name]="member.name" size="s" entityType="users" pictureName="" />
+                </div>
+                <div class="participant-info">
+                  <span class="participant-name">{{ member.name }} {{ member.surname }}</span>
+                </div>
+              </div>
+            }
+            @if (!t.members.length) {
+              <span class="empty-text">{{ 'generic.statuses.empty' | translate }}</span>
+            }
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  } @else {
+    <tui-block-status>
+      <img
+        alt="{{ 'generic.statuses.notFound' | translate }}"
+        src="assets/images/not-found.svg"
+        tuiSlot="top"
+        class="image"
+      />
+      <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
+      <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
+    </tui-block-status>
+  }
+
+</div>

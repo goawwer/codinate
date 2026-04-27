@@ -35,19 +35,9 @@
               [underline]="false"
               [activeItemIndex]="activeItemIndex()"
             >
-              <a tuiTab *tuiItem routerLink="/main/activity" routerLinkActive>{{ 'main.subnav.activity' | translate }}</a>
+              <a tuiTab *tuiItem routerLink="/main/feed" routerLinkActive>{{ 'main.subnav.feed' | translate }}</a>
               <a tuiTab *tuiItem routerLink="/main/projects" routerLinkActive>{{ 'main.subnav.projects' | translate }}</a>
-              <button
-                tuiChevron
-                tuiTab
-                type="button"
-                [tuiDropdown]="teamsDropdown"
-                [(tuiDropdownOpen)]="teamsOpen"
-                (tui-tab-activate)="stop($event)"
-              >
-                {{ 'main.subnav.teams' | translate }}
-              </button>
-
+              <a tuiTab *tuiItem routerLink="/main/teams" routerLinkActive>{{ 'main.subnav.teams' | translate }}</a>
             </tui-tabs-with-more>
           </div>
         }

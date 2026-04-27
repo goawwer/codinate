@@ -56,7 +56,8 @@
       "dateRange": "Date range",
       "sort": "Sort",
       "info": "Info",
-      "progress": "Progress"
+      "progress": "Progress",
+      "feed": "Feed"
     },
     "tabs": {
       "general": "General",
@@ -85,7 +86,7 @@
   },
   "main": {
     "subnav": {
-      "activity": "Activity",
+      "feed": "Feed",
       "tasks": "My Tasks",
       "teams": "Teams",
       "projects": "Projects"
@@ -108,6 +109,10 @@
   },
   "models": {
     "team": {
+      "title": {
+        "default": "Team",
+        "plural": "Teams"
+      },
       "name": "Name",
       "description": "Description",
       "pictureName": "Picture",
