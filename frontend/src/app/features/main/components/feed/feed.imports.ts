@@ -26,7 +26,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { LowerCasePipe } from '@angular/common';
 import { StripHtmlPipe } from '../../../../common/pipes/strip-html.pipe';
 
-export const ACTIVITYIMPORTS = [
+export const FEEDIMPORTS = [
   DatePipe,
   ReactiveFormsModule,
   RouterLink,

@@ -1,0 +1,85 @@
+<div class="h-full flex flex-col items-center pt-12 px-4">
+  <div class="w-full max-w-3xl flex flex-col gap-4">
+
+    <tui-textfield
+      class="w-full"
+      [tuiTextfieldSize]="$any(inputSize)"
+      iconStart="@tui.search"
+    >
+      <input
+        tuiTextfield
+        type="search"
+        [placeholder]="'generic.actions.search' | translate: { value: '' }"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+      />
+    </tui-textfield>
+
+    <div class="flex items-center justify-between px-1">
+      <span class="text-sm text-(--tui-text-tertiary)">
+        {{ 'models.team.title.plural' | translate }}
+      </span>
+      @if (isLoading()) {
+        <tui-loader />
+      }
+    </div>
+
+    <div class="flex flex-col gap-2">
+    @for (team of filteredTeams(); track team.id) {
+      <a
+        class="flex items-center gap-4 p-4 rounded-xl bg-(--tui-background-neutral-1) hover:bg-(--tui-background-neutral-2) transition-all cursor-pointer no-underline"
+        [routerLink]="['/teams', team.id]"
+      >
+        <div class="w-16 h-16 rounded-lg overflow-hidden shrink-0">
+          <app-picture
+            [name]="team.name"
+            [pictureName]="team.pictureName"
+            entityType="teams"
+            fontSize="1.5rem"
+            size="l"
+            [isRound]="false"
+          />
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-(--tui-text-primary) truncate leading-snug">
+            {{ team.name }}
+          </div>
+
+          @if (team.description) {
+            <div class="text-sm text-(--tui-text-secondary) truncate mt-0.5">
+              {{ team.description }}
+            </div>
+          }
+
+          <div class="flex items-center gap-3 mt-1.5">
+            <span class="text-xs text-(--tui-text-tertiary)">
+              {{ 'generic.statuses.updated' | translate }} {{ team.updatedAt | appDate: 'dd MMM yyyy' }}
+            </span>
+            @if (team.members.length) {
+              <span class="text-xs text-(--tui-text-tertiary) flex items-center gap-1">
+                <tui-icon icon="@tui.users" style="font-size: 0.75rem" />
+                {{ team.members.length }}
+              </span>
+            }
+          </div>
+        </div>
+      </a>
+    }
+
+    @if (!isLoading() && filteredTeams().length === 0) {
+      <tui-block-status>
+        <img
+          alt="{{ 'generic.statuses.notFound' | translate }}"
+          src="assets/images/not-found.svg"
+          tuiSlot="top"
+          class="image"
+        />
+        <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
+        <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
+      </tui-block-status>
+    }
+    </div>
+
+  </div>
+</div>

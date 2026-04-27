@@ -12,7 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TuiDay, TuiDayRange } from '@taiga-ui/cdk';
 import { tuiScrollbarOptionsProvider } from '@taiga-ui/core';
 import { debounceTime, filter, forkJoin, startWith } from 'rxjs';
-import { ACTIVITYIMPORTS } from './activity.imports';
+import { FEEDIMPORTS } from './feed.imports';
 import { Task } from '../../../task/types/task.model';
 import { TaskCoreService } from '../../../task/service/task-core.service';
 import { TaskStatus, TaskStatusesService } from '../../../task/service/task-statuses.service';
@@ -30,14 +30,14 @@ type Segment = '' | 'Open' | 'Closed';
 type SortOrder = 'asc' | 'desc';
 
 @Component({
-  selector: 'app-activity',
-  imports: [ACTIVITYIMPORTS],
-  templateUrl: './activity.html',
-  styleUrl: './activity.scss',
+  selector: 'app-feed',
+  imports: [FEEDIMPORTS],
+  templateUrl: './feed.html',
+  styleUrl: './feed.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [tuiScrollbarOptionsProvider({ mode: 'hover' })],
 })
-export class MainActivityComponent implements OnInit {
+export class MainFeedComponent implements OnInit {
   private readonly taskService = inject(TaskCoreService);
   private readonly statusesService = inject(TaskStatusesService);
   private readonly prioritiesService = inject(TaskPrioritiesService);

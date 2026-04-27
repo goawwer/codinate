@@ -11,7 +11,7 @@
   @switch (activeTab()) {
     @case (0) {
       <div class="flex flex-col items-center gap-3 pb-5">
-        <div class="w-28 h-28 rounded-full overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
+        <div class="w-25 h-25 rounded-full overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
           @if (previewUrl(); as url) {
             <img [src]="url" alt="Preview" class="w-full h-full object-cover" />
           } @else {
@@ -20,6 +20,7 @@
               entityType="teams"
               [pictureName]="team!.pictureName"
               fontSize="4rem"
+              size="xxl"
             />
           }
         </div>

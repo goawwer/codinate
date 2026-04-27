@@ -34,7 +34,9 @@
       "notFoundDetails": "Пожалуйста попробуйте другие опции",
       "empty": "Пока ничего нет",
       "updated": "Обновлён",
-      "created": "Создан"
+      "updatedAccusative": "Обновлена",
+      "created": "Создан",
+      "createdAccusative": "Создана"
     },
     "filters": {
       "all": "Все"
@@ -59,7 +61,8 @@
       "dateRange": "Диапазон дат",
       "sort": "Сортировка",
       "info": "Информация",
-      "progress": "Прогресс"
+      "progress": "Прогресс",
+      "feed": "Лента"
     },
     "tabs": {
       "general": "Основное",
@@ -88,7 +91,7 @@
   },
   "main": {
     "subnav": {
-      "activity": "Активность",
+      "feed": "Лента",
       "tasks": "Мои задачи",
       "teams": "Команды",
       "projects": "Проекты"
@@ -111,7 +114,10 @@
   },
   "models": {
     "team": {
-      "title": "Проект",
+      "title": {
+        "default": "Команда",
+        "plural": "Команды"
+      },
       "name": "Название",
       "description": "Описание",
       "pictureName": "Изображение",

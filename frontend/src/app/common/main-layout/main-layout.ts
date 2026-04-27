@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { NavbarComponent } from './navbar/navbar';
 import { TuiNavigation } from '@taiga-ui/layout';
-import { TuiTabs, TuiChevron } from '@taiga-ui/kit';
+import { TuiTabs } from '@taiga-ui/kit';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TuiDropdown, TuiDataList } from '@taiga-ui/core';
 import { TeamStore } from '../../features/team/store/team.store';
@@ -14,7 +14,7 @@ import { StoreStatus } from '../../core/declarations/types/store-statuses.type';
 import { TuiItem } from '@taiga-ui/cdk/directives/item';
 
 const ADMIN_ROUTES = ['/admin/users', '/admin/teams', '/admin/projects', '/admin/settings'];
-const MAIN_ROUTES = ['/main/activity'];
+const MAIN_ROUTES = ['/main/feed', '/main/projects', '/main/teams'];
 const MINE_ROUTES = ['/mine/assigned', '/mine/created', '/mine/history'];
 
 @Component({
@@ -29,7 +29,6 @@ const MINE_ROUTES = ['/mine/assigned', '/mine/created', '/mine/history'];
     TranslatePipe,
     TuiDropdown,
     TuiDataList,
-    TuiChevron,
     TuiItem,
   ],
   templateUrl: './main-layout.html',
@@ -58,7 +57,10 @@ export class MainLayoutComponent implements OnInit {
     const mineIdx = MINE_ROUTES.findIndex((r) => url.startsWith(r));
     if (mineIdx !== -1) return mineIdx;
     const mainIdx = MAIN_ROUTES.findIndex((r) => url.startsWith(r));
-    return mainIdx !== -1 ? mainIdx : 0;
+    if (mainIdx !== -1) return mainIdx;
+    if (url.startsWith('/projects')) return 1;
+    if (url.startsWith('/teams')) return 2;
+    return 0;
   });
 
   ngOnInit(): void {
