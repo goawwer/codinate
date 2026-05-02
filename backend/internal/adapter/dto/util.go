@@ -29,3 +29,14 @@ func ResolveReleaseStatus(status string) enum.ReleaseStatus {
 
 	return ""
 }
+
+func ResolveCommentEntityType(entity string) enum.CommentEntityType {
+	switch entity {
+	case "task":
+		return enum.TaskCommentEntity
+	case "post":
+		return enum.PostCommentEntity
+	}
+
+	return ""
+}

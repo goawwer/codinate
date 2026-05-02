@@ -114,9 +114,9 @@
 
         <tui-textfield>
           <label tuiLabel>{{ 'models.task.fields.dueAt' | translate }}</label>
-          <input tuiTextfield type="date" formControlName="dueAt" />
+          <input tuiInputDate formControlName="dueAt" />
+          <tui-calendar *tuiTextfieldDropdown />
         </tui-textfield>
-        <div></div>
       </div>
 
       <footer class="task-dialog-footer" style="margin-top: auto">

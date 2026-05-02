@@ -40,7 +40,8 @@ func GetProjectRepo() ProjectRepo {
 }
 
 func (r *projectRepoImpl) GetAll(ctx context.Context) ([]project.Row, error) {
-	var res []project.Row
+	res := make([]project.Row, 0)
+
 	err := r.SelectContext(ctx, &res, `
 		SELECT
 			p.id,
@@ -209,7 +210,7 @@ func (r *projectRepoImpl) DeletePictureBy(ctx context.Context, projectId int) er
 }
 
 func (r *projectRepoImpl) GetReleases(ctx context.Context, projectId int) ([]model.Release, error) {
-	var res []model.Release
+	res := make([]model.Release, 0)
 
 	err := r.SelectContext(ctx, &res, `
 		SELECT * FROM project_releases
@@ -239,7 +240,7 @@ func (r *projectRepoImpl) UpdateRelease(ctx context.Context, input project.Updat
 		Eq("id", id).
 		Build()
 
-	_, err := r.ExecContext(ctx, "UPDATE projects "+clause, qb.Args()...)
+	_, err := r.ExecContext(ctx, "UPDATE project_releases "+clause, qb.Args()...)
 	return err
 }
 

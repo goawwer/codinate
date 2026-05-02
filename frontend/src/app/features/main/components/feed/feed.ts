@@ -22,7 +22,6 @@ import { Project } from '../../../project/types/model/project.model';
 import { TranslateService } from '@ngx-translate/core';
 import { AppDialogService } from '../../../../common/dialogs/dialog.service';
 import { TaskDialogComponent } from '../../../task/dialog/task-dialog.component';
-import { LowerCasePipe } from '@angular/common';
 
 const PAGE_SIZE = 10;
 

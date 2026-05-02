@@ -16,8 +16,7 @@ export class EditorUploadService {
   upload(file: File | Blob): Observable<{ name: string; link: string }> {
     const ext = file instanceof File ? '' : (file.type.split('/')[1] ?? 'png');
     const name = file instanceof File ? file.name : `clipboard-${Date.now()}.${ext}`;
-    const asFile =
-      file instanceof File ? file : new File([file], name, { type: file.type });
+    const asFile = file instanceof File ? file : new File([file], name, { type: file.type });
 
     if (!this.entityId) {
       const blobUrl = URL.createObjectURL(file);
@@ -28,10 +27,12 @@ export class EditorUploadService {
     const formData = new FormData();
     formData.append('file', file, name);
     return this.http
-      .post<{ id: string; name: string; size: number; url: string }>(
-        `/api/files/${this.entityType}/${this.entityId}/upload`,
-        formData,
-      )
+      .post<{
+        id: string;
+        name: string;
+        size: number;
+        url: string;
+      }>(`/api/files/${this.entityType}/${this.entityId}/upload`, formData)
       .pipe(map(({ name: n, url }) => ({ name: n, link: url })));
   }
 

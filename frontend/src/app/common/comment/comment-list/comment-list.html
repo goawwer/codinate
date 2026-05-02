@@ -1,0 +1,66 @@
+<div class="comment-list">
+  <div #commentTop class="flex justify-between p-1 text-(--tui-text-secondary)">
+    <div class="flex gap-1.5 items-center">
+      <tui-icon icon="@tui.message-circle-more" [style.font-size.rem]="1"/>
+      <span>{{ 'models.task.detailed.comments' | translate }}</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span>({{ comments().length }})</span>
+      @if (canScroll()) {
+        <button class="scroll-btn" type="button" (click)="scrollToBottom()">
+          <tui-icon icon="@tui.arrow-down" />
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <tui-loader />
+  } @else if (comments().length > 0) {
+    @for (comment of comments(); track comment.id) {
+      <app-comment-item
+        [comment]="comment"
+        [currentUserId]="currentUserId()"
+        [isAdmin]="isAdmin()"
+        (deleted)="onDeleted($event)"
+        (updated)="onUpdated($event)"
+      />
+    }
+  }
+
+  <div class="compose-wrapper">
+    <div #commentBottom class="comment-compose" (click)="!isInputActive() && activateInput()">
+      @if (!isInputActive()) {
+        <span class="compose-placeholder">{{ 'generic.actions.addComment' | translate }}</span>
+      } @else {
+        <div class="compose-body">
+          <app-editor
+            [formControl]="newCommentControl"
+            entityType="comments"
+            [placeholder]="'generic.actions.addComment' | translate"
+          />
+          <div class="compose-actions">
+            <button
+              tuiButton
+              appearance="ghost"
+              size="s"
+              type="button"
+              (click)="$event.stopPropagation(); cancelInput()"
+            >
+              {{ 'generic.actions.cancel' | translate }}
+            </button>
+            <button
+              tuiIconButton
+              iconStart="@tui.forward"
+              size="s"
+              type="button"
+              class="btn-primary"
+              [disabled]="isSubmitting()"
+              (click)="$event.stopPropagation(); submit()"
+            ></button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

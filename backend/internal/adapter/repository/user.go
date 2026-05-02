@@ -45,7 +45,7 @@ func (r *userRepoImpl) Create(ctx context.Context, u *models.User) error {
 
 func (r *userRepoImpl) GetAll(ctx context.Context, f *user.Filters) ([]user.Row, error) {
 	var qb QueryFiltersBuilder
-	var res []user.Row
+	res := make([]user.Row, 0)
 
 	orderCol, err := util.GetDBColumn(user.Row{}, f.SortBy.Column, nil)
 	if err != nil && f.SortBy.Column != "" {

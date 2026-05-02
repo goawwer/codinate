@@ -25,6 +25,7 @@ import { TuiBlockStatus, TuiSearch } from '@taiga-ui/layout';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LowerCasePipe } from '@angular/common';
 import { StripHtmlPipe } from '../../../../common/pipes/strip-html.pipe';
+import { AppDatePipe } from '../../../../common/pipes/app-date.pipe';
 
 export const FEEDIMPORTS = [
   DatePipe,
@@ -51,4 +52,5 @@ export const FEEDIMPORTS = [
   LowerCasePipe,
   TuiHint,
   StripHtmlPipe,
+  AppDatePipe,
 ];

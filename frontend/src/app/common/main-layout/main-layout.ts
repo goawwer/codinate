@@ -3,7 +3,6 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { NavbarComponent } from './navbar/navbar';
-import { TuiNavigation } from '@taiga-ui/layout';
 import { TuiTabs } from '@taiga-ui/kit';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TuiDropdown, TuiDataList } from '@taiga-ui/core';
@@ -22,7 +21,6 @@ const MINE_ROUTES = ['/mine/assigned', '/mine/created', '/mine/history'];
   imports: [
     RouterOutlet,
     NavbarComponent,
-    TuiNavigation,
     TuiTabs,
     RouterLink,
     RouterLinkActive,

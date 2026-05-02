@@ -6,14 +6,15 @@
     </tui-block-status>
   } @else if (task(); as t) {
     <div class="main-layout">
-      <tui-scrollbar class="main-scroll">
-        <div ckass="main-scroll-inner">
+      <tui-scrollbar class="main-scroll" [hidden]="true">
+        <div class="main-scroll-inner">
           <div class="main-col">
             <div class="bg-(--tui-background-neutral-1) flex flex-col rounded-2xl p-4">
               <div class="flex gap-1 items-center mb-3">
                 <tui-badged-content class="task-badge">
                   <app-picture
                     [name]="t.assigneeName"
+                    [surname]="t.assigneeSurname"
                     size="m"
                     pictureName=""
                     entityType="users"
@@ -141,7 +142,8 @@
 
                   <tui-textfield>
                     <label tuiLabel>{{ 'models.task.fields.dueAt' | translate }}</label>
-                    <input tuiTextfield type="date" formControlName="dueAt" />
+                    <input tuiInputDate formControlName="dueAt" />
+                    <tui-calendar *tuiTextfieldDropdown />
                   </tui-textfield>
                 </div>
               } @else {
@@ -188,7 +190,7 @@
                         <tui-icon icon="@tui.clock" />
                         {{ 'models.task.fields.dueAt' | translate }}
                       </span>
-                      <span class="prop-value">{{ t.dueAt | date: 'MMM d, yyyy' }}</span>
+                      <span class="prop-value">{{ t.dueAt | appDate: 'dd MMMM yyyy' }}</span>
                     </div>
                   }
                 </div>
@@ -206,64 +208,7 @@
               }
             </div>
 
-            <div class="comments-section">
-              <div class="comments-header">
-                <div class="comments-header-title">
-                  <tui-icon icon="@tui.message-square" />
-                  <span>{{ 'models.task.detailed.comments' | translate }}</span>
-                </div>
-                <span class="comments-count">0</span>
-              </div>
-
-              <div class="comments-list">
-              </div>
-
-              <div class="comment-compose" (click)="!isCommentActive() && activateComment()">
-                @if (!isCommentActive()) {
-                  <div class="comment-compose-placeholder">
-                    {{ 'models.task.detailed.addComment' | translate }}
-                  </div>
-                } @else {
-                  <div class="comment-compose-body">
-                    <app-editor
-                      [formControl]="commentControl"
-                      [placeholder]="'models.task.detailed.addComment' | translate"
-                      entityType="comments"
-                    />
-                    <div class="comment-compose-actions">
-                      <button
-                        tuiButton
-                        appearance="ghost"
-                        size="s"
-                        type="button"
-                        (click)="$event.stopPropagation(); cancelComment()"
-                      >
-                        {{ 'generic.actions.cancel' | translate }}
-                      </button>
-
-                      <button
-                        tuiIconButton
-                        iconStart="@tui.forward"
-                        class="btn-primary"
-                        size="s"
-                        type="button"
-                        (click)="$event.stopPropagation(); submitComment()"
-                      >
-                        {{ 'generic.actions.send' | translate }}
-                      </button>
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <div class="comments-empty">
-              <tui-icon icon="@tui.message-square-dashed" class="comments-empty-icon" />
-              <div class="comments-empty-text">
-                <p>{{ 'models.task.detailed.commentsEmpty' | translate }}</p>
-                <span>{{ 'models.task.detailed.commentsEmptySub' | translate }}</span>
-              </div>
-            </div>
+            <app-comment-list entityType="task" [entityId]="taskId" />
           </div>
         </div>
       </tui-scrollbar>
@@ -273,13 +218,43 @@
           <div class="widget-header">
             <tui-icon icon="@tui.users" />
             <span>{{ 'models.task.detailed.participants' | translate }}</span>
+            <button
+              tuiIconButton
+              appearance="ghost"
+              type="button"
+              size="xs"
+              [iconStart]="isAddingParticipant() ? '@tui.x' : '@tui.plus'"
+              (click)="toggleAddParticipant()"
+            ></button>
           </div>
+          @if (isAddingParticipant()) {
+            <div class="participant-add-row">
+              <div class="flex items-center p-2 gap-1">
+                <tui-textfield tuiChevron [stringify]="stringifyUser" class="flex-1" tuiTextfieldSize="m">
+                  <label tuiLabel>{{ 'models.task.detailed.addParticipant' | translate }}</label>
+                  <input tuiSelect [formControl]="participantControl" />
+                  <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="availableParticipants()" [emptyContent]="'models.task.detailed.noAvailableParticipants' | translate" />
+                </tui-textfield>
+                <button
+                  tuiIconButton
+                  appearance="primary"
+                  type="button"
+                  size="xs"
+                  iconStart="@tui.plus"
+                  [disabled]="!participantControl.value"
+                  (click)="addParticipant()"
+                ></button>
+              </div>
+
+            </div>
+          }
           <div class="widget-body">
             @for (member of t.members; track member.id) {
               <div class="participant-row">
                 <div class="participant-avatar">
                   <app-picture
                     [name]="member.name"
+                    [surname]="member.surname"
                     size="s"
                     pictureName=""
                     entityType="users"

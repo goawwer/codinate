@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { Project, ProjectLink } from '../types/model/project.model';
-import { CreateProjectInput, UpdateProjectInput } from '../types/model/project-dashboard.model';
+import { CreateProjectInput, UpdateProjectInput } from '../types/model/project-requests.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectApiService {

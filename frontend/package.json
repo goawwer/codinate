@@ -47,6 +47,7 @@
     "@taiga-ui/layout": "^4.74.1",
     "@taiga-ui/legacy": "^4.80.1",
     "@taiga-ui/polymorpheus": "^5.0.0",
+    "@taiga-ui/styles": "4.80.1",
     "@tailwindcss/postcss": "^4.2.1",
     "ng": "0.0.0",
     "postcss": "^8.5.8",

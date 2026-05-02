@@ -3,26 +3,26 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TuiDialogContext } from '@taiga-ui/core';
 import { TUI_VALIDATION_ERRORS } from '@taiga-ui/kit';
-import { TUI_MULTI_SELECT_TEXTS } from '@taiga-ui/kit/tokens';
-import { forkJoin, of, startWith } from 'rxjs';
+import { forkJoin, Observable, of, startWith } from 'rxjs';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import { TranslateService } from '@ngx-translate/core';
-import { Project, ProjectMember } from '../../../../project/types/model/project.model';
-import { ProjectStore } from '../../../../project/store/project.store';
-import { ProjectApiService } from '../../../../project/service/project.service';
-import { AlertService } from '../../../../../core/declarations/services/alert.service';
-import {
-  CreateProjectInput,
-  UpdateProjectInput,
-} from '../../../../project/types/model/project-dashboard.model';
+import { Project, ProjectMember } from '../../types/model/project.model';
+import { ProjectStore } from '../../store/project.store';
+import { ProjectApiService } from '../../service/project.service';
+import { AlertService } from '../../../../core/declarations/services/alert.service';
+import { CreateProjectInput, UpdateProjectInput } from '../../types/model/project-requests.model';
 import { PROJECT_DIALOG_IMPORTS } from './project-dialog.imports';
-import { loginValidationErrorsFactory } from '../../../../auth/model/auth.validation';
-import { UserStore } from '../../../../user/store/user.store';
-import { User } from '../../../../user/types/model/user.model';
+import { loginValidationErrorsFactory } from '../../../auth/model/auth.validation';
+import { UserStore } from '../../../user/store/user.store';
+import { User } from '../../../user/types/model/user.model';
+import { TaskCategoriesService, TaskCategory } from '../../../task/service/task-categories.service';
 import {
-  TaskCategoriesService,
-  TaskCategory,
-} from '../../../../task/service/task-categories.service';
+  ReleaseService,
+  Release,
+  CreateReleaseInput,
+  UpdateReleaseInput,
+} from '../../service/release.service';
+import { TuiDay } from '@taiga-ui/cdk';
 
 export interface ProjectDialogData {
   project: Project | null;
@@ -41,16 +41,13 @@ export interface ProjectDialogData {
       useFactory: loginValidationErrorsFactory,
       deps: [TranslateService],
     },
-    {
-      provide: TUI_MULTI_SELECT_TEXTS,
-      useValue: of({ all: 'Выбрать всё', none: 'Отменить выбор' }),
-    },
   ],
 })
 export class ProjectDialogComponent {
   protected readonly store = inject(ProjectStore);
   protected readonly service = inject(ProjectApiService);
   protected readonly categoryService = inject(TaskCategoriesService);
+  protected readonly releaseService = inject(ReleaseService);
   protected readonly userStore = inject(UserStore);
   protected readonly context = injectContext<TuiDialogContext<void, ProjectDialogData>>();
   private readonly alert = inject(AlertService);
@@ -62,6 +59,8 @@ export class ProjectDialogComponent {
   protected readonly activeTab = signal(0);
   protected readonly previewUrl = signal<string | null>(null);
   protected readonly selectedFile = signal<File | null>(null);
+  protected readonly categoriesOpen = signal(false);
+  protected readonly releasesOpen = signal(false);
 
   protected readonly members = signal<ProjectMember[]>([...(this.project?.members ?? [])]);
   protected readonly memberToAdd = new FormControl<string>('', { nonNullable: true });
@@ -77,11 +76,37 @@ export class ProjectDialogComponent {
   protected readonly newCategories = signal<string[]>([]);
   protected readonly newCategoryInput = new FormControl<string>('', { nonNullable: true });
 
+  protected readonly releases = signal<Release[]>([]);
+  protected readonly addingRelease = signal(false);
+  protected readonly removingReleaseId = signal<number | null>(null);
+  protected readonly savingReleaseId = signal<number | null>(null);
+  protected readonly editingReleaseId = signal<number | null>(null);
+  protected readonly showReleaseForm = signal(false);
+  protected readonly newReleases = signal<CreateReleaseInput[]>([]);
+
+  protected readonly RELEASE_STATUSES = ['active', 'finished', 'archived', 'closed'];
+  protected readonly startAtOpen = signal(false);
+  protected readonly endAtOpen = signal(false);
+
+  protected readonly releaseForm = new FormGroup({
+    title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    description: new FormControl('', { nonNullable: true }),
+    status: new FormControl('active', { nonNullable: true }),
+    startAt: new FormControl<TuiDay | null>(null),
+    endAt: new FormControl<TuiDay | null>(null),
+  });
+
+  protected readonly stringifyReleaseStatus = (status: string): string =>
+    this.translate.instant(`models.release.statuses.${status.toLowerCase()}`);
+
   protected readonly stringify = (user: User) => `${user.name} ${user.surname}`;
 
   constructor() {
     if (this.isEdit) {
       this.categoryService.getAll(this.project!.id).subscribe((cats) => this.categories.set(cats));
+      this.releaseService
+        .getByProject(this.project!.id)
+        .subscribe((rels) => this.releases.set(rels));
     }
   }
 
@@ -203,6 +228,108 @@ export class ProjectDialogComponent {
     });
   }
 
+  protected addNewRelease(): void {
+    if (!this.releaseForm.controls.title.value?.trim()) return;
+    const v = this.releaseForm.getRawValue();
+    const input: CreateReleaseInput = {
+      title: v.title,
+      description: v.description,
+      status: v.status,
+      startAt: v.startAt ? v.startAt.toLocalNativeDate().toISOString() : '',
+      endAt: v.endAt ? v.endAt.toLocalNativeDate().toISOString() : '',
+    };
+    this.newReleases.update((rels) => [...rels, input]);
+    this.releaseForm.reset({ status: 'active' });
+    this.showReleaseForm.set(false);
+  }
+
+  protected removeNewRelease(index: number): void {
+    this.newReleases.update((rels) => rels.filter((_, i) => i !== index));
+  }
+
+  protected addRelease(): void {
+    if (!this.releaseForm.controls.title.value?.trim()) return;
+    this.addingRelease.set(true);
+    const v = this.releaseForm.getRawValue();
+    const input: CreateReleaseInput = {
+      title: v.title,
+      description: v.description,
+      status: v.status,
+      startAt: v.startAt ? v.startAt.toLocalNativeDate().toISOString() : '',
+      endAt: v.endAt ? v.endAt.toLocalNativeDate().toISOString() : '',
+    };
+    this.releaseService.add(this.project!.id, input).subscribe({
+      next: () => {
+        this.releaseService
+          .getByProject(this.project!.id)
+          .subscribe((rels) => this.releases.set(rels));
+        this.releaseForm.reset({ status: 'active' });
+        this.showReleaseForm.set(false);
+        this.addingRelease.set(false);
+        this.alert.success(this.translate.instant('cmd.projects.success.releaseCreated'));
+      },
+      error: () => this.addingRelease.set(false),
+    });
+  }
+
+  protected startEditRelease(release: Release): void {
+    this.showReleaseForm.set(false);
+    this.editingReleaseId.set(release.id);
+    this.releaseForm.setValue({
+      title: release.title,
+      description: release.description ?? '',
+      status: release.status ?? 'active',
+      startAt: release.startAt?.startsWith('0001')
+        ? null
+        : TuiDay.fromLocalNativeDate(new Date(release.startAt)),
+      endAt: release.endAt?.startsWith('0001')
+        ? null
+        : TuiDay.fromLocalNativeDate(new Date(release.endAt)),
+    });
+  }
+
+  protected saveRelease(): void {
+    const id = this.editingReleaseId();
+    if (!id || !this.releaseForm.controls.title.value?.trim()) return;
+    this.savingReleaseId.set(id);
+    const v = this.releaseForm.getRawValue();
+    const input: UpdateReleaseInput = {
+      title: v.title,
+      description: v.description,
+      status: v.status,
+      startAt: v.startAt ? v.startAt.toLocalNativeDate().toISOString() : undefined,
+      updateAt: v.endAt ? v.endAt.toLocalNativeDate().toISOString() : undefined,
+    };
+    this.releaseService.update(id, input).subscribe({
+      next: () => {
+        this.releaseService
+          .getByProject(this.project!.id)
+          .subscribe((rels) => this.releases.set(rels));
+        this.releaseForm.reset({ status: 'active' });
+        this.editingReleaseId.set(null);
+        this.savingReleaseId.set(null);
+        this.alert.success(this.translate.instant('cmd.projects.success.releaseUpdated'));
+      },
+      error: () => this.savingReleaseId.set(null),
+    });
+  }
+
+  protected cancelEditRelease(): void {
+    this.editingReleaseId.set(null);
+    this.releaseForm.reset({ status: 'active' });
+  }
+
+  protected removeRelease(release: Release): void {
+    this.removingReleaseId.set(release.id);
+    this.releaseService.delete(release.id).subscribe({
+      next: () => {
+        this.releases.update((list) => list.filter((r) => r.id !== release.id));
+        this.removingReleaseId.set(null);
+      },
+      error: () => this.removingReleaseId.set(null),
+    });
+  }
+
   protected deletePicture(): void {
     if (this.previewUrl()) {
       this.previewUrl.set(null);
@@ -259,8 +386,13 @@ export class ProjectDialogComponent {
         file: this.selectedFile() ?? undefined,
         onSuccess: (id) => {
           const cats = this.newCategories();
-          if (cats.length > 0) {
-            forkJoin(cats.map((name) => this.categoryService.add(id, name))).subscribe();
+          const rels = this.newReleases();
+          const tasks: Observable<void>[] = [
+            ...cats.map((name) => this.categoryService.add(id, name)),
+            ...rels.map((rel) => this.releaseService.add(id, rel)),
+          ];
+          if (tasks.length > 0) {
+            forkJoin(tasks).subscribe();
           }
         },
       });

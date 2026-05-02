@@ -34,7 +34,7 @@ func GetTeamRepo() TeamRepo {
 }
 
 func (r *teamRepoImpl) GetAllTeamsWithMembersShort(ctx context.Context) ([]team.Row, error) {
-	var res []team.Row
+	res := make([]team.Row, 0)
 
 	err := r.SelectContext(ctx, &res, `
 		SELECT
@@ -61,7 +61,7 @@ func (r *teamRepoImpl) GetAllTeamsWithMembersShort(ctx context.Context) ([]team.
 }
 
 func (r *teamRepoImpl) GetTeamMembersBy(ctx context.Context, id uuid.UUID) ([]user.TeamMember, error) {
-	var res []user.TeamMember
+	res := make([]user.TeamMember, 0)
 
 	err := r.SelectContext(ctx, &res, `
 		SELECT

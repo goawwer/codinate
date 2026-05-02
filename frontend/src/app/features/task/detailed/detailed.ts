@@ -10,10 +10,11 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { forkJoin, filter, of, switchMap } from 'rxjs';
+import { TuiDay } from '@taiga-ui/cdk';
 import { TuiEditorTool, provideTuiEditor } from '@taiga-ui/editor';
 import { EDITOR_RU_PROVIDER } from '../../../common/editor/editor-i18n';
 import { TaskCoreService } from '../service/task-core.service';
-import { TaskFileService } from '../service/file.service';
+import { FileService } from '../../../common/file/file.service';
 import { TaskDetailed, UpdateTaskInput } from '../types/task.model';
 import { TaskStatus, TaskStatusesService } from '../service/task-statuses.service';
 import { TaskPriority, TaskPrioritiesService } from '../service/task-priorities.service';
@@ -33,15 +34,11 @@ import { tuiScrollbarOptionsProvider } from '@taiga-ui/core';
   templateUrl: './detailed.html',
   styleUrl: './detailed.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    provideTuiEditor(),
-    EDITOR_RU_PROVIDER,
-    tuiScrollbarOptionsProvider({ mode: 'hover' }),
-  ],
+  providers: [provideTuiEditor(), EDITOR_RU_PROVIDER],
 })
 export class Detailed implements OnInit {
   private readonly taskService = inject(TaskCoreService);
-  protected readonly fileService = inject(TaskFileService);
+  protected readonly fileService = inject(FileService);
   private readonly statusesService = inject(TaskStatusesService);
   private readonly prioritiesService = inject(TaskPrioritiesService);
   private readonly categoriesService = inject(TaskCategoriesService);
@@ -59,6 +56,7 @@ export class Detailed implements OnInit {
   protected readonly isSaving = signal(false);
   protected readonly isDeleting = signal(false);
   protected readonly infoExpanded = signal(false);
+
   protected readonly attachedFilesExpanded = signal(false);
   protected readonly deleteConfirmPending = signal(false);
   protected readonly isEditing = signal(false);
@@ -67,8 +65,16 @@ export class Detailed implements OnInit {
   protected readonly users = signal<User[]>([]);
   protected readonly categories = signal<TaskCategory[]>([]);
   protected readonly releases = signal<Release[]>([]);
-  protected readonly isCommentActive = signal(false);
   protected readonly removedFileIds = signal<string[]>([]);
+  protected readonly isAddingParticipant = signal(false);
+  protected readonly participantControl = new FormControl<User | null>(null);
+
+  protected readonly availableParticipants = computed(() => {
+    const task = this.task();
+    if (!task) return this.users();
+    const memberIds = new Set(task.members.map((m) => m.id));
+    return this.users().filter((u) => !memberIds.has(u.id));
+  });
 
   protected readonly visibleAttachedFiles = computed(() => {
     const task = this.task();
@@ -76,8 +82,6 @@ export class Detailed implements OnInit {
     const removed = this.removedFileIds();
     return task.attachedFiles.filter((f) => !removed.includes(f.id));
   });
-
-  protected readonly commentControl = new FormControl('', { nonNullable: true });
 
   protected taskId = '';
 
@@ -144,8 +148,10 @@ export class Detailed implements OnInit {
     assignee: new FormControl<User | null>(null),
     release: new FormControl<Release | null>(null),
     category: new FormControl<TaskCategory | null>(null),
-    dueAt: new FormControl('', { nonNullable: true }),
+    dueAt: new FormControl<TuiDay | null>(null),
   });
+
+
 
   protected readonly stringifyStatus = (s: TaskStatus): string => s.name;
   protected readonly stringifyPriority = (p: TaskPriority): string => p.name;
@@ -197,8 +203,8 @@ export class Detailed implements OnInit {
     const category = categories.find((c) => c.id === task.categoryId) ?? null;
     const dueAt =
       task.dueAt && !task.dueAt.startsWith('0001')
-        ? new Date(task.dueAt).toISOString().split('T')[0]
-        : '';
+        ? TuiDay.fromLocalNativeDate(new Date(task.dueAt))
+        : null;
 
     this.form.patchValue({
       title: task.title,
@@ -223,7 +229,7 @@ export class Detailed implements OnInit {
       assigneeId: v.assignee?.id,
       releaseId: v.release?.id,
       categoryId: v.category?.id,
-      dueAt: v.dueAt ? new Date(v.dueAt).toISOString() : undefined,
+      dueAt: v.dueAt ? v.dueAt.toLocalNativeDate().toISOString() : undefined,
     };
 
     this.isSaving.set(true);
@@ -319,19 +325,25 @@ export class Detailed implements OnInit {
     this.infoExpanded.update((v) => !v);
   }
 
-  protected activateComment(): void {
-    this.isCommentActive.set(true);
+  protected toggleAddParticipant(): void {
+    this.isAddingParticipant.update((v) => !v);
+    if (!this.isAddingParticipant()) {
+      this.participantControl.setValue(null);
+    }
   }
 
-  protected cancelComment(): void {
-    this.isCommentActive.set(false);
-    this.commentControl.reset();
-  }
-
-  protected submitComment(): void {
-    const content = this.commentControl.value;
-    if (!content?.trim()) return;
-    // TODO: wire up comment API
-    this.cancelComment();
+  protected addParticipant(): void {
+    const user = this.participantControl.value;
+    if (!user) return;
+    this.taskService.addParticipant(this.taskId, user.id).subscribe({
+      next: () => {
+        this.participantControl.setValue(null);
+        this.isAddingParticipant.set(false);
+        this.taskService.getById(this.taskId).subscribe((task) => this.task.set(task));
+      },
+      error: () => {
+        this.alert.error(this.translate.instant('cmd.tasks.errors.participantAddFailed'));
+      },
+    });
   }
 }

@@ -91,11 +91,6 @@
   min-height: 0;
 }
 
-.main-scroll-inner {
-  min-height: 100%;
-  padding: 0 0.75rem 0 0.75rem;
-}
-
 .main-col {
   display: flex;
   flex-direction: column;
@@ -123,7 +118,6 @@
   font-size: 2rem;
   font-weight: 600;
   color: var(--app-brand-500);
-  font-family: monospace;
 }
 
 .task-badges {
@@ -166,116 +160,6 @@
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
-}
-
-.comments-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border-radius: 1rem;
-  background: var(--tui-background-neutral-1);
-  overflow: hidden;
-}
-
-.comments-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--tui-border-normal);
-}
-
-.comments-header-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--tui-text-primary);
-}
-
-.comments-count {
-  flex-shrink: 0;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--tui-text-secondary);
-}
-
-.comment-compose {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.875rem;
-  padding: 1rem 1.25rem;
-}
-
-.comment-compose-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.comment-compose-editor {
-  min-width: 0;
-  padding-bottom: 0.5rem;
-  cursor: text;
-  transition:
-    border-color 0.15s ease,
-    opacity 0.15s ease;
-
-  &:hover {
-    border-color: var(--tui-text-secondary);
-  }
-
-  &.active {
-    border-color: var(--tui-border-focus);
-  }
-}
-
-.comment-compose-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.comments-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.comments-empty {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  padding: 1.25rem;
-  justify-content: center;
-}
-
-.comments-empty-icon {
-  flex-shrink: 0;
-  font-size: 1.5rem;
-  color: var(--tui-text-tertiary);
-}
-
-.comments-empty-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  min-width: 0;
-
-  p {
-    margin: 0;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--tui-text-secondary);
-  }
-
-  span {
-    font-size: 0.8125rem;
-    color: var(--tui-text-tertiary);
-  }
 }
 
 .side-col {

@@ -6,18 +6,15 @@ import { TUI_MULTI_SELECT_TEXTS } from '@taiga-ui/kit/tokens';
 import { of, startWith } from 'rxjs';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import { TranslateService } from '@ngx-translate/core';
-import { Team, TeamMember } from '../../../../team/types/model/team.model';
-import { TeamStore } from '../../../../team/store/team.store';
-import { TeamApiService } from '../../../../team/service/team.service';
-import { AlertService } from '../../../../../core/declarations/services/alert.service';
-import {
-  CreateTeamInput,
-  UpdateTeamInput,
-} from '../../../../team/types/model/team-dashboard.model';
+import { Team, TeamMember } from '../../types/model/team.model';
+import { TeamStore } from '../../store/team.store';
+import { TeamApiService } from '../../service/team.service';
+import { AlertService } from '../../../../core/declarations/services/alert.service';
+import { CreateTeamInput, UpdateTeamInput } from '../../types/model/team-dashboard.model';
 import { TEAM_DIALOG_IMPORTS } from './team-dialog.imports';
-import { loginValidationErrorsFactory } from '../../../../auth/model/auth.validation';
-import { UserStore } from '../../../../user/store/user.store';
-import { User } from '../../../../user/types/model/user.model';
+import { loginValidationErrorsFactory } from '../../../auth/model/auth.validation';
+import { UserStore } from '../../../user/store/user.store';
+import { User } from '../../../user/types/model/user.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 export interface TeamDialogData {

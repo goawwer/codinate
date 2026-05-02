@@ -17,6 +17,7 @@ func Register() {
 	ui.RegisterPost("/tasks/{id}/close", enum.AnyUser, reflect.TypeOf(service{}), close)
 	ui.RegisterPost("/tasks/{id}/reopen", enum.AnyUser, reflect.TypeOf(service{}), reopen)
 	ui.RegisterDelete("/tasks/{id}/delete", enum.AnyUser, reflect.TypeOf(service{}), deleteById)
+	ui.RegisterPost("/tasks/{id}/participants/{userId}/add", enum.AnyUser, reflect.TypeOf(service{}), addParticipant)
 }
 
 // getById
@@ -172,6 +173,20 @@ func deleteById(s ui.UIService) (any, error) {
 
 	return nil, s.GetService().(*service).deleteTask(
 		s.GetRequest().Context(), uuid.MustParse(taskId), u.Id, u.Permission,
+	)
+}
+
+func addParticipant(s ui.UIService) (any, error) {
+	taskId, err := s.GetPathParameterAsString("id")
+	if err != nil {
+		return nil, err
+	}
+	userId, err := s.GetPathParameterAsString("userId")
+	if err != nil {
+		return nil, err
+	}
+	return nil, s.GetService().(*service).addParticipant(
+		s.GetRequest().Context(), uuid.MustParse(taskId), uuid.MustParse(userId),
 	)
 }
 

@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/goawwer/codinate/internal/controller/public/pictures"
+	"github.com/goawwer/codinate/internal/controller/ui/comment"
 	"github.com/goawwer/codinate/internal/controller/ui/current"
 	"github.com/goawwer/codinate/internal/controller/ui/employee"
 	"github.com/goawwer/codinate/internal/controller/ui/file"
@@ -25,6 +26,7 @@ func init() {
 	categories.Register()
 	tasks.Register()
 	file.Register()
+	comment.Register()
 
 	// public
 	pictures.Register()

@@ -66,8 +66,10 @@ func (s *service) updateTask(ctx context.Context, input task.UpdateTaskInput, id
 		closedAt, _ = time.Parse(time.RFC3339Nano, *input.ClosedAt)
 	}
 
-	return repository.GetTaskRepo().UpdateTaskBy(ctx, model.Task{
-		AssigneeId:  uuid.MustParse(input.AssigneeId),
+	assigneeId := uuid.MustParse(input.AssigneeId)
+
+	if err := repository.GetTaskRepo().UpdateTaskBy(ctx, model.Task{
+		AssigneeId:  assigneeId,
 		ProjectId:   input.ProjectId,
 		ReleaseId:   input.ReleaseId,
 		CategoryId:  input.CategoryId,
@@ -78,7 +80,15 @@ func (s *service) updateTask(ctx context.Context, input task.UpdateTaskInput, id
 		DueAt:       dueAt,
 		ClosedAt:    closedAt,
 		UpdatedAt:   time.Now(),
-	}, id)
+	}, id); err != nil {
+		return err
+	}
+
+	return repository.GetTaskRepo().AddParticipant(ctx, id, assigneeId)
+}
+
+func (s *service) addParticipant(ctx context.Context, taskId, userId uuid.UUID) error {
+	return repository.GetTaskRepo().AddParticipant(ctx, taskId, userId)
 }
 
 func (s *service) closeTask(ctx context.Context, id uuid.UUID) error {

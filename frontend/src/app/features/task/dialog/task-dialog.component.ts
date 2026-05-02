@@ -10,6 +10,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TuiDialogContext } from '@taiga-ui/core';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import { forkJoin, of, switchMap } from 'rxjs';
+import { TuiDay } from '@taiga-ui/cdk';
 import { TASK_DIALOG_IMPORTS } from './task-dialog.imports';
 import { CreateTaskInput } from '../types/task.model';
 import { TaskCoreService } from '../service/task-core.service';
@@ -85,7 +86,7 @@ export class TaskDialogComponent implements OnDestroy {
     priority: new FormControl<TaskPriority | null>(null, [Validators.required]),
     status: new FormControl<TaskStatus | null>(null, [Validators.required]),
     assignee: new FormControl<User | null>(null, [Validators.required]),
-    dueAt: new FormControl('', { nonNullable: true }),
+    dueAt: new FormControl<TuiDay | null>(null),
   });
 
   protected readonly stringifyProject = (p: Project): string => p.projectName;
@@ -178,7 +179,7 @@ export class TaskDialogComponent implements OnDestroy {
 
     const pendingFiles = this.pendingUploads.pending();
 
-    const dueAt = v.dueAt ? new Date(v.dueAt).toISOString() : new Date(0).toISOString();
+    const dueAt = v.dueAt ? v.dueAt.toLocalNativeDate().toISOString() : new Date(0).toISOString();
 
     this.isSubmitting.set(true);
 

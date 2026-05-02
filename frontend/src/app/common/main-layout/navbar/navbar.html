@@ -23,6 +23,7 @@
     <a>
       <app-picture
         [name]="this.userStore.user()?.name ?? ''"
+        [surname]="this.userStore.user()?.surname ?? ''"
         size="s"
         [pictureName]="this.userStore.user()?.picture ?? ''"
         entityType="users"

@@ -106,12 +106,28 @@ func create(s ui.UIService) (any, error) {
 	}
 	input.Core.PictureName = &pictureName
 
+	currentUser, err := s.GetCurrentUser()
+	if err != nil {
+		return nil, err
+	}
+	input.AuthorId = currentUser.Id.String()
+	input.MembersIds = appendIfMissing(input.MembersIds, input.AuthorId)
+
 	id, err := s.GetService().(*service).addNewProject(s.GetRequest().Context(), input)
 	if err != nil {
 		return nil, err
 	}
 
 	return map[string]int{"id": id}, nil
+}
+
+func appendIfMissing(ids []string, id string) []string {
+	for _, v := range ids {
+		if v == id {
+			return ids
+		}
+	}
+	return append(ids, id)
 }
 
 // update

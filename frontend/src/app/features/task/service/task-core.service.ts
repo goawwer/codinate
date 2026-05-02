@@ -35,4 +35,8 @@ export class TaskCoreService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseURL}/${id}/delete`);
   }
+
+  addParticipant(taskId: string, userId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseURL}/${taskId}/participants/${userId}/add`, {});
+  }
 }

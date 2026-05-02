@@ -13,7 +13,10 @@ import { Project } from '../../../../project/types/model/project.model';
 import { ProjectStore } from '../../../../project/store/project.store';
 import { PROJECTSDASHBOARDIMPORTS } from './admin-projects.imports';
 import { APP_SIZE, AppSize } from '../../../../../core/declarations/tokens/size.token';
-import { ProjectDialogComponent, ProjectDialogData } from '../dialog/project-dialog.component';
+import {
+  ProjectDialogComponent,
+  ProjectDialogData,
+} from '../../../../project/components/dialog/project-dialog.component';
 
 type Column = {
   key: keyof Project;

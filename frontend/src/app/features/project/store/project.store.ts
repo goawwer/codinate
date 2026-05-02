@@ -8,7 +8,7 @@ import { StoreStatus } from '../../../core/declarations/types/store-statuses.typ
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, EMPTY, exhaustMap, map, pipe, switchMap, tap } from 'rxjs';
 import { ProjectApiService } from '../service/project.service';
-import { CreateProjectInput, UpdateProjectInput } from '../types/model/project-dashboard.model';
+import { CreateProjectInput, UpdateProjectInput } from '../types/model/project-requests.model';
 
 type ProjectState = {
   projects: Project[];
@@ -52,12 +52,18 @@ export const ProjectStore = signalStore(
         ),
       ),
 
-      createProject: rxMethod<{ input: CreateProjectInput; file?: File; onSuccess?: (id: number) => void }>(
+      createProject: rxMethod<{
+        input: CreateProjectInput;
+        file?: File;
+        onSuccess?: (id: number) => void;
+      }>(
         pipe(
           tap(() => patchState(store, { status: StoreStatus.Saving })),
           exhaustMap(({ input, file, onSuccess }) =>
             projectsService.create(input, file).pipe(
-              switchMap((id) => projectsService.getAll().pipe(map((projects) => ({ projects, id })))),
+              switchMap((id) =>
+                projectsService.getAll().pipe(map((projects) => ({ projects, id }))),
+              ),
               tap(({ projects, id }) => {
                 patchState(store, { projects, status: StoreStatus.Saved });
                 alertService.success(translate.instant('cmd.projects.success.created'));
@@ -112,8 +118,6 @@ export const ProjectStore = signalStore(
           ),
         ),
       ),
-
-
     }),
   ),
 );

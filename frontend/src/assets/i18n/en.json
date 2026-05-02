@@ -12,6 +12,7 @@
       "default": "Actions",
       "add": "Add",
       "delete": "Delete",
+      "deleteModel": "Удалить {{ model }}",
       "cancel": "Cancel",
       "create": "Create {{ value }}",
       "save": "Save",
@@ -25,7 +26,9 @@
       "assign": "Assign",
       "send": "Send",
       "show": "Show {{ n }} more",
-      "showLess": "Show less"
+      "showLess": "Show less",
+      "addComment": "Add a comment...",
+      "deleteConfirm": "Are you sure you want to delete {{ model }}? This action cannot be undone."
     },
     "statuses": {
       "active": "Active",
@@ -34,7 +37,8 @@
       "notFoundDetails": "Please try another options",
       "empty": "Nothing here yet",
       "updated": "Updated",
-      "created": "Created"
+      "created": "Created",
+      "edited": "Edited"
     },
     "permissions": {
       "owner": "Owner",
@@ -139,6 +143,18 @@
       "links": "Links",
       "detailed": {
         "recent": "Recent"
+      },
+      "releases": {
+        "title": "Project releases",
+        "subtitle": "Releases represent milestones in your project timeline. Tasks can be linked to a release to track delivery scope.",
+        "empty": "No releases yet",
+        "add": "Add release",
+        "fields": {
+          "title": "Title",
+          "description": "Description",
+          "startAt": "Start date",
+          "endAt": "End date"
+        }
       }
     },
     "user": {
@@ -181,13 +197,12 @@
         "closedAt": "Closed",
         "noDescription": "No description provided",
         "comments": "Comments",
-        "addComment": "Add a comment...",
-        "commentsEmpty": "No comments yet",
-        "commentsEmptySub": "Comments will appear here once added",
         "participants": "Participants",
         "assignee": "Assignee",
         "author": "Author",
-        "properties": "Properties"
+        "properties": "Properties",
+        "addParticipant": "Add participant",
+        "noAvailableParticipants": "All users are already participants"
       },
       "state": {
         "assigned": "Assigned",
@@ -208,6 +223,9 @@
         "archived": "Archived",
         "closed": "Closed"
       }
+    },
+    "comment": {
+      "title": "Comment"
     }
   },
   "admin": {
@@ -290,6 +308,12 @@
     }
   },
   "cmd": {
+    "comments": {
+      "success": {
+        "updated": "Comment updated successfully",
+        "deleted": "Comment deleted successfully"
+      }
+    },
     "teams": {
       "success": {
         "created": "Team created successfully",
@@ -310,7 +334,9 @@
         "created": "Project created successfully",
         "updated": "Project updated successfully",
         "deleted": "Project(s) deleted successfully",
-        "pictureDeleted": "Project picture deleted successfully"
+        "pictureDeleted": "Project picture deleted successfully",
+        "releaseCreated": "Release created successfully",
+        "releaseUpdated": "Release updated successfully"
       },
       "errors": {
         "loadFailed": "Failed to load projects",
@@ -346,7 +372,8 @@
         "deleteFailed": "Failed to delete task",
         "createFailed": "Failed to create task",
         "closeFailed": "Failed to close task",
-        "reopenFailed": "Failed to reopen task"
+        "reopenFailed": "Failed to reopen task",
+        "participantAddFailed": "Failed to add participant"
       },
       "dialogs": {
         "deleteTitle": "Delete task",

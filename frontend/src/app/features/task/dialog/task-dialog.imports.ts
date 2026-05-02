@@ -3,7 +3,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import {
   TuiButton,
+  TuiCalendar,
   TuiDataList,
+  TuiDropdown,
   TuiError,
   TuiLabel,
   TuiOptGroup,
@@ -15,6 +17,7 @@ import {
   TuiChevron,
   TuiDataListWrapper,
   TuiFieldErrorPipe,
+  TuiInputDate,
   TuiSelect,
   TuiStepper,
 } from '@taiga-ui/kit';
@@ -23,6 +26,8 @@ import { AppEditorComponent } from '../../../common/editor/app-editor.component'
 
 export const TASK_DIALOG_IMPORTS = [
   AsyncPipe,
+  TuiCalendar,
+  TuiDropdown,
   ReactiveFormsModule,
   TranslatePipe,
   TuiButton,
@@ -40,4 +45,5 @@ export const TASK_DIALOG_IMPORTS = [
   TuiIcon,
   TuiStepper,
   AppEditorComponent,
+  TuiInputDate,
 ];

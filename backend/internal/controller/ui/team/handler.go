@@ -74,7 +74,23 @@ func createTeam(s ui.UIService) (any, error) {
 	}
 	input.PictureName = pictureName
 
+	currentUser, err := s.GetCurrentUser()
+	if err != nil {
+		return nil, err
+	}
+	input.AuthorId = currentUser.Id.String()
+	input.MembersIds = appendIfMissing(input.MembersIds, input.AuthorId)
+
 	return nil, s.GetService().(*service).addNewTeam(s.GetRequest().Context(), input)
+}
+
+func appendIfMissing(ids []string, id string) []string {
+	for _, v := range ids {
+		if v == id {
+			return ids
+		}
+	}
+	return append(ids, id)
 }
 
 // update

@@ -22,10 +22,7 @@ import { AlertService } from '../../../../core/declarations/services/alert.servi
 import { Project, ProjectLink } from '../../types/model/project.model';
 import { Task } from '../../../task/types/task.model';
 import { UserStore } from '../../../user/store/user.store';
-import {
-  ProjectDialogComponent,
-  ProjectDialogData,
-} from '../../../admin/components/projects/dialog/project-dialog.component';
+import { ProjectDialogComponent, ProjectDialogData } from '../dialog/project-dialog.component';
 import { AppDialogService } from '../../../../common/dialogs/dialog.service';
 import { TranslateService } from '@ngx-translate/core';
 

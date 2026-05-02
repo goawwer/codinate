@@ -14,10 +14,7 @@ import { TeamStore } from '../../store/team.store';
 import { UserStore } from '../../../user/store/user.store';
 import { AppDialogService } from '../../../../common/dialogs/dialog.service';
 import { TranslateService } from '@ngx-translate/core';
-import {
-  TeamDialogComponent,
-  TeamDialogData,
-} from '../../../admin/components/teams/dialog/team-dialog.component';
+import { TeamDialogComponent, TeamDialogData } from '../dialog/team-dialog.component';
 import { TEAMDETAILIMPORTS } from './team-detail.imports';
 
 @Component({

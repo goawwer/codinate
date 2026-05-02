@@ -100,6 +100,8 @@ export class AppEditorComponent implements ControlValueAccessor, OnInit {
     TuiEditorTool.Size,
     TuiEditorTool.List,
     TuiEditorTool.Align,
+    TuiEditorTool.Italic,
+    TuiEditorTool.Strikethrough,
     TuiEditorTool.Bold,
     TuiEditorTool.CellColor,
     TuiEditorTool.Clear,

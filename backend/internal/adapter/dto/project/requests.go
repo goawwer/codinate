@@ -20,7 +20,7 @@ type CreateReleaseInput struct {
 }
 
 type UpdateReleaseInput struct {
-	Name        *string `db:"name"         json:"name,omitempty"`
+	Title       *string `db:"title"         json:"title,omitempty"`
 	Description *string `db:"description"  json:"description,omitempty"`
 	Status      *string `db:"status" json:"status,omitempty"`
 	StartAt     *string `db:"start_at" json:"startAt,omitempty"`

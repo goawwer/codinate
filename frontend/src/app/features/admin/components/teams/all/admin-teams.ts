@@ -13,7 +13,10 @@ import { Team } from '../../../../team/types/model/team.model';
 import { TeamStore } from '../../../../team/store/team.store';
 import { TEAMSDASHBOARDIMPORTS } from './admin-teams.imports';
 import { APP_SIZE, AppSize } from '../../../../../core/declarations/tokens/size.token';
-import { TeamDialogComponent, TeamDialogData } from '../dialog/team-dialog.component';
+import {
+  TeamDialogComponent,
+  TeamDialogData,
+} from '../../../../team/components/dialog/team-dialog.component';
 
 type Column = {
   key: keyof Team;

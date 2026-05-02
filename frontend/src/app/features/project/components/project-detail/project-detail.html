@@ -212,7 +212,7 @@
             @for (member of p.members; track member.id) {
               <div class="participant-row">
                 <div class="participant-avatar">
-                  <app-picture [name]="member.name" size="s" entityType="users" pictureName="" />
+                  <app-picture [name]="member.name" [surname]="member.surname" size="s" entityType="users" pictureName="" />
                 </div>
                 <div class="participant-info">
                   <span class="participant-name">{{ member.name }} {{ member.surname }}</span>

@@ -22,6 +22,7 @@ type TaskRepo interface {
 	AddNewTask(ctx context.Context, input model.Task) (uuid.UUID, error)
 	GetNextTaskIdentifier(ctx context.Context, releaseId int) (int, error)
 	UpdateTaskBy(ctx context.Context, newTask model.Task, id uuid.UUID) error
+	AddParticipant(ctx context.Context, taskId, userId uuid.UUID) error
 	AttachFilesToTask(ctx context.Context, taskId uuid.UUID, fileIds []uuid.UUID) error
 	DetachFileFromTask(ctx context.Context, taskId, fileId uuid.UUID) error
 	CloseTaskBy(ctx context.Context, id uuid.UUID) error
@@ -58,7 +59,7 @@ func GetTaskRepo() TaskRepo {
 
 func (r *taskRepoImpl) GetTasksRows(ctx context.Context, f *task.Filters) ([]task.Row, error) {
 	var qb QueryFiltersBuilder
-	var res []task.Row
+	res := make([]task.Row, 0)
 
 	customNames := map[string]string{
 		"authorId":   "t.author_id",
@@ -116,10 +117,6 @@ func (r *taskRepoImpl) GetTasksRows(ctx context.Context, f *task.Filters) ([]tas
 			Limit(f.Paging.GetOffset(), f.Paging.GetLimit()).
 			Build(),
 	)
-
-	if res == nil {
-		return []task.Row{}, err
-	}
 
 	return res, err
 }
@@ -239,6 +236,15 @@ func (r *taskRepoImpl) AddNewTask(ctx context.Context, input model.Task) (uuid.U
 	return input.Id, err
 }
 
+func (r *taskRepoImpl) AddParticipant(ctx context.Context, taskId, userId uuid.UUID) error {
+	_, err := r.ExecContext(ctx, `
+		INSERT INTO task_participants (task_id, user_id, role_id)
+		VALUES ($1, $2, (SELECT role_id FROM users WHERE id = $2))
+		ON CONFLICT DO NOTHING
+	`, taskId, userId)
+	return err
+}
+
 func (r *taskRepoImpl) AttachFilesToTask(ctx context.Context, taskId uuid.UUID, fileIds []uuid.UUID) error {
 	strIds := make([]string, len(fileIds))
 	for i, id := range fileIds {
@@ -325,7 +331,7 @@ func (r *taskRepoImpl) DeleteTaskBy(ctx context.Context, id uuid.UUID) error {
 }
 
 func (r *taskRepoImpl) GetTaskPriorities(ctx context.Context) ([]shared.IdWithName, error) {
-	var res []shared.IdWithName
+	res := make([]shared.IdWithName, 0)
 
 	err := r.SelectContext(ctx, &res, `SELECT * FROM task_priorities`)
 
@@ -360,7 +366,7 @@ func (r *taskRepoImpl) DeleteTaskPriorityById(ctx context.Context, id int) error
 }
 
 func (r *taskRepoImpl) GetTaskStatuses(ctx context.Context) ([]shared.IdWithName, error) {
-	var res []shared.IdWithName
+	res := make([]shared.IdWithName, 0)
 
 	err := r.SelectContext(ctx, &res, `SELECT * FROM task_statuses`)
 
@@ -395,7 +401,7 @@ func (r *taskRepoImpl) DeleteTaskStatusById(ctx context.Context, id int) error {
 }
 
 func (r *taskRepoImpl) GetAllCategoriesBy(ctx context.Context, proejctId int) ([]shared.IdWithName, error) {
-	var res []shared.IdWithName
+	res := make([]shared.IdWithName, 0)
 
 	err := r.SelectContext(ctx, &res, `
 		SELECT id, name FROM task_categories
