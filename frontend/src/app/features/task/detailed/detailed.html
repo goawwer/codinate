@@ -208,7 +208,7 @@
               }
             </div>
 
-            <app-comment-list entityType="task" [entityId]="taskId" />
+            <app-comment-list entityType="task" [entityId]="taskId" (filesChanged)="reloadTask()" />
           </div>
         </div>
       </tui-scrollbar>
@@ -290,7 +290,7 @@
           <div class="widget-body">
             @for (file of visibleAttachedFiles(); track file.id) {
               <div class="attachment-row">
-                <span>{{ file.name }}</span>
+                <span class="text-ellipsis overflow-hidden">{{ file.name }}</span>
                 <div class="flex">
                   <button
                     tuiIconButton

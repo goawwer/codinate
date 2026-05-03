@@ -22,12 +22,17 @@ export interface Comment {
 }
 
 export interface CreateCommentInput {
+  id?: string;
   entityType: CommentEntityType;
   entityId: string;
   body: string;
+  attachedFiles?: CommentAttachedFile[];
 }
 
 export interface UpdateCommentInput {
+  entityType?: CommentEntityType;
+  entityId?: string;
   body: string;
   attachedFiles?: CommentAttachedFile[];
+  newAttachedFiles?: CommentAttachedFile[];
 }

@@ -27,6 +27,7 @@ func (s *service) addComment(ctx context.Context, input comment.CreateCommentInp
 	}
 
 	return repository.GetCommentRepo().Create(ctx, model.Comment{
+		Id:               uuid.MustParse(input.Id),
 		EntityType:       dto.ResolveCommentEntityType(input.EntityType),
 		EntityId:         uuid.MustParse(input.EntityId),
 		UserId:           userId,
@@ -45,8 +46,8 @@ func (s *service) updateCommentBy(
 		return err
 	}
 
-	if !isAuthor || !slices.Contains(enum.AtLeastAdmin, userRole) {
-		return errors.New("failed to update comment you are not the author and you don't have permissions")
+	if !isAuthor && !slices.Contains(enum.AtLeastAdmin, userRole) {
+		return errors.New("failed to update comment: you are not the author and you don't have permissions")
 	}
 
 	attachedFileIds, err := util.ParseAttachedFileIds(input.AttachedFiles)
@@ -54,10 +55,18 @@ func (s *service) updateCommentBy(
 		return err
 	}
 
+	newAttachedFileIds, err := util.ParseAttachedFileIds(input.NewAttachedFiles)
+	if err != nil {
+		return err
+	}
+
 	return repository.GetCommentRepo().Update(ctx, model.Comment{
-		Id:               commentId,
-		Body:             input.Body,
-		AttachedFilesIds: attachedFileIds,
+		Id:                  commentId,
+		EntityType:          dto.ResolveCommentEntityType(input.EntityType),
+		EntityId:            uuid.MustParse(input.EntityId),
+		Body:                input.Body,
+		AttachedFilesIds:    attachedFileIds,
+		NewAttachedFilesIds: newAttachedFileIds,
 	})
 }
 
@@ -67,8 +76,8 @@ func (s *service) deleteBy(ctx context.Context, userRole enum.PermissionRole, au
 		return err
 	}
 
-	if !isAuthor || !slices.Contains(enum.AtLeastAdmin, userRole) {
-		return errors.New("failed to delete comment you are not the author and you don't have permissions")
+	if !isAuthor && !slices.Contains(enum.AtLeastAdmin, userRole) {
+		return errors.New("failed to delete comment: you are not the author and you don't have permissions")
 	}
 
 	return repository.GetCommentRepo().Delete(ctx, commentId)

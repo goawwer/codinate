@@ -37,7 +37,7 @@ import { AppDialogService } from '../../dialogs/dialog.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './comment-item.html',
   styleUrl: './comment-item.scss',
-  providers: [provideTuiEditor()],
+  providers: [provideTuiEditor(), PendingEditorUploads],
 })
 export class CommentItem {
   @Input({ required: true }) comment!: Comment;
@@ -55,6 +55,8 @@ export class CommentItem {
   protected readonly isEditing = signal(false);
   protected readonly showCreated = signal(false);
   protected readonly editControl = new FormControl('', { nonNullable: true });
+  protected readonly existingFiles = signal<CommentAttachedFile[]>([]);
+  protected readonly pendingFiles = this.pendingUploads.pending;
 
   protected get isEdited(): boolean {
     return this.comment.createdAt !== this.comment.updatedAt;
@@ -70,30 +72,46 @@ export class CommentItem {
 
   protected startEdit(): void {
     this.editControl.setValue(this.comment.body);
+    this.existingFiles.set([...(this.comment.attachedFiles ?? [])]);
     this.isEditing.set(true);
   }
 
   protected cancelEdit(): void {
+    this.pendingUploads.clear();
     this.isEditing.set(false);
     this.editControl.reset();
+  }
+
+  protected isImage(type: string): boolean {
+    return type.startsWith('image/');
+  }
+
+  protected removeExistingFile(fileId: string): void {
+    this.existingFiles.update((files) => files.filter((f) => f.id !== fileId));
+  }
+
+  protected removeFile(blobUrl: string): void {
+    this.pendingUploads.remove(blobUrl);
   }
 
   protected submitEdit(): void {
     const rawBody = this.editControl.value.trim();
     if (!rawBody) return;
 
-    const pendingFiles = this.pendingUploads.getPendingInHtml(rawBody);
+    const pendingFiles = this.pendingUploads.pending();
 
-    this.pendingUploads.flush('comments', this.comment.id, rawBody).subscribe((body) => {
-      const existing = this.comment.attachedFiles ?? [];
+    this.pendingUploads.flush(this.comment.entityType + 's', this.comment.entityId, rawBody).subscribe((body) => {
       const added: CommentAttachedFile[] = pendingFiles.map((f) => ({
         id: f.fileId,
         name: f.name,
       }));
       this.updated.emit({
         id: this.comment.id,
+        entityType: this.comment.entityType,
+        entityId: this.comment.entityId,
         body,
-        attachedFiles: [...existing, ...added],
+        attachedFiles: [...this.existingFiles(), ...added],
+        newAttachedFiles: added,
       });
       this.isEditing.set(false);
     });

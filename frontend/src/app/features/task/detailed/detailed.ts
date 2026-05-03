@@ -317,6 +317,10 @@ export class Detailed implements OnInit {
     });
   }
 
+  protected reloadTask(): void {
+    this.taskService.getById(this.taskId).subscribe((task) => this.task.set(task));
+  }
+
   protected toggleFiles(): void {
     this.attachedFilesExpanded.update((v) => !v);
   }

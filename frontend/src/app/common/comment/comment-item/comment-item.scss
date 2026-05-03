@@ -88,7 +88,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;
-  margin-top: 0.5rem;
+  margin-top: 0.7rem;
 }
 
 .comment-file-chip {
@@ -97,7 +97,7 @@
   gap: 0.375rem;
   padding: 0.25rem 0.625rem;
   border-radius: 999px;
-  background: var(--tui-background-neutral-2);
+  background: var(--app-grey-100);
   border: none;
   cursor: pointer;
   font-size: 0.75rem;
@@ -107,9 +107,23 @@
   tui-icon {
     font-size: 0.75rem;
   }
+}
+
+.pending-chip-thumb {
+  width: 1.5rem;
+  height: 1.5rem;
+  object-fit: cover;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+}
+
+.comment-file-chip--removable {
+  cursor: default;
+  color: var(--tui-text-primary);
+  padding-right: 0.25rem;
 
   &:hover {
-    background: var(--tui-background-neutral-3);
+    background: var(--app-grey-100);
   }
 }
 

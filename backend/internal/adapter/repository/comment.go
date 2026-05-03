@@ -33,6 +33,8 @@ func (r *commentRepoImpl) GetAllBy(ctx context.Context, entityId uuid.UUID) ([]c
 	err := r.SelectContext(ctx, &res, `
 		SELECT
 			c.id,
+			c.entity_type,
+			c.entity_id,
 			u.id as employee_id,
 			u.name as employee_name,
 			u.surname as employee_surname,
@@ -61,13 +63,13 @@ func (r *commentRepoImpl) Create(ctx context.Context, c model.Comment) (uuid.UUI
 
 	err := r.QueryRowContext(ctx, `
 		INSERT INTO comments (
-			entity_type, entity_id, user_id, body, attached_files_ids
+			id, entity_type, entity_id, user_id, body, attached_files_ids
 		)
 		VALUES (
-			$1, $2, $3, $4, $5::uuid[]
+			$1, $2, $3, $4, $5, $6::uuid[]
 		)
 		RETURNING id
-	`, c.EntityType, c.EntityId, c.UserId, c.Body, pq.Array(c.AttachedFilesIds)).Scan(&id)
+	`, c.Id, c.EntityType, c.EntityId, c.UserId, c.Body, pq.Array(c.AttachedFilesIds)).Scan(&id)
 
 	return id, err
 }

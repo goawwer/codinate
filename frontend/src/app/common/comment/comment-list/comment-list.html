@@ -29,9 +29,15 @@
   }
 
   <div class="compose-wrapper">
-    <div #commentBottom class="comment-compose" (click)="!isInputActive() && activateInput()">
+    <div #commentBottom class="comment-compose">
       @if (!isInputActive()) {
-        <span class="compose-placeholder">{{ 'generic.actions.addComment' | translate }}</span>
+        <button
+          type="button"
+          class="compose-placeholder"
+          (click)="activateInput()"
+        >
+          {{ 'generic.actions.addComment' | translate }}
+        </button>
       } @else {
         <div class="compose-body">
           <app-editor
@@ -39,16 +45,41 @@
             entityType="comments"
             [placeholder]="'generic.actions.addComment' | translate"
           />
+
+          @if (pendingFiles().length) {
+            <div class="pending-chips">
+              @for (item of pendingFiles(); track item.blobUrl) {
+                <div class="pending-chip">
+                  @if (isImage(item.type)) {
+                    <img [src]="item.blobUrl" class="pending-chip-thumb" [alt]="item.name" />
+                  } @else {
+                    <tui-icon icon="@tui.file" class="pending-chip-icon" />
+                  }
+                  <span class="pending-chip-name" [title]="item.name">{{ item.name }}</span>
+                  <button
+                    tuiIconButton
+                    appearance="ghost"
+                    type="button"
+                    size="xs"
+                    iconStart="@tui.x"
+                    (click)="removeFile(item.blobUrl)"
+                  ></button>
+                </div>
+              }
+            </div>
+          }
+
           <div class="compose-actions">
             <button
               tuiButton
               appearance="ghost"
               size="s"
               type="button"
-              (click)="$event.stopPropagation(); cancelInput()"
+              (click)="cancelInput()"
             >
               {{ 'generic.actions.cancel' | translate }}
             </button>
+
             <button
               tuiIconButton
               iconStart="@tui.forward"
@@ -56,7 +87,7 @@
               type="button"
               class="btn-primary"
               [disabled]="isSubmitting()"
-              (click)="$event.stopPropagation(); submit()"
+              (click)="submit()"
             ></button>
           </div>
         </div>

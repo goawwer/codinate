@@ -9,6 +9,8 @@ import (
 
 type Row struct {
 	Id               uuid.UUID          `db:"id" json:"id"`
+	EntityType       string             `db:"entity_type" json:"entityType"`
+	EntityId         uuid.UUID          `db:"entity_id" json:"entityId"`
 	EmployeeId       uuid.UUID          `db:"employee_id" json:"employeeId"`
 	EmployeeName     string             `db:"employee_name" json:"employeeName"`
 	EmployeeSurname  string             `db:"employee_surname" json:"employeeSurname"`

@@ -3,22 +3,22 @@ import {
   Component,
   computed,
   ElementRef,
+  EventEmitter,
   inject,
   Input,
   OnInit,
+  Output,
   signal,
   ViewChild,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { of, switchMap } from 'rxjs';
+import { switchMap } from 'rxjs';
 import { TuiButton, TuiIcon, TuiLoader, tuiLoaderOptionsProvider } from '@taiga-ui/core';
-import { provideTuiEditor } from '@taiga-ui/editor';
 import { CommentItem } from '../comment-item/comment-item';
 import { CommentService } from '../comment.service';
-import { Comment, CommentEntityType } from './../comment.model';
+import { Comment, CommentEntityType, UpdateCommentInput } from './../comment.model';
 import { UserStore } from '../../../features/user/store/user.store';
 import { AppEditorComponent } from '../../editor/app-editor.component';
-import { AppPicture } from '../../picture/app-picture';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PendingEditorUploads } from '../../editor/pending-editor-uploads.service';
 import { AlertService } from '../../../core/declarations/services/alert.service';
@@ -39,7 +39,6 @@ import { AlertService } from '../../../core/declarations/services/alert.service'
   templateUrl: './comment-list.html',
   styleUrl: './comment-list.scss',
   providers: [
-    provideTuiEditor(),
     tuiLoaderOptionsProvider({
       size: 'l',
       inheritColor: false,
@@ -50,6 +49,7 @@ import { AlertService } from '../../../core/declarations/services/alert.service'
 export class CommentList implements OnInit {
   @Input({ required: true }) entityType!: CommentEntityType;
   @Input({ required: true }) entityId!: string;
+  @Output() filesChanged = new EventEmitter<void>();
 
   @ViewChild('commentTop') private commentTop!: ElementRef<HTMLElement>;
   @ViewChild('commentBottom') private commentBottom!: ElementRef<HTMLElement>;
@@ -66,6 +66,7 @@ export class CommentList implements OnInit {
   protected readonly isInputActive = signal(false);
   protected readonly newCommentControl = new FormControl('', { nonNullable: true });
 
+  protected readonly pendingFiles = this.pendingUploads.pending;
   protected readonly currentUserId = computed(() => this.userStore.user()?.id ?? '');
   protected readonly isAdmin = computed(() => this.userStore.isAtLeastAdmin());
 
@@ -98,6 +99,14 @@ export class CommentList implements OnInit {
     this.isInputActive.set(true);
   }
 
+  protected isImage(type: string): boolean {
+    return type.startsWith('image/');
+  }
+
+  protected removeFile(blobUrl: string): void {
+    this.pendingUploads.remove(blobUrl);
+  }
+
   protected cancelInput(): void {
     this.pendingUploads.clear();
     this.isInputActive.set(false);
@@ -108,23 +117,21 @@ export class CommentList implements OnInit {
     const body = this.newCommentControl.value.trim();
     if (!body || this.isSubmitting()) return;
 
-    const pendingFiles = this.pendingUploads.getPendingInHtml(body);
+    const commentId = crypto.randomUUID();
+    const pendingFiles = this.pendingUploads.pending();
 
     this.isSubmitting.set(true);
-    this.commentService
-      .add({ entityType: this.entityType, entityId: this.entityId, body })
+    this.pendingUploads
+      .flush(this.entityType + 's', this.entityId, body)
       .pipe(
-        switchMap(({ id }) =>
-          this.pendingUploads.flush('comments', id, body).pipe(
-            switchMap((flushedBody) =>
-              flushedBody !== body
-                ? this.commentService.update(id, {
-                    body: flushedBody,
-                    attachedFiles: pendingFiles.map((f) => ({ id: f.fileId, name: f.name })),
-                  })
-                : of(void 0),
-            ),
-          ),
+        switchMap((flushedBody) =>
+          this.commentService.add({
+            id: commentId,
+            entityType: this.entityType,
+            entityId: this.entityId,
+            body: flushedBody,
+            attachedFiles: pendingFiles.map((f) => ({ id: f.fileId, name: f.name })),
+          }),
         ),
       )
       .subscribe({
@@ -133,22 +140,26 @@ export class CommentList implements OnInit {
           this.isInputActive.set(false);
           this.isSubmitting.set(false);
           this.load();
+          if (pendingFiles.length) this.filesChanged.emit();
         },
         error: () => this.isSubmitting.set(false),
       });
   }
 
-  protected onUpdated(event: {
-    id: string;
-    body: string;
-    attachedFiles?: { id: string; name: string }[];
-  }): void {
+  protected onUpdated(event: { id: string } & UpdateCommentInput): void {
     this.commentService
-      .update(event.id, { body: event.body, attachedFiles: event.attachedFiles })
+      .update(event.id, {
+        entityType: event.entityType,
+        entityId: event.entityId,
+        body: event.body,
+        attachedFiles: event.attachedFiles,
+        newAttachedFiles: event.newAttachedFiles,
+      })
       .subscribe({
         next: () => {
           this.alert.success(this.translate.instant('cmd.comments.success.updated'));
           this.load();
+          if (event.newAttachedFiles?.length) this.filesChanged.emit();
         },
       });
   }

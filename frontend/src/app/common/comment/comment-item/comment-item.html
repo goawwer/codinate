@@ -61,8 +61,43 @@
         <app-editor
           [formControl]="editControl"
           entityType="comments"
-          [entityId]="comment.id"
         />
+        @if (existingFiles().length || pendingFiles().length) {
+          <div class="comment-files">
+            @for (file of existingFiles(); track file.id) {
+              <div class="comment-file-chip comment-file-chip--removable">
+                <tui-icon icon="@tui.file" [style.font-size.rem]="0.75"/>
+                <span>{{ file.name }}</span>
+                <button
+                  tuiIconButton
+                  appearance="ghost"
+                  type="button"
+                  size="xs"
+                  iconStart="@tui.x"
+                  (click)="removeExistingFile(file.id)"
+                ></button>
+              </div>
+            }
+            @for (item of pendingFiles(); track item.blobUrl) {
+              <div class="comment-file-chip comment-file-chip--removable">
+                @if (isImage(item.type)) {
+                  <img [src]="item.blobUrl" class="pending-chip-thumb" [alt]="item.name" />
+                } @else {
+                  <tui-icon icon="@tui.file" [style.font-size.rem]="0.75"/>
+                }
+                <span>{{ item.name }}</span>
+                <button
+                  tuiIconButton
+                  appearance="ghost"
+                  type="button"
+                  size="xs"
+                  iconStart="@tui.x"
+                  (click)="removeFile(item.blobUrl)"
+                ></button>
+              </div>
+            }
+          </div>
+        }
         <div class="comment-edit-actions">
           <button tuiButton appearance="ghost" size="xs" type="button" (click)="cancelEdit()">
             {{ 'generic.actions.cancel' | translate }}
@@ -80,9 +115,9 @@
             <button
               type="button"
               class="comment-file-chip"
-              (click)="fileService.download('comments', comment.id, file)"
+              (click)="fileService.download(comment.entityType + 's', comment.entityId, file)"
             >
-              <tui-icon icon="@tui.paperclip" />
+              <tui-icon icon="@tui.download" [style.font-size.rem]="1"/>
               <span>{{ file.name }}</span>
             </button>
           }

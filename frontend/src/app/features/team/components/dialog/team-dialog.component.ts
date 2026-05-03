@@ -33,10 +33,6 @@ export interface TeamDialogData {
       useFactory: loginValidationErrorsFactory,
       deps: [TranslateService],
     },
-    {
-      provide: TUI_MULTI_SELECT_TEXTS,
-      useValue: of({ all: 'Выбрать всё', none: 'Отменить выбор' }),
-    },
   ],
 })
 export class TeamDialogComponent {
