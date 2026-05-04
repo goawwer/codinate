@@ -67,3 +67,9 @@ export interface CreateTaskInput {
 export interface UpdateTaskInput extends Partial<CreateTaskInput> {
   closedAt?: string | null;
 }
+
+export interface TaskSuggestion {
+  id: string;
+  identifier: number;
+  title: string;
+}

@@ -21,6 +21,7 @@ type Service interface {
 	GetPathParameterAsString(name string) (string, error)
 	GetPathParamAsInt(name string) (int, error)
 	GetUrlParamAsString(name string) (string, error)
+	GetUrlParamAsInt(name string) (int, error)
 	GetBodyAs(model interface{}) error
 	GetUrlParamAsStrings(name string) ([]string, error)
 	BindUrlParams(target any, prefix string) error
@@ -72,6 +73,20 @@ func (s *CoreService) GetUrlParamAsString(name string) (string, error) {
 	return params[0], nil
 }
 
+func (s *CoreService) GetUrlParamAsInt(name string) (int, error) {
+	params, ok := s.Request.URL.Query()[name]
+	if !ok {
+		return 0, fmt.Errorf("failed to get URL parameter - %s: not found", name)
+	}
+
+	num, err := strconv.Atoi(params[0])
+	if err != nil {
+		return 0, fmt.Errorf("failed to convert string parameter to int - %s", params[0])
+	}
+
+	return num, nil
+}
+
 func (s *CoreService) GetBodyAs(model interface{}) error {
 	rv := reflect.ValueOf(model)
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
@@ -108,11 +123,12 @@ func (s *CoreService) GetSorting() (string, string) {
 	return by, direction
 }
 
-func (s *CoreService) GetPaging() (int, int) {
-	num, _ := s.GetPathParamAsInt("pageNumber")
-	size, _ := s.GetPathParamAsInt("pageSize")
+func (s *CoreService) GetPaging() (int, int, int) {
+	num, _ := s.GetUrlParamAsInt("pageNumber")
+	size, _ := s.GetUrlParamAsInt("pageSize")
+	limit, _ := s.GetUrlParamAsInt("limit")
 
-	return num, size
+	return num, size, limit
 }
 
 func (s *CoreService) GetSearching() (string, string) {
@@ -131,13 +147,14 @@ func (s *CoreService) GetDateRange() (string, string) {
 
 func (s *CoreService) GetBasicSortingAndPagingParams() BasicQueryParams {
 	sortBy, sort := s.GetSorting()
-	pageNumber, pageSize := s.GetPaging()
+	pageNumber, pageSize, limit := s.GetPaging()
 	searchBy, searchValue := s.GetSearching()
 	from, to := s.GetDateRange()
 
 	return BasicQueryParams{
 		PageNumber:  pageNumber,
 		PageSize:    pageSize,
+		PagesLimit:  limit,
 		SortBy:      sortBy,
 		Sort:        sort,
 		SearchBy:    searchBy,

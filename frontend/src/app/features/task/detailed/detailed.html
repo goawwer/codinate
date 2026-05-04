@@ -95,6 +95,15 @@
                         size="s"
                         (click)="toggleEditing()"
                       ></button>
+                      <button
+                        tuiIconButton
+                        class="btn-primary"
+                        type="button"
+                        iconStart="@tui.plus"
+                        size="s"
+                        [title]="'models.worklog.logTime' | translate"
+                        (click)="openLogTimeDialog()"
+                      ></button>
                     </div>
                   </div>
                   @if (isEditing()) {

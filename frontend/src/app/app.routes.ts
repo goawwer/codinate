@@ -39,8 +39,12 @@ export const routes: Routes = [
       },
       {
         path: 'tasks/:id',
+        loadComponent: () => import('./features/task/detailed/detailed').then((m) => m.Detailed),
+      },
+      {
+        path: 'worklog',
         loadComponent: () =>
-          import('./features/task/detailed/detailed').then((m) => m.Detailed),
+          import('./features/worklog/components/main/worklog').then((m) => m.WorklogComponent),
       },
     ],
   },

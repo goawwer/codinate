@@ -12,6 +12,7 @@ import (
 	"github.com/goawwer/codinate/internal/adapter/model"
 	"github.com/goawwer/codinate/internal/adapter/model/enum"
 	"github.com/goawwer/codinate/internal/adapter/repository"
+	"github.com/goawwer/codinate/internal/controller"
 	"github.com/goawwer/codinate/pkg/util"
 	"github.com/google/uuid"
 )
@@ -110,6 +111,10 @@ func (s *service) deleteTask(ctx context.Context, taskId, userId uuid.UUID, user
 	}
 
 	return repository.GetTaskRepo().DeleteTaskBy(ctx, taskId)
+}
+
+func (s *service) suggestionsBy(ctx context.Context, b controller.BasicQueryParams) ([]task.Suggestion, error) {
+	return repository.GetTaskRepo().GetTasksSuggestion(ctx, b)
 }
 
 func uniqueUUIDs(ids ...uuid.UUID) []uuid.UUID {

@@ -13,6 +13,7 @@ import (
 	"github.com/goawwer/codinate/internal/controller/ui/task/tasks"
 	"github.com/goawwer/codinate/internal/controller/ui/team"
 	"github.com/goawwer/codinate/internal/controller/ui/user"
+	"github.com/goawwer/codinate/internal/controller/ui/worklog"
 )
 
 func init() {
@@ -27,6 +28,7 @@ func init() {
 	tasks.Register()
 	file.Register()
 	comment.Register()
+	worklog.Register()
 
 	// public
 	pictures.Register()

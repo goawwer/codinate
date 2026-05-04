@@ -28,6 +28,8 @@
               <a tuiTab *tuiItem routerLink="/mine/history" routerLinkActive>{{ 'models.task.state.history' | translate }}</a>
             </tui-tabs-with-more>
           </div>
+        } @else if (isWorklogSection()) {
+          <a tuiTab *tuiItem routerLink="/worklog/main" routerLinkActive>{{ 'models.task.state.history' | translate }}</a>
         } @else {
           <div class="bg-(--app-grey-600)/20">
             <tui-tabs-with-more

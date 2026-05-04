@@ -40,3 +40,9 @@ type RowDetailed struct {
 	AttachedFiles   file.AttachedFiles  `db:"attached_files" json:"attachedFiles"`
 	UpdatedAt       time.Time           `db:"updated_at" json:"updatedAt"`
 }
+
+type Suggestion struct {
+	Id         uuid.UUID `db:"id" json:"id"`
+	Identifier int       `db:"identifier" json:"identifier"`
+	Title      string    `db:"title" json:"title"`
+}

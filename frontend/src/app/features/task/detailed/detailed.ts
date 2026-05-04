@@ -27,6 +27,8 @@ import { User } from '../../user/types/model/user.model';
 import { AlertService } from '../../../core/declarations/services/alert.service';
 import { AppDialogService } from '../../../common/dialogs/dialog.service';
 import { tuiScrollbarOptionsProvider } from '@taiga-ui/core';
+import { WorklogDialogComponent } from '../../worklog/components/dialog/worklog-dialog.component';
+import { WorklogDialogData } from '../../worklog/types/worklog.model';
 
 @Component({
   selector: 'app-detailed',
@@ -150,8 +152,6 @@ export class Detailed implements OnInit {
     category: new FormControl<TaskCategory | null>(null),
     dueAt: new FormControl<TuiDay | null>(null),
   });
-
-
 
   protected readonly stringifyStatus = (s: TaskStatus): string => s.name;
   protected readonly stringifyPriority = (p: TaskPriority): string => p.name;
@@ -319,6 +319,27 @@ export class Detailed implements OnInit {
 
   protected reloadTask(): void {
     this.taskService.getById(this.taskId).subscribe((task) => this.task.set(task));
+  }
+
+  protected openLogTimeDialog(): void {
+    console.log('asdsadas');
+    const task = this.task();
+    if (!task) {
+      console.log('bvbbbb');
+      return;
+    }
+
+    this.dialogs
+      .component<WorklogDialogComponent, boolean, WorklogDialogData>(WorklogDialogComponent, {
+        label: this.translate.instant('models.worklog.logTime'),
+        size: 's',
+        data: {
+          taskId: this.taskId,
+          taskIdentifier: task.identifier,
+          taskTitle: task.title,
+        },
+      })
+      .subscribe();
   }
 
   protected toggleFiles(): void {

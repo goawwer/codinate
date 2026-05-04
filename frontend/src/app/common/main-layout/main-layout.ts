@@ -79,6 +79,10 @@ export class MainLayoutComponent implements OnInit {
     return this.currentUrl().startsWith('/mine');
   }
 
+  protected isWorklogSection(): boolean {
+    return this.currentUrl().startsWith('/worklog');
+  }
+
   protected isAdminSection(): boolean {
     return this.currentUrl().startsWith('/admin');
   }

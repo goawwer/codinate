@@ -8,6 +8,7 @@ import (
 	"github.com/goawwer/codinate/internal/adapter/dto/shared"
 	"github.com/goawwer/codinate/internal/adapter/dto/task"
 	"github.com/goawwer/codinate/internal/adapter/model"
+	"github.com/goawwer/codinate/internal/controller"
 	"github.com/goawwer/codinate/pkg/util"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -19,8 +20,10 @@ type TaskRepo interface {
 	GetTasksRows(ctx context.Context, f *task.Filters) ([]task.Row, error)
 	GetTaskBy(ctx context.Context, id uuid.UUID) (task.RowDetailed, error)
 	GetTaskAuthorId(ctx context.Context, taskId uuid.UUID) (uuid.UUID, error)
+	GetTaskProjectId(ctx context.Context, taskId uuid.UUID) (int, error)
 	AddNewTask(ctx context.Context, input model.Task) (uuid.UUID, error)
 	GetNextTaskIdentifier(ctx context.Context, releaseId int) (int, error)
+	GetTasksSuggestion(ctx context.Context, b controller.BasicQueryParams) ([]task.Suggestion, error)
 	UpdateTaskBy(ctx context.Context, newTask model.Task, id uuid.UUID) error
 	AddParticipant(ctx context.Context, taskId, userId uuid.UUID) error
 	AttachFilesToTask(ctx context.Context, taskId uuid.UUID, fileIds []uuid.UUID) error
@@ -200,6 +203,14 @@ func (r *taskRepoImpl) GetTaskAuthorId(ctx context.Context, taskId uuid.UUID) (u
 	return authorId, err
 }
 
+func (r *taskRepoImpl) GetTaskProjectId(ctx context.Context, taskId uuid.UUID) (int, error) {
+	var projectId int
+
+	err := r.QueryRowContext(ctx, "SELECT project_id FROM tasks WHERE id = $1", taskId).Scan(&projectId)
+
+	return projectId, err
+}
+
 func (r *taskRepoImpl) AddNewTask(ctx context.Context, input model.Task) (uuid.UUID, error) {
 	err := r.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
 		if _, err := tx.ExecContext(ctx, `
@@ -277,6 +288,23 @@ func (r *taskRepoImpl) GetNextTaskIdentifier(ctx context.Context, releaseId int)
 	`, releaseId).Scan(&nextSeq)
 
 	return nextSeq, err
+}
+
+func (r *taskRepoImpl) GetTasksSuggestion(ctx context.Context, b controller.BasicQueryParams) ([]task.Suggestion, error) {
+	var qb QueryFiltersBuilder
+	res := make([]task.Suggestion, 0)
+
+	err := r.SelectContext(ctx, &res, `
+		SELECT id, identifier, title
+		FROM tasks
+		`+
+		qb.Like("CAST(identifier AS TEXT)", b.SearchValue).
+			Order("created_at", "DESC").
+			Limit(0, b.PagesLimit).
+			Build(),
+	)
+
+	return res, err
 }
 
 func (r *taskRepoImpl) UpdateTaskBy(ctx context.Context, newTask model.Task, id uuid.UUID) error {

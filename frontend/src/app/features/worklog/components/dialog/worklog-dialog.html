@@ -1,0 +1,90 @@
+<div class="worklog-dialog" [formGroup]="form">
+
+  @if (prefilledTask(); as t) {
+    <div class="wld-task-badge wld-task-badge--fixed">
+      <tui-icon icon="@tui.link" class="wld-task-badge-icon" />
+      <span class="wld-task-badge-label">#{{ t.identifier }} {{ t.title }}</span>
+    </div>
+  } @else {
+  <div class="wld-task-search">
+    <tui-textfield class="wld-task-input">
+      <label tuiLabel>{{ 'models.worklog.fields.taskIdentifier' | translate }}</label>
+
+      <input
+        tuiTextfield
+        [ngModel]="searchText()"
+        (ngModelChange)="onSearchTextChange($event)"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="#"
+        autocomplete="off"
+      />
+
+      @if (isLoadingSuggestions()) {
+        <tui-loader size="xs" class="wld-input-loader" />
+      }
+    </tui-textfield>
+
+    @if (resolvedTask(); as t) {
+      <div class="wld-selected-task">
+        <button type="button" class="wld-selected-task-main" (click)="navigateToTask(t.id)">
+          <span class="wld-selected-task-id">#{{ t.identifier }}</span>
+          <span class="wld-selected-task-title">{{ t.title }}</span>
+          <tui-icon icon="@tui.external-link" class="wld-selected-task-icon" />
+        </button>
+
+        <button
+          type="button"
+          tuiButton
+          appearance="flat"
+          size="xs"
+          iconStart="@tui.x"
+          (click)="clearTask()"
+        ></button>
+      </div>
+    }
+
+    @if (shouldShowSuggestions()) {
+      <div class="wld-suggestions">
+        @for (task of taskSuggestions(); track task.id) {
+          <button type="button" class="wld-suggestion-item" (mousedown)="$event.preventDefault()" (click)="selectSuggestion(task)">
+            <span class="wld-suggestion-id">#{{ task.identifier }}</span>
+            <span class="wld-suggestion-title">{{ task.title }}</span>
+          </button>
+        }
+      </div>
+    }
+  </div>
+  }
+
+  <tui-textfield>
+    <label tuiLabel>{{ 'models.worklog.fields.date' | translate }}</label>
+    <input tuiInputDate formControlName="date" />
+    <tui-calendar *tuiTextfieldDropdown />
+  </tui-textfield>
+
+  <div class="wld-time-row">
+    <tui-textfield class="wld-time-field">
+      <label tuiLabel>{{ 'models.worklog.fields.startAt' | translate }}</label>
+      <input tuiTextfield type="time" formControlName="startTime" />
+    </tui-textfield>
+    <span class="wld-time-sep">—</span>
+    <tui-textfield class="wld-time-field">
+      <label tuiLabel>{{ 'models.worklog.fields.endAt' | translate }}</label>
+      <input tuiTextfield type="time" formControlName="endTime" />
+    </tui-textfield>
+  </div>
+
+  <tui-textfield>
+    <label tuiLabel>{{ 'models.worklog.fields.description' | translate }}</label>
+    <textarea tuiTextfield formControlName="description" rows="3"></textarea>
+  </tui-textfield>
+
+  <div class="wld-actions">
+    <button tuiButton type="button" appearance="outline" size="m" (click)="cancel()">
+      {{ 'generic.actions.cancel' | translate }}
+    </button>
+    <button tuiButton type="button" appearance="primary" size="m" [disabled]="isSubmitting()" (click)="submit()">
+      {{ 'generic.actions.save' | translate }}
+    </button>
+  </div>
+</div>

@@ -8,6 +8,10 @@
       {{ 'navbar.mine' | translate }}
     </a>
 
+    <a class="cursor-pointer" routerLink="/worklog" routerLinkActive="font-bold">
+      {{ 'navbar.worklog' | translate }}
+    </a>
+
     @if (userStore.isAtLeastAdmin()) {
       <a class="cursor-pointer" routerLink="/admin" routerLinkActive="font-bold" [routerLinkActiveOptions]="{exact: false}">
         {{ 'navbar.admin' | translate }}

@@ -1,7 +1,13 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CreateTaskInput, Task, TaskDetailed, UpdateTaskInput } from '../types/task.model';
+import {
+  CreateTaskInput,
+  Task,
+  TaskDetailed,
+  TaskSuggestion,
+  UpdateTaskInput,
+} from '../types/task.model';
 
 @Injectable({ providedIn: 'root' })
 export class TaskCoreService {
@@ -10,6 +16,20 @@ export class TaskCoreService {
 
   getAll(params?: HttpParams): Observable<Task[]> {
     return this.http.get<Task[]>(this.baseURL, { params });
+  }
+
+  getByIdentifier(identifier: number): Observable<Task[]> {
+    const params = new HttpParams().set('identifier', identifier);
+    return this.http.get<Task[]>(this.baseURL, { params });
+  }
+
+  searchSuggestions(query: string, limit = 8): Observable<TaskSuggestion[]> {
+    return this.http.get<TaskSuggestion[]>(`${this.baseURL}/suggestions`, {
+      params: {
+        searchValue: query,
+        limit,
+      },
+    });
   }
 
   getById(id: string): Observable<TaskDetailed> {

@@ -10,6 +10,7 @@ import (
 )
 
 func Register() {
+	ui.RegisterGet("/tasks/suggestions", enum.AnyUser, reflect.TypeOf(service{}), suggestions)
 	ui.RegisterGet("/tasks/{id}", enum.AnyUser, reflect.TypeOf(service{}), getById)
 	ui.RegisterGet("/tasks", enum.AnyUser, reflect.TypeOf(service{}), getAll)
 	ui.RegisterPost("/tasks/add", enum.AnyUser, reflect.TypeOf(service{}), add)
@@ -188,6 +189,10 @@ func addParticipant(s ui.UIService) (any, error) {
 	return nil, s.GetService().(*service).addParticipant(
 		s.GetRequest().Context(), uuid.MustParse(taskId), uuid.MustParse(userId),
 	)
+}
+
+func suggestions(s ui.UIService) (any, error) {
+	return s.GetService().(*service).suggestionsBy(s.GetRequest().Context(), s.GetBasicSortingAndPagingParams())
 }
 
 func parseFilterParams(s ui.UIService) (*task.Filters, error) {

@@ -25,3 +25,17 @@ func ParseAttachedFileIds(files []file.AttachedFileInput) ([]uuid.UUID, error) {
 
 	return ids, nil
 }
+
+func ResolveStringsToUUIDs(s []string) []uuid.UUID {
+	if len(s) == 0 {
+		return []uuid.UUID{}
+	}
+
+	ids := make([]uuid.UUID, 0, len(s))
+
+	for _, strID := range s {
+		ids = append(ids, uuid.MustParse(strID))
+	}
+
+	return ids
+}

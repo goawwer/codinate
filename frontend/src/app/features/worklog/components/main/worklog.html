@@ -1,0 +1,101 @@
+<div class="worklog-page">
+  <div class="worklog-top">
+    <div class="worklog-top-left">
+      <tui-textfield tuiChevron [tuiTextfieldSize]="'m'" class="w-1/3" [stringify]="stringifyPeriod">
+        <label tuiLabel>{{ 'generic.titles.period' | translate }}</label>
+        <input tuiSelect [ngModel]="selectedPeriod()" (ngModelChange)="selectedPeriod.set($event)"/>
+        <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="periods" />
+      </tui-textfield>
+
+      <tui-textfield tuiChevron [tuiTextfieldSize]="'m'" class="w-1/3" [stringify]="stringifyProject">
+        <label tuiLabel>{{ 'generic.titles.project' | translate }}</label>
+        <input tuiSelect [ngModel]="selectedProjectName()" (ngModelChange)="selectedProjectName.set($event)"/>
+        <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="projectItems()" />
+      </tui-textfield>
+
+      @if (!store.isLoading()) {
+        <div class="worklog-total">
+          <span class="total-label">{{ 'models.worklog.columns.total' | translate }}:</span>
+          <span class="total-value">{{ totalHours() | number: '1.2-2' }} {{ 'models.worklog.columns.hoursUnit' | translate }}</span>
+        </div>
+      }
+    </div>
+
+    <button tuiButton appearance="action" size="s" type="button" (click)="openLogDialog()">
+      <tui-icon icon="@tui.plus" />
+      {{ 'models.worklog.logTime' | translate }}
+    </button>
+  </div>
+
+  @if (store.isLoading()) {
+    <tui-loader class="worklog-loader" />
+  } @else {
+    <div class="worklog-col-header">
+      <button class="col-sort-header" (click)="toggleSort('date')">
+        {{ 'models.worklog.columns.date' | translate }}
+        <tui-icon
+          class="sort-icon"
+          [class.sort-icon--active]="sortCol() === 'date'"
+          [icon]="sortCol() === 'date' && sortDir() === 'desc' ? '@tui.arrow-down' : '@tui.arrow-up'"
+        />
+      </button>
+      <button class="col-sort-header" (click)="toggleSort('startAt')">
+        {{ 'models.worklog.columns.time' | translate }}
+        <tui-icon
+          class="sort-icon"
+          [class.sort-icon--active]="sortCol() === 'startAt'"
+          [icon]="sortCol() === 'startAt' && sortDir() === 'desc' ? '@tui.arrow-down' : '@tui.arrow-up'"
+        />
+      </button>
+      <span class="col-amount">{{ 'models.worklog.columns.hours' | translate }}</span>
+      <span class="col-desc">{{ 'models.worklog.columns.description' | translate }}</span>
+      <span class="col-project">{{ 'models.worklog.columns.project' | translate }}</span>
+      <span class="col-actions"></span>
+    </div>
+
+    <div class="worklog-list">
+      @for (log of filteredLogs(); track log.id) {
+        <div class="worklog-item">
+          <div class="col-date">
+            <span class="log-day">{{ log.date | appDate: 'd' }}</span>
+            <span class="log-month">{{ log.date | appDate: 'MMM' }}</span>
+          </div>
+
+          <div class="col-time">
+            <tui-icon icon="@tui.clock" class="log-icon" />
+            <span>{{ log.startAt | appDate: 'HH:mm' }} – {{ log.endAt | appDate: 'HH:mm' }}</span>
+          </div>
+
+          <div class="col-amount">
+            <span class="log-hours">{{ log.totalMinutes / 60 | number: '1.2-2' }} {{ 'models.worklog.columns.hoursUnit' | translate }}</span>
+          </div>
+
+          <div class="col-desc">
+            @if (log.taskIdentifier && log.taskId) {
+              <a class="log-task-id" [routerLink]="['/tasks', log.taskId]">#{{ log.taskIdentifier }}</a>
+            }
+            <p class="log-description">{{ log.description }}</p>
+          </div>
+
+          <div class="col-project">
+            <div class="log-project-chip">
+              <span>{{ log.projectName }}</span>
+            </div>
+          </div>
+
+          <div class="col-actions">
+            <button tuiButton appearance="ghost" size="xs" type="button" iconStart="@tui.pencil"></button>
+            <button tuiButton appearance="ghost" size="xs" type="button" iconStart="@tui.trash"></button>
+          </div>
+        </div>
+      }
+
+      @empty {
+        <div class="worklog-empty">
+          <tui-icon icon="@tui.clock" class="empty-icon" />
+          <span>{{ 'models.worklog.columns.noLogs' | translate }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>
