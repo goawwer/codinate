@@ -12,24 +12,24 @@ import { injectContext } from '@taiga-ui/polymorpheus';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { TuiDay } from '@taiga-ui/cdk';
 import { TASK_DIALOG_IMPORTS } from './task-dialog.imports';
-import { CreateTaskInput } from '../types/task.model';
-import { TaskCoreService } from '../service/task-core.service';
-import { TaskStatus, TaskStatusesService } from '../service/task-statuses.service';
-import { TaskPriority, TaskPrioritiesService } from '../service/task-priorities.service';
-import { TaskCategory, TaskCategoriesService } from '../service/task-categories.service';
-import { ProjectApiService } from '../../project/service/project.service';
-import { Project } from '../../project/types/model/project.model';
-import { Release, ReleaseService } from '../../project/service/release.service';
-import { UserStore } from '../../user/store/user.store';
-import { User } from '../../user/types/model/user.model';
-import { AlertService } from '../../../core/declarations/services/alert.service';
+import { CreateTaskInput } from '../../types/task.model';
+import { TaskCoreService } from '../../service/task-core.service';
+import { TaskStatus, TaskStatusesService } from '../../service/task-statuses.service';
+import { TaskPriority, TaskPrioritiesService } from '../../service/task-priorities.service';
+import { TaskCategory, TaskCategoriesService } from '../../service/task-categories.service';
+import { ProjectApiService } from '../../../project/service/project.service';
+import { Project } from '../../../project/types/model/project.model';
+import { Release, ReleaseService } from '../../../project/service/release.service';
+import { UserStore } from '../../../user/store/user.store';
+import { User } from '../../../user/types/model/user.model';
+import { AlertService } from '../../../../core/declarations/services/alert.service';
 import { TranslateService } from '@ngx-translate/core';
 import { TUI_VALIDATION_ERRORS } from '@taiga-ui/kit';
-import { requiredErrorFactory } from '../../auth/model/auth.validation';
+import { requiredErrorFactory } from '../../../auth/model/auth.validation';
 import {
   PendingEditorUploads,
   PendingFile,
-} from '../../../common/editor/pending-editor-uploads.service';
+} from '../../../../common/editor/pending-editor-uploads.service';
 import { signal } from '@angular/core';
 import { Router } from '@angular/router';
 

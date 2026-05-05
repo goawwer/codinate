@@ -39,12 +39,13 @@ export const routes: Routes = [
       },
       {
         path: 'tasks/:id',
-        loadComponent: () => import('./features/task/detailed/detailed').then((m) => m.Detailed),
+        loadComponent: () =>
+          import('./features/task/components/detailed/detailed').then((m) => m.Detailed),
       },
       {
         path: 'worklog',
-        loadComponent: () =>
-          import('./features/worklog/components/main/worklog').then((m) => m.WorklogComponent),
+        loadChildren: () =>
+          import('./features/worklog/worklog.routes').then((m) => m.WORKLOG_ROUTES),
       },
     ],
   },

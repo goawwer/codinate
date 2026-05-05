@@ -26,6 +26,7 @@
       "assign": "Assign",
       "send": "Send",
       "show": "Show {{ n }} more",
+      "showMore": "Show more",
       "showLess": "Show less",
       "addComment": "Add a comment...",
       "deleteConfirm": "Are you sure you want to delete {{ model }}? This action cannot be undone."
@@ -237,7 +238,9 @@
       "title": "Comment"
     },
     "worklog": {
+      "title": "Record",
       "logTime": "Log Time",
+      "editTime": "Edit Log",
       "allProjects": "All projects",
       "fields": {
         "date": "Date",
@@ -258,6 +261,10 @@
       },
       "taskSearch": {
         "notFound": "Task not found"
+      },
+      "subnav": {
+        "overview": "Overview",
+        "dailyPlan": "Daily plan"
       }
     }
   },
@@ -415,10 +422,14 @@
     },
     "worklog": {
       "success": {
-        "created": "Time logged successfully"
+        "created": "Time logged successfully",
+        "updated": "Time log updated",
+        "deleted": "Time log deleted"
       },
       "errors": {
-        "createFailed": "Failed to log time"
+        "createFailed": "Failed to log time",
+        "updateFailed": "Failed to update time log",
+        "deleteFailed": "Failed to delete time log"
       }
     }
   }

@@ -29,7 +29,16 @@
             </tui-tabs-with-more>
           </div>
         } @else if (isWorklogSection()) {
-          <a tuiTab *tuiItem routerLink="/worklog/main" routerLinkActive>{{ 'models.task.state.history' | translate }}</a>
+          <div class="bg-(--app-grey-600)/20">
+            <tui-tabs-with-more
+              class="custom"
+              [underline]="false"
+              [activeItemIndex]="activeItemIndex()"
+            >
+              <a tuiTab *tuiItem routerLink="/worklog/overview" routerLinkActive>{{ 'models.worklog.subnav.overview' | translate }}</a>
+              <a tuiTab *tuiItem routerLink="/worklog/dailyPlan" routerLinkActive>{{ 'models.worklog.subnav.dailyPlan' | translate }}</a>
+            </tui-tabs-with-more>
+          </div>
         } @else {
           <div class="bg-(--app-grey-600)/20">
             <tui-tabs-with-more

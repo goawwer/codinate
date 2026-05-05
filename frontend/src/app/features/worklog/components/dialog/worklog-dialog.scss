@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-top: 1rem;
   padding: 0.25rem 0;
 }
 
@@ -9,6 +10,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  width: 50%;
 
   .wld-time-field {
     flex: 1;
@@ -19,6 +21,17 @@
     font-size: 1rem;
     flex-shrink: 0;
     margin-top: 0.25rem;
+  }
+}
+
+.wld-end-time {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+
+  .wld-time-field {
+    flex: 1;
   }
 }
 
@@ -77,7 +90,7 @@
 }
 
 .wld-task-input {
-  width: 100%;
+  width: 50%;
 }
 
 .wld-input-loader {
@@ -219,4 +232,50 @@
 
   font-size: 0.6875rem;
   color: var(--tui-text-tertiary);
+}
+
+.wld-description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.wld-description-label {
+  font-size: 0.8125rem;
+  color: var(--tui-text-secondary);
+  padding-left: 0.125rem;
+}
+
+.wld-description-input {
+  resize: vertical;
+  min-height: 30vh;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--tui-border-normal);
+  border-radius: 0.625rem;
+  background: var(--tui-background-base);
+  color: var(--tui-text-primary);
+  font-size: 0.875rem;
+  font-family: inherit;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 0.15s ease;
+
+  &::placeholder {
+    color: var(--tui-text-tertiary);
+  }
+
+  &:hover {
+    border-color: var(--tui-border-hover);
+  }
+
+  &:focus {
+    border-color: var(--tui-border-focus);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--tui-border-focus) 18%, transparent);
+  }
+}
+
+.wld-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
 }

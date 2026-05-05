@@ -13,6 +13,8 @@ import (
 type WorklogRepo interface {
 	GetAll(ctx context.Context, userId uuid.UUID, f *worklog.Filters) ([]worklog.Row, error)
 	Add(ctx context.Context, input model.Worklog) (uuid.UUID, error)
+	UpdateBy(ctx context.Context, id uuid.UUID, newLog worklog.UpdateLogInput) error
+	DeleteBy(ctx context.Context, id uuid.UUID) error
 }
 
 type worklogRepoImpl struct {
@@ -57,10 +59,11 @@ func (r *worklogRepoImpl) GetAll(ctx context.Context, userId uuid.UUID, f *workl
 	result := make([]worklog.Row, 0)
 
 	qb.In(util.GetDBColumnsFiltersValuesMap(customNames, model.Worklog{}, f)).
-		FilterWithOperator("t.created_at::TIMESTAMP", f.DateRange.From, ">=").
-		FilterWithOperator("t.created_at::TIMESTAMP", f.DateRange.To, "<").
+		FilterWithOperator("t.start_at::TIMESTAMP", f.DateRange.From, ">=").
+		FilterWithOperator("t.end_at::TIMESTAMP", f.DateRange.To, "<").
 		Eq("t.user_id", userId).
 		Eq("tk.identifier", f.Identifier).
+		Eq("t.project_id", f.ProjectId).
 		Like(searchCol, f.SearchBy.Value).
 		Order(orderCol, f.SortBy.Direction, "t.created_at", "DESC").
 		Limit(f.Paging.GetOffset(), f.Paging.GetLimit())
@@ -103,6 +106,18 @@ func (r *worklogRepoImpl) Add(ctx context.Context, input model.Worklog) (uuid.UU
 	).Scan(&id)
 
 	return id, err
+}
+
+func (r *worklogRepoImpl) UpdateBy(ctx context.Context, id uuid.UUID, newLog worklog.UpdateLogInput) error {
+	var qb QueryFiltersBuilder
+
+	clause := qb.Update(util.GetDBColumnsFiltersValuesMap(nil, model.Worklog{}, &newLog)).
+		Eq("id::uuid", id).
+		Build()
+
+	_, err := r.ExecContext(ctx, "UPDATE time_logs "+clause, qb.Args()...)
+
+	return err
 }
 
 func (r *worklogRepoImpl) DeleteBy(ctx context.Context, id uuid.UUID) error {

@@ -22,11 +22,11 @@ export const WorklogStore = signalStore(
     isLoading: computed(() => store.status() === StoreStatus.Loading),
   })),
   withMethods((store, service = inject(WorklogService)) => ({
-    loadLogs: rxMethod<{ userId: string; params: HttpParams }>(
+    loadLogs: rxMethod<{ userId: string; params: HttpParams; projectId?: number }>(
       pipe(
         tap(() => patchState(store, { status: StoreStatus.Loading })),
-        switchMap(({ userId, params }) =>
-          service.getAll(userId, params).pipe(
+        switchMap(({ userId, params, projectId }) =>
+          service.getAll(userId, params, projectId).pipe(
             tap((logs) => patchState(store, { logs, status: StoreStatus.Loaded })),
             catchError(() => {
               patchState(store, { status: StoreStatus.LoadError });

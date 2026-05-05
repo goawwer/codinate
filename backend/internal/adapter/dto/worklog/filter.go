@@ -10,6 +10,7 @@ import (
 type InputFilters struct {
 	TaskId     []string `json:"taskId"`
 	Identifier int      `json:"identifier"`
+	ProjectId  int      `json:"projectId"`
 }
 
 type Filters struct {
@@ -18,6 +19,7 @@ type Filters struct {
 	SearchBy   *filters.Search
 	Paging     *filters.Page
 	TaskId     []uuid.UUID
+	ProjectId  int
 	Identifier int
 }
 
@@ -29,5 +31,6 @@ func (in *InputFilters) ResolveFilters(basic controller.BasicQueryParams) *Filte
 		Paging:     filters.NewPaging(basic.PageNumber, basic.PageSize),
 		TaskId:     util.ResolveStringsToUUIDs(in.TaskId),
 		Identifier: in.Identifier,
+		ProjectId:  in.ProjectId,
 	}
 }

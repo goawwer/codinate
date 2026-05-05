@@ -25,11 +25,11 @@ import {
 } from '@taiga-ui/kit';
 import { TuiBlockStatus, TuiCard, TuiHeader } from '@taiga-ui/layout';
 import { TuiEditor } from '@taiga-ui/editor';
-import { AppPicture } from '../../../common/picture/app-picture';
-import { EmployeeRolePipe } from '../../../common/pipes/employee-role.pipe';
-import { AppEditorComponent } from '../../../common/editor/app-editor.component';
-import { CommentList } from '../../../common/comment/comment-list/comment-list';
-import { AppDatePipe } from '../../../common/pipes/app-date.pipe';
+import { AppPicture } from '../../../../common/picture/app-picture';
+import { EmployeeRolePipe } from '../../../../common/pipes/employee-role.pipe';
+import { AppEditorComponent } from '../../../../common/editor/app-editor.component';
+import { CommentList } from '../../../../common/comment/comment-list/comment-list';
+import { AppDatePipe } from '../../../../common/pipes/app-date.pipe';
 
 export const DETAILED_IMPORTS = [
   AsyncPipe,

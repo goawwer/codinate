@@ -8,11 +8,21 @@ export class WorklogService {
   private readonly baseUrl = '/api/worklogs';
   private readonly http = inject(HttpClient);
 
-  getAll(userId: string, params?: HttpParams): Observable<WorklogRow[]> {
-    return this.http.get<WorklogRow[]>(`${this.baseUrl}/${userId}/all`, { params });
+  getAll(userId: string, params?: HttpParams, projectId?: number): Observable<WorklogRow[]> {
+    let p = params ?? new HttpParams();
+    if (projectId) p = p.set('projectId', projectId);
+    return this.http.get<WorklogRow[]>(`${this.baseUrl}/${userId}/all`, { params: p });
   }
 
-  add(userId: string, input: CreateWorklogInput): Observable<{ id: string }> {
-    return this.http.post<{ id: string }>(`${this.baseUrl}/${userId}/add`, input);
+  add(input: CreateWorklogInput): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(`${this.baseUrl}/add`, input);
+  }
+
+  update(logId: string, input: CreateWorklogInput): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${logId}/update`, input);
+  }
+
+  delete(logId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${logId}/delete`);
   }
 }

@@ -10,22 +10,20 @@ import (
 )
 
 func Register() {
+	ui.RegisterPost("/worklogs/add", enum.AnyUser, reflect.TypeOf(service{}), add)
 	ui.RegisterGet("/worklogs/{user_id}/all", enum.AnyUser, reflect.TypeOf(service{}), all)
-	ui.RegisterPost("/worklogs/{user_id}/add", enum.AnyUser, reflect.TypeOf(service{}), add)
+	ui.RegisterPatch("/worklogs/{log_id}/update", enum.AnyUser, reflect.TypeOf(service{}), update)
+	ui.RegisterDelete("/worklogs/{log_id}/delete", enum.AnyUser, reflect.TypeOf(service{}), deleteLog)
 }
 
 func add(s ui.UIService) (any, error) {
-	userId, err := s.GetPathParameterAsString("user_id")
-	if err != nil {
-		return nil, err
-	}
-
 	var input worklog.CreateLogInput
+
 	if err := s.GetBodyAs(&input); err != nil {
 		return nil, err
 	}
 
-	return s.GetService().(*service).add(s.GetRequest().Context(), uuid.MustParse(userId), input)
+	return s.GetService().(*service).add(s.GetRequest().Context(), input)
 }
 
 func all(s ui.UIService) (any, error) {
@@ -40,6 +38,30 @@ func all(s ui.UIService) (any, error) {
 	}
 
 	return s.GetService().(*service).getAll(s.GetRequest().Context(), uuid.MustParse(userId), f)
+}
+
+func update(s ui.UIService) (any, error) {
+	id, err := s.GetPathParameterAsString("log_id")
+	if err != nil {
+		return nil, err
+	}
+
+	var input worklog.UpdateLogInput
+
+	if err := s.GetBodyAs(&input); err != nil {
+		return nil, err
+	}
+
+	return nil, s.GetService().(*service).update(s.GetRequest().Context(), uuid.MustParse(id), input)
+}
+
+func deleteLog(s ui.UIService) (any, error) {
+	id, err := s.GetPathParameterAsString("log_id")
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, s.GetService().(*service).deleteBy(s.GetRequest().Context(), uuid.MustParse(id))
 }
 
 func parseFilterParams(s ui.UIService) (*worklog.Filters, error) {

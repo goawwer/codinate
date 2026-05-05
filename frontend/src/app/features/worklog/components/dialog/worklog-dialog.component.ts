@@ -15,7 +15,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TuiDay } from '@taiga-ui/cdk';
+import { TuiDay, TuiTime } from '@taiga-ui/cdk';
 import {
   TuiDialogContext,
   TuiButton,
@@ -25,13 +25,15 @@ import {
   TuiLoader,
   TuiDropdown,
 } from '@taiga-ui/core';
-import { TuiInputDate } from '@taiga-ui/kit';
+import { TuiInputDate, TuiInputTime, tuiInputTimeOptionsProvider } from '@taiga-ui/kit';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Task, TaskSuggestion } from '../../../task/types/task.model';
+import { TaskSuggestion } from '../../../task/types/task.model';
+import { TaskSuggestionsComponent } from '../../../task/components/task-suggestions/task-suggestions.component';
 import { TaskCoreService } from '../../../task/service/task-core.service';
 import { WorklogService } from '../../service/worklog.service';
 import { WorklogDialogData } from '../../types/worklog.model';
+import { WorklogStore } from '../../store/worklog.store';
 import { UserStore } from '../../../user/store/user.store';
 import { AlertService } from '../../../../core/declarations/services/alert.service';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
@@ -42,6 +44,7 @@ import {
   filter,
   finalize,
   map,
+  Observable,
   of,
   switchMap,
   tap,
@@ -59,16 +62,20 @@ import {
     TuiDropdown,
     TuiIcon,
     TuiInputDate,
+    TuiInputTime,
     TuiLoader,
     TuiTextfield,
+    TaskSuggestionsComponent,
   ],
   templateUrl: './worklog-dialog.html',
   styleUrl: './worklog-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [tuiInputTimeOptionsProvider({ icon: () => '' })],
 })
 export class WorklogDialogComponent implements OnInit {
   private readonly taskService = inject(TaskCoreService);
   private readonly worklogService = inject(WorklogService);
+  private readonly worklogStore = inject(WorklogStore);
   private readonly userStore = inject(UserStore);
   private readonly alert = inject(AlertService);
   private readonly translate = inject(TranslateService);
@@ -84,7 +91,10 @@ export class WorklogDialogComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly searchText$ = toObservable(this.searchText);
 
+  protected readonly isEditMode = computed(() => !!this.context.data?.logId);
+
   protected readonly prefilledTask = computed(() => {
+    if (this.isEditMode()) return null;
     const d = this.context.data;
     if (!d?.taskId) return null;
     return { id: d.taskId, identifier: d.taskIdentifier, title: d.taskTitle };
@@ -96,13 +106,33 @@ export class WorklogDialogComponent implements OnInit {
 
   protected readonly form = new FormGroup({
     date: new FormControl<TuiDay | null>(null, [Validators.required]),
-    startTime: new FormControl<string>('', [Validators.required]),
-    endTime: new FormControl<string>('', [Validators.required]),
+    startTime: new FormControl<TuiTime | null>(null, [Validators.required]),
+    endTime: new FormControl<TuiTime | null>(null, [Validators.required]),
     description: new FormControl<string>(''),
   });
 
   ngOnInit(): void {
-    this.form.controls.date.setValue(TuiDay.fromLocalNativeDate(new Date()));
+    const d = this.context.data;
+
+    if (this.isEditMode()) {
+      const startAt = new Date(d!.startAt!);
+      const endAt = new Date(d!.endAt!);
+      this.form.controls.date.setValue(TuiDay.fromLocalNativeDate(startAt));
+      this.form.controls.startTime.setValue(TuiTime.fromLocalNativeDate(startAt));
+      this.form.controls.endTime.setValue(TuiTime.fromLocalNativeDate(endAt));
+      this.form.controls.description.setValue(d!.description ?? '');
+      if (d!.taskId && d!.taskIdentifier) {
+        this.resolvedTask.set({
+          id: d!.taskId,
+          identifier: d!.taskIdentifier,
+          title: d!.taskTitle ?? '',
+        });
+        this.searchText.set(`#${d!.taskIdentifier}`);
+      }
+    } else {
+      this.form.controls.date.setValue(TuiDay.fromLocalNativeDate(new Date()));
+      this.prefillStartTimeFromTodaysLogs();
+    }
 
     if (this.prefilledTask()) {
       return;
@@ -151,6 +181,22 @@ export class WorklogDialogComponent implements OnInit {
     }
   }
 
+  protected setEndTimeNow(): void {
+    this.form.controls.endTime.setValue(TuiTime.currentLocal());
+  }
+
+  private prefillStartTimeFromTodaysLogs(): void {
+    const todayStr = new Date().toDateString();
+    const todaysLogs = this.worklogStore
+      .logs()
+      .filter((l) => new Date(l.endAt).toDateString() === todayStr);
+
+    if (!todaysLogs.length) return;
+
+    const latest = todaysLogs.reduce((a, b) => (new Date(a.endAt) > new Date(b.endAt) ? a : b));
+    this.form.controls.startTime.setValue(TuiTime.fromLocalNativeDate(new Date(latest.endAt)));
+  }
+
   protected clearTask(): void {
     this.resolvedTask.set(null);
     this.searchText.set('');
@@ -169,40 +215,46 @@ export class WorklogDialogComponent implements OnInit {
     this.form.markAllAsTouched();
     if (this.form.invalid || this.isSubmitting()) return;
 
-    const userId = this.userStore.user()?.id;
-    if (!userId) return;
-
     const v = this.form.getRawValue();
     const date = v.date!.toLocalNativeDate();
 
-    const [sh, sm] = (v.startTime || '00:00').split(':').map(Number);
-    const [eh, em] = (v.endTime || '00:00').split(':').map(Number);
-
     const startAt = new Date(date);
-    startAt.setHours(sh, sm, 0, 0);
+    startAt.setHours(v.startTime?.hours ?? 0, v.startTime?.minutes ?? 0, 0, 0);
     const endAt = new Date(date);
-    endAt.setHours(eh, em, 0, 0);
+    endAt.setHours(v.endTime?.hours ?? 0, v.endTime?.minutes ?? 0, 0, 0);
 
     const taskId = this.prefilledTask()?.id ?? this.resolvedTask()?.id ?? '';
+    const payload = {
+      userId: this.userStore.user()!.id,
+      startAt: startAt.toISOString(),
+      endAt: endAt.toISOString(),
+      taskId,
+      description: v.description ?? '',
+    };
 
     this.isSubmitting.set(true);
-    this.worklogService
-      .add(userId, {
-        startAt: startAt.toISOString(),
-        endAt: endAt.toISOString(),
-        taskId,
-        description: v.description ?? '',
-      })
-      .subscribe({
-        next: () => {
-          this.isSubmitting.set(false);
-          this.alert.success(this.translate.instant('cmd.worklog.success.created'));
-          this.context.completeWith(true);
-        },
-        error: () => {
-          this.isSubmitting.set(false);
-          this.alert.error(this.translate.instant('cmd.worklog.errors.createFailed'));
-        },
-      });
+
+    const request$: Observable<unknown> = this.isEditMode()
+      ? this.worklogService.update(this.context.data!.logId!, payload)
+      : this.worklogService.add(payload);
+
+    const successKey = this.isEditMode()
+      ? 'cmd.worklog.success.updated'
+      : 'cmd.worklog.success.created';
+    const errorKey = this.isEditMode()
+      ? 'cmd.worklog.errors.updateFailed'
+      : 'cmd.worklog.errors.createFailed';
+
+    request$.subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.alert.success(this.translate.instant(successKey));
+        this.context.completeWith(true);
+      },
+      error: () => {
+        this.isSubmitting.set(false);
+        this.alert.error(this.translate.instant(errorKey));
+      },
+    });
   }
 }

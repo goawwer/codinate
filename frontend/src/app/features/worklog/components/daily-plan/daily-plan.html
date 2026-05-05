@@ -1,0 +1,92 @@
+<div class="day-plan">
+  <header class="day-plan__header">
+    <div>
+      <h2 class="day-plan__title">План дня</h2>
+      <p class="day-plan__subtitle">
+        Расположите задачи в том порядке, в котором планируете их выполнять.
+      </p>
+    </div>
+
+    <div class="day-plan__summary">
+      <span class="day-plan__summary-label">Запланировано</span>
+      <strong>{{ minutesLabel(totalPlanned()) }}</strong>
+    </div>
+  </header>
+
+  <section class="day-plan__toolbar">
+    <tui-textfield class="day-plan__search" [tuiTextfieldSize]="'m'">
+      <label tuiLabel>Добавить задачу</label>
+      <input tuiTextfield placeholder="Найти задачу..." />
+    </tui-textfield>
+
+    <button tuiButton size="m" appearance="primary" type="button">
+      Добавить
+    </button>
+  </section>
+
+  @if (items().length) {
+    <tui-tiles
+      class="day-plan__tiles"
+      [order]="order()"
+      (orderChange)="updateOrder($event)"
+    >
+      @for (item of items(); track item.id; let index = $index) {
+        <tui-tile
+          tuiTileHandle
+          class="plan-tile"
+          [style.order]="order().get(index)"
+        >
+          <article class="plan-card">
+            <div class="plan-card__top">
+              <div class="plan-card__handle">
+                <tui-icon icon="@tui.grip-vertical" />
+              </div>
+
+              <div class="plan-card__main">
+                <div class="plan-card__meta">
+                  <span class="plan-card__identifier">{{ item.identifier }}</span>
+
+                  @if (item.projectName) {
+                    <span class="plan-card__project">{{ item.projectName }}</span>
+                  }
+                </div>
+
+                <h3 class="plan-card__title">
+                  {{ item.title }}
+                </h3>
+              </div>
+
+              <button
+                tuiIconButton
+                type="button"
+                appearance="ghost"
+                size="xs"
+                iconStart="@tui.x"
+                (click)="remove(item.id)"
+              ></button>
+            </div>
+
+            <footer class="plan-card__footer">
+              <tui-badge
+                size="s"
+                [appearance]="item.priority === 'high' ? 'negative' : item.priority === 'medium' ? 'warning' : 'neutral'"
+              >
+                {{ priorityLabel(item.priority) }}
+              </tui-badge>
+
+              <span class="plan-card__time">
+                {{ minutesLabel(item.plannedMinutes) }}
+              </span>
+            </footer>
+          </article>
+        </tui-tile>
+      }
+    </tui-tiles>
+  } @else {
+    <div class="day-plan__empty">
+      <tui-icon icon="@tui.calendar-plus" />
+      <strong>План пуст</strong>
+      <span>Добавьте задачи, которые хотите выполнить сегодня.</span>
+    </div>
+  }
+</div>

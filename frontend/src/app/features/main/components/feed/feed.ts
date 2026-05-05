@@ -21,7 +21,7 @@ import { ProjectApiService } from '../../../project/service/project.service';
 import { Project } from '../../../project/types/model/project.model';
 import { TranslateService } from '@ngx-translate/core';
 import { AppDialogService } from '../../../../common/dialogs/dialog.service';
-import { TaskDialogComponent } from '../../../task/dialog/task-dialog.component';
+import { TaskDialogComponent } from '../../../task/components/dialog/task-dialog.component';
 
 const PAGE_SIZE = 10;
 

@@ -5,13 +5,15 @@ import {
   TuiIcon,
   TuiLoader,
   TuiTextfield,
+  TuiLink,
 } from '@taiga-ui/core';
-import { TuiChevron, TuiDataListWrapper, TuiSelect } from '@taiga-ui/kit';
+import { TuiChevron, TuiDataListWrapper, TuiSelect, TuiElasticContainer } from '@taiga-ui/kit';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AppDatePipe } from '../../../../common/pipes/app-date.pipe';
+import { TuiScrollbar } from '@taiga-ui/core';
 
 export const WORKLOGIMPORTS = [
   TuiButton,
@@ -28,4 +30,7 @@ export const WORKLOGIMPORTS = [
   TranslatePipe,
   RouterLink,
   FormsModule,
+  TuiLink,
+  TuiElasticContainer,
+  TuiScrollbar,
 ];

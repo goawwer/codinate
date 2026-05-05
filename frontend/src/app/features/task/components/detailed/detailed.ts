@@ -12,23 +12,23 @@ import { TranslateService } from '@ngx-translate/core';
 import { forkJoin, filter, of, switchMap } from 'rxjs';
 import { TuiDay } from '@taiga-ui/cdk';
 import { TuiEditorTool, provideTuiEditor } from '@taiga-ui/editor';
-import { EDITOR_RU_PROVIDER } from '../../../common/editor/editor-i18n';
-import { TaskCoreService } from '../service/task-core.service';
-import { FileService } from '../../../common/file/file.service';
-import { TaskDetailed, UpdateTaskInput } from '../types/task.model';
-import { TaskStatus, TaskStatusesService } from '../service/task-statuses.service';
-import { TaskPriority, TaskPrioritiesService } from '../service/task-priorities.service';
-import { TaskCategory, TaskCategoriesService } from '../service/task-categories.service';
-import { Release, ReleaseService } from '../../project/service/release.service';
+import { EDITOR_RU_PROVIDER } from '../../../../common/editor/editor-i18n';
+import { TaskCoreService } from '../../service/task-core.service';
+import { FileService } from '../../../../common/file/file.service';
+import { TaskDetailed, UpdateTaskInput } from '../../types/task.model';
+import { TaskStatus, TaskStatusesService } from '../../service/task-statuses.service';
+import { TaskPriority, TaskPrioritiesService } from '../../service/task-priorities.service';
+import { TaskCategory, TaskCategoriesService } from '../../service/task-categories.service';
+import { Release, ReleaseService } from '../../../project/service/release.service';
 import { DETAILED_IMPORTS } from './detailed.imports';
-import { UserStore } from '../../user/store/user.store';
-import { UserApiService } from '../../user/service/user.service';
-import { User } from '../../user/types/model/user.model';
-import { AlertService } from '../../../core/declarations/services/alert.service';
-import { AppDialogService } from '../../../common/dialogs/dialog.service';
+import { UserStore } from '../../../user/store/user.store';
+import { UserApiService } from '../../../user/service/user.service';
+import { User } from '../../../user/types/model/user.model';
+import { AlertService } from '../../../../core/declarations/services/alert.service';
+import { AppDialogService } from '../../../../common/dialogs/dialog.service';
 import { tuiScrollbarOptionsProvider } from '@taiga-ui/core';
-import { WorklogDialogComponent } from '../../worklog/components/dialog/worklog-dialog.component';
-import { WorklogDialogData } from '../../worklog/types/worklog.model';
+import { WorklogDialogComponent } from '../../../worklog/components/dialog/worklog-dialog.component';
+import { WorklogDialogData } from '../../../worklog/types/worklog.model';
 
 @Component({
   selector: 'app-detailed',

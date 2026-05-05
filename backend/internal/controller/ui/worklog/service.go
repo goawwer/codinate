@@ -17,7 +17,15 @@ func (s *service) getAll(ctx context.Context, userId uuid.UUID, f *worklog.Filte
 	return repository.GetWorklogRepo().GetAll(ctx, userId, f)
 }
 
-func (s *service) add(ctx context.Context, userId uuid.UUID, input worklog.CreateLogInput) (uuid.UUID, error) {
+func (s *service) update(ctx context.Context, id uuid.UUID, input worklog.UpdateLogInput) error {
+	return repository.GetWorklogRepo().UpdateBy(ctx, id, input)
+}
+
+func (s *service) deleteBy(ctx context.Context, id uuid.UUID) error {
+	return repository.GetWorklogRepo().DeleteBy(ctx, id)
+}
+
+func (s *service) add(ctx context.Context, input worklog.CreateLogInput) (uuid.UUID, error) {
 	startAt, err := time.Parse(time.RFC3339Nano, input.StartAt)
 	if err != nil {
 		return uuid.Nil, err
@@ -45,7 +53,7 @@ func (s *service) add(ctx context.Context, userId uuid.UUID, input worklog.Creat
 
 	return repository.GetWorklogRepo().Add(ctx, model.Worklog{
 		TaskId:       taskId,
-		UserId:       userId,
+		UserId:       uuid.MustParse(input.UserId),
 		ProjectId:    projectId,
 		Description:  input.Description,
 		StartAt:      startAt,

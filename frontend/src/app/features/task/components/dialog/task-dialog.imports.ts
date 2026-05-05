@@ -22,7 +22,7 @@ import {
   TuiStepper,
 } from '@taiga-ui/kit';
 import { TuiForm } from '@taiga-ui/layout';
-import { AppEditorComponent } from '../../../common/editor/app-editor.component';
+import { AppEditorComponent } from '../../../../common/editor/app-editor.component';
 
 export const TASK_DIALOG_IMPORTS = [
   AsyncPipe,

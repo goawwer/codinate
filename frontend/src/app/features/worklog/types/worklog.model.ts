@@ -11,6 +11,7 @@ export interface WorklogRow {
 }
 
 export interface CreateWorklogInput {
+  userId: string;
   startAt: string;
   endAt: string;
   taskId: string;
@@ -18,7 +19,21 @@ export interface CreateWorklogInput {
 }
 
 export interface WorklogDialogData {
+  logId?: string;
   taskId?: string;
   taskIdentifier?: number;
   taskTitle?: string;
+  startAt?: string;
+  endAt?: string;
+  description?: string;
+}
+
+export interface DayPlanItem {
+  id: string;
+  taskId: string;
+  identifier: string;
+  title: string;
+  projectName?: string;
+  priority?: 'low' | 'medium' | 'high';
+  plannedMinutes?: number;
 }

@@ -15,6 +15,7 @@ import { TuiItem } from '@taiga-ui/cdk/directives/item';
 const ADMIN_ROUTES = ['/admin/users', '/admin/teams', '/admin/projects', '/admin/settings'];
 const MAIN_ROUTES = ['/main/feed', '/main/projects', '/main/teams'];
 const MINE_ROUTES = ['/mine/assigned', '/mine/created', '/mine/history'];
+const WORKLOG_SUBNAV = ['/worklog/general', '/worklog/tasks'];
 
 @Component({
   selector: 'app-main-layout',
@@ -54,6 +55,8 @@ export class MainLayoutComponent implements OnInit {
     if (adminIdx !== -1) return adminIdx;
     const mineIdx = MINE_ROUTES.findIndex((r) => url.startsWith(r));
     if (mineIdx !== -1) return mineIdx;
+    const worklogIdx = WORKLOG_SUBNAV.findIndex((r) => url.startsWith(r));
+    if (worklogIdx !== -1) return worklogIdx;
     const mainIdx = MAIN_ROUTES.findIndex((r) => url.startsWith(r));
     if (mainIdx !== -1) return mainIdx;
     if (url.startsWith('/projects')) return 1;
