@@ -1,28 +1,133 @@
 <div class="day-plan">
   <header class="day-plan__header">
     <div>
-      <h2 class="day-plan__title">План дня</h2>
-      <p class="day-plan__subtitle">
-        Расположите задачи в том порядке, в котором планируете их выполнять.
-      </p>
+      <h2 class="day-plan__title">{{ 'models.worklog.subnav.dailyPlan' | translate }}</h2>
+      <p class="day-plan__subtitle">{{ 'models.worklog.dailyPlan.subtitle' | translate }}</p>
     </div>
 
     <div class="day-plan__summary">
-      <span class="day-plan__summary-label">Запланировано</span>
+      <span class="day-plan__summary-label">{{ 'models.worklog.dailyPlan.planned' | translate }}</span>
       <strong>{{ minutesLabel(totalPlanned()) }}</strong>
+      @if (doneCount() > 0) {
+        <span class="day-plan__done-count">
+          {{ doneCount() }}/{{ items().length }} {{ 'models.worklog.dailyPlan.done' | translate }}
+        </span>
+      }
     </div>
   </header>
 
   <section class="day-plan__toolbar">
-    <tui-textfield class="day-plan__search" [tuiTextfieldSize]="'m'">
-      <label tuiLabel>Добавить задачу</label>
-      <input tuiTextfield placeholder="Найти задачу..." />
-    </tui-textfield>
-
-    <button tuiButton size="m" appearance="primary" type="button">
-      Добавить
+    <button
+      tuiButton
+      size="m"
+      [appearance]="isFormVisible() ? 'outline' : 'primary'"
+      type="button"
+      (click)="toggleForm()"
+    >
+      <tui-icon [icon]="isFormVisible() ? '@tui.x' : '@tui.plus'" />
+      {{ isFormVisible() ? ('generic.actions.cancel' | translate) : ""}}
     </button>
+
+    @if (items().length && !isFormVisible()) {
+      <button tuiButton size="m" appearance="ghost" type="button" (click)="clearPlan()">
+        {{ 'models.worklog.dailyPlan.clearPlan' | translate }}
+      </button>
+    }
   </section>
+
+  @if (isFormVisible()) {
+    <div class="day-plan__add-form">
+
+      @if (isEditing()) {
+        <p class="day-plan__form-caption">{{ 'models.worklog.dailyPlan.editItem' | translate }}</p>
+      }
+
+      <div class="flex gap-1">
+        <div class="dp-task-search day-plan__add-form-field--wide">
+          <tui-textfield [tuiTextfieldSize]="'m'">
+            <label tuiLabel>{{ 'models.worklog.dailyPlan.addForm.identifier' | translate }}</label>
+            <input
+              tuiTextfield
+              [ngModel]="searchText()"
+              (ngModelChange)="onSearchTextChange($event)"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="#1..."
+              autocomplete="off"
+              [attr.disabled]="resolvedTask() ? true : null"
+              (keyup.enter)="saveItem()"
+            />
+            @if (isLoadingSuggestions()) {
+              <tui-loader size="xs" class="dp-input-loader" />
+            }
+          </tui-textfield>
+
+          @if (resolvedTask(); as t) {
+            <div class="dp-selected-task">
+              <button type="button" class="dp-selected-task-main" (click)="navigateToTask(t.id)">
+                <span class="dp-selected-task-id">#{{ t.identifier }}</span>
+                <span class="dp-selected-task-title">{{ t.title }}</span>
+                <tui-icon icon="@tui.external-link" class="dp-selected-task-icon" />
+              </button>
+              <button
+                type="button"
+                tuiButton
+                appearance="flat"
+                size="xs"
+                iconStart="@tui.x"
+                (click)="clearTask()"
+              ></button>
+            </div>
+          }
+
+          @if (shouldShowSuggestions()) {
+            <div class="dp-suggestions">
+              <app-task-suggestions
+                [suggestions]="taskSuggestions()"
+                (selected)="selectSuggestion($event)"
+                (dismissed)="taskSuggestions.set([])"
+              />
+            </div>
+          }
+        </div>
+
+        <tui-textfield [tuiTextfieldSize]="'m'">
+          <label tuiLabel>{{ 'models.worklog.dailyPlan.addForm.plannedMinutes' | translate }}</label>
+          <input
+            tuiTextfield
+            tuiInputNumber
+            min="1"
+            [ngModel]="form().plannedMinutes"
+            (ngModelChange)="updatePlannedMinutes($event)"
+          />
+        </tui-textfield>
+      </div>
+
+
+
+      <div class="dp-description day-plan__add-form-field--wide">
+        <label class="dp-description-label">{{ 'models.worklog.fields.description' | translate }}</label>
+        <textarea
+          class="dp-description-textarea"
+          rows="3"
+          [ngModel]="form().description"
+          (ngModelChange)="updateDescription($event)"
+        ></textarea>
+      </div>
+
+      <div class="day-plan__add-form-actions">
+        <button
+          tuiButton
+          size="m"
+          appearance="primary"
+          type="button"
+          [disabled]="!resolvedTask() && !searchText().trim()"
+          (click)="saveItem()"
+        >
+          {{ (isEditing() ? 'generic.actions.save' : 'models.worklog.dailyPlan.addForm.add') | translate }}
+        </button>
+      </div>
+    </div>
+  }
 
   @if (items().length) {
     <tui-tiles
@@ -32,51 +137,84 @@
     >
       @for (item of items(); track item.id; let index = $index) {
         <tui-tile
-          tuiTileHandle
+          planTileHeight
           class="plan-tile"
+          [class.plan-tile--done]="item.done"
+          [class.plan-tile--editing]="editingItem()?.id === item.id"
           [style.order]="order().get(index)"
         >
           <article class="plan-card">
             <div class="plan-card__top">
-              <div class="plan-card__handle">
+              <div tuiTileHandle class="plan-card__handle">
                 <tui-icon icon="@tui.grip-vertical" />
               </div>
 
               <div class="plan-card__main">
-                <div class="plan-card__meta">
+                <div class="plan-card__meta" [routerLink]="['/tasks', item.taskId]">
                   <span class="plan-card__identifier">{{ item.identifier }}</span>
-
-                  @if (item.projectName) {
-                    <span class="plan-card__project">{{ item.projectName }}</span>
-                  }
+                  <h3 class="plan-card__title">{{ item.title }}</h3>
                 </div>
 
-                <h3 class="plan-card__title">
-                  {{ item.title }}
-                </h3>
+                @if (item.description) {
+                  <div class="plan-card__description-block">
+                    <tui-elastic-container>
+                      <p class="plan-card__description">{{ visibleDescription(item) }}</p>
+                      @if (isDescriptionLong(item.description)) {
+                        <button
+                          tuiLink
+                          type="button"
+                          class="plan-card__description-toggle"
+                          (click)="toggleDescription(item.id)"
+                        >
+                          {{ (expandedDescriptions().has(item.id) ? 'generic.actions.showLess' : 'generic.actions.showMore') | translate }}
+                        </button>
+                      }
+                    </tui-elastic-container>
+                  </div>
+                }
               </div>
 
-              <button
-                tuiIconButton
-                type="button"
-                appearance="ghost"
-                size="xs"
-                iconStart="@tui.x"
-                (click)="remove(item.id)"
-              ></button>
+              <div class="plan-card__actions">
+                <button
+                  tuiIconButton
+                  type="button"
+                  [appearance]="item.done ? 'positive' : 'ghost'"
+                  size="s"
+                  [iconStart]="item.done ? '@tui.check-circle' : '@tui.circle'"
+                  (click)="toggleDone(item.id)"
+                ></button>
+
+                <button
+                  tuiIconButton
+                  type="button"
+                  appearance="ghost"
+                  size="xs"
+                  iconStart="@tui.pencil"
+                  (click)="startEdit(item)"
+                ></button>
+
+                <button
+                  tuiIconButton
+                  type="button"
+                  appearance="ghost"
+                  size="xs"
+                  iconStart="@tui.x"
+                  (click)="remove(item.id)"
+                ></button>
+              </div>
             </div>
 
             <footer class="plan-card__footer">
-              <tui-badge
-                size="s"
-                [appearance]="item.priority === 'high' ? 'negative' : item.priority === 'medium' ? 'warning' : 'neutral'"
-              >
-                {{ priorityLabel(item.priority) }}
-              </tui-badge>
+              @if (item.priority) {
+                <tui-badge
+                  size="s"
+                  [appearance]="item.priority === 'high' ? 'negative' : item.priority === 'medium' ? 'warning' : 'neutral'"
+                >
+                  {{ priorityKey(item.priority) | translate }}
+                </tui-badge>
+              }
 
-              <span class="plan-card__time">
-                {{ minutesLabel(item.plannedMinutes) }}
-              </span>
+              <span class="plan-card__time">{{ minutesLabel(item.plannedMinutes) }}</span>
             </footer>
           </article>
         </tui-tile>
@@ -85,8 +223,8 @@
   } @else {
     <div class="day-plan__empty">
       <tui-icon icon="@tui.calendar-plus" />
-      <strong>План пуст</strong>
-      <span>Добавьте задачи, которые хотите выполнить сегодня.</span>
+      <strong>{{ 'models.worklog.dailyPlan.empty.title' | translate }}</strong>
+      <span>{{ 'models.worklog.dailyPlan.empty.subtitle' | translate }}</span>
     </div>
   }
 </div>

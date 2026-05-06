@@ -36,4 +36,6 @@ export interface DayPlanItem {
   projectName?: string;
   priority?: 'low' | 'medium' | 'high';
   plannedMinutes?: number;
+  done?: boolean;
+  description?: string;
 }

@@ -43,37 +43,212 @@
   color: var(--tui-text-tertiary);
 }
 
+.day-plan__done-count {
+  font-size: 0.75rem;
+  color: var(--tui-status-positive);
+  font-weight: 500;
+}
+
 .day-plan__toolbar {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.day-plan__search {
+.day-plan__form-caption {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--tui-text-action);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.day-plan__add-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--tui-border-normal);
+  border-radius: 1rem;
+  background: var(--tui-background-neutral-1);
+
+  &-field--wide {
+    grid-column: 1 / -1;
+  }
+
+  &-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.dp-description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.dp-description-label {
+  font-size: 0.8125rem;
+  color: var(--tui-text-secondary);
+  padding-left: 0.125rem;
+}
+
+.dp-description-textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+  max-height: 10rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--tui-border-normal);
+  border-radius: 0.625rem;
+  background: var(--tui-background-base);
+  color: var(--tui-text-primary);
+  font-size: 0.875rem;
+  font-family: inherit;
+  line-height: 1.5;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+
+  &::placeholder {
+    color: var(--tui-text-tertiary);
+  }
+
+  &:hover {
+    border-color: var(--tui-border-hover);
+  }
+
+  &:focus {
+    border-color: var(--tui-border-focus);
+  }
+}
+
+.dp-task-search {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.dp-input-loader {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dp-selected-task {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.dp-selected-task-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
   flex: 1;
+  height: 2.25rem;
+  padding: 0 0.625rem;
+  border: 1px solid color-mix(in srgb, var(--tui-text-action) 22%, transparent);
+  border-radius: 0.625rem;
+  background: color-mix(in srgb, var(--tui-text-action) 7%, transparent);
+  color: var(--tui-text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--tui-text-action) 11%, transparent);
+    border-color: color-mix(in srgb, var(--tui-text-action) 32%, transparent);
+  }
+}
+
+.dp-selected-task-id {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--tui-text-action);
+}
+
+.dp-selected-task-title {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.8125rem;
+  color: var(--tui-text-secondary);
+}
+
+.dp-selected-task-icon {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--tui-text-tertiary);
+}
+
+.dp-suggestions {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  max-height: 15rem;
+  overflow-y: auto;
+  padding: 0.25rem;
+  border: 1px solid var(--tui-border-normal);
+  border-radius: 0.75rem;
+  background: var(--tui-background-elevation-2, var(--tui-background-base));
+  box-shadow:
+    0 0.5rem 1.5rem rgba(0, 0, 0, 0.12),
+    0 0.125rem 0.375rem rgba(0, 0, 0, 0.08);
 }
 
 .day-plan__tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  gap: 0.75rem;
+  --plan-row-size: 8px;
+  inline-size: 100%;
+  gap: 0.5rem;
+  grid-auto-rows: var(--plan-row-size);
 }
 
 .plan-tile {
-  min-height: 9rem;
+  min-height: unset;
+
+  &--done {
+    .plan-card {
+      opacity: 0.55;
+    }
+
+    .plan-card__title {
+      text-decoration: line-through;
+      color: var(--tui-text-secondary);
+    }
+  }
+
+  &--editing {
+    .plan-card {
+      border-color: var(--tui-border-focus);
+    }
+  }
 }
 
 .plan-card {
-  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.875rem;
+  gap: 0.625rem;
+  padding: 0.75rem 0.875rem;
   border: 1px solid var(--tui-border-normal);
-  border-radius: 1rem;
+  border-radius: 0.875rem;
   background: var(--tui-background-base);
-  box-shadow: 0 0.25rem 1.25rem rgb(0 0 0 / 0.04);
+
 }
 
 .plan-card__top {
@@ -102,6 +277,7 @@
   display: flex;
   align-items: center;
   gap: 0.375rem;
+  padding: 0 0.125rem;
   margin-bottom: 0.375rem;
   font-size: 0.75rem;
 }
@@ -109,6 +285,11 @@
 .plan-card__identifier {
   font-weight: 600;
   color: var(--tui-text-secondary);
+
+  &:hover {
+    color: var(--app-brand-500);
+    cursor: pointer;
+  }
 }
 
 .plan-card__project {
@@ -117,20 +298,48 @@
 
 .plan-card__title {
   margin: 0;
-  font-size: 0.9375rem;
-  line-height: 1.35;
   font-weight: 600;
   color: var(--tui-text-primary);
-
-  display: -webkit-box;
   overflow: hidden;
-  -webkit-box-orient: vertical;
+}
+
+.plan-card__description-block {
+  margin-top: 0.25rem;
+  max-width: 40rem;
+}
+
+.plan-card__description {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--tui-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.plan-card__description-toggle {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.plan-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+
+  .plan-card:hover & {
+    opacity: 1;
+  }
 }
 
 .plan-card__footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 0.75rem;
 }
 
@@ -162,8 +371,11 @@
     width: 100%;
   }
 
-  .day-plan__toolbar {
-    flex-direction: column;
-    align-items: stretch;
+  .day-plan__add-form {
+    grid-template-columns: 1fr;
+
+    &-field--wide {
+      grid-column: 1;
+    }
   }
 }

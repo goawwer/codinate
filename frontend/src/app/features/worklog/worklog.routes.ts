@@ -11,7 +11,7 @@ export const WORKLOG_ROUTES: Routes = [
     loadComponent: () => import('./components/main/worklog').then((m) => m.WorklogComponent),
   },
   {
-    path: 'dailyPlan',
+    path: 'daily-plan',
     loadComponent: () =>
       import('./components/daily-plan/daily-plan').then((m) => m.DailyPlanComponent),
   },

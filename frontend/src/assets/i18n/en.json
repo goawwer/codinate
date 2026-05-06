@@ -254,6 +254,7 @@
         "time": "Time",
         "hours": "Hours",
         "hoursUnit": "h",
+        "minutesUnit": "min",
         "description": "Description",
         "project": "Project",
         "total": "Total",
@@ -265,6 +266,32 @@
       "subnav": {
         "overview": "Overview",
         "dailyPlan": "Daily plan"
+      },
+      "dailyPlan": {
+        "subtitle": "Arrange tasks in the order you plan to complete them.",
+        "planned": "Planned",
+        "done": "done",
+        "noEstimate": "No estimate",
+        "addTask": "Add task",
+        "editItem": "Editing task",
+        "clearPlan": "Clear plan",
+        "empty": {
+          "title": "Plan is empty",
+          "subtitle": "Add tasks you plan to complete today."
+        },
+        "priority": {
+          "high": "High",
+          "medium": "Medium",
+          "low": "Low",
+          "default": "No priority"
+        },
+        "addForm": {
+          "title": "Task title",
+          "identifier": "Identifier",
+          "project": "Project",
+          "plannedMinutes": "Planned time (min)",
+          "add": "Add to plan"
+        }
       }
     }
   },
