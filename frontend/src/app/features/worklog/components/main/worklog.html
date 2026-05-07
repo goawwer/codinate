@@ -115,10 +115,16 @@
         }
 
         @empty {
-          <div class="worklog-empty">
-            <tui-icon icon="@tui.clock" class="empty-icon" />
-            <span>{{ 'models.worklog.columns.noLogs' | translate }}</span>
-          </div>
+          <tui-block-status>
+            <img
+              alt="{{ 'generic.statuses.notFound' | translate }}"
+              src="assets/images/not-found.svg"
+              tuiSlot="top"
+              class="image"
+            />
+            <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
+            <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
+          </tui-block-status>
         }
       </div>
 

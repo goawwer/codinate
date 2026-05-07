@@ -14,7 +14,7 @@ type User struct {
 	Email          string              `db:"email"`
 	Username       string              `db:"username"`
 	HashedPassword string              `db:"hashed_password"`
-	ProfilePicture string              `db:"profile_picture_path"`
+	ProfilePicture string              `db:"avatar"`
 	RoleId         int64               `db:"role_id"`
 	Permission     enum.PermissionRole `db:"permission_role"`
 	Disabled       bool                `db:"disabled"`

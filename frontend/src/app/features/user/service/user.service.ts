@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from '../types/model/user.model';
 import { CreateUserInput, UpdateUserInput, UserFilters } from '../types/model/dashboard.model';
+import { UserProfile } from '../types/model/profile.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserApiService {
@@ -40,5 +41,9 @@ export class UserApiService {
 
   currentUser(): Observable<User> {
     return this.httpClient.get<User>(`${this.currentURL}/user`);
+  }
+
+  getProfile(userId: string): Observable<UserProfile> {
+    return this.httpClient.get<UserProfile>(`${this.baseURL}/profile/${userId}`);
   }
 }

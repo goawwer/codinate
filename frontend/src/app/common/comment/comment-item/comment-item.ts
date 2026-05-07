@@ -10,6 +10,7 @@ import {
 import { filter } from 'rxjs';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TuiButton, TuiIcon } from '@taiga-ui/core';
+import { RouterLink } from '@angular/router';
 import { provideTuiEditor } from '@taiga-ui/editor';
 import { AppPicture } from '../../picture/app-picture';
 import { AppDatePipe } from '../../pipes/app-date.pipe';
@@ -33,6 +34,7 @@ import { AppDialogService } from '../../dialogs/dialog.service';
     AppEditorComponent,
     TranslatePipe,
     LowerCasePipe,
+    RouterLink,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './comment-item.html',

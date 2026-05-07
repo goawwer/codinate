@@ -1,4 +1,5 @@
 import { TuiButton, TuiHint, TuiIcon, TuiLoader, TuiScrollbar } from '@taiga-ui/core';
+import { RouterLink } from '@angular/router';
 import { TuiBlockStatus } from '@taiga-ui/layout';
 import { TuiTabs } from '@taiga-ui/kit';
 import { AppPicture } from '../../../../common/picture/app-picture';
@@ -16,4 +17,5 @@ export const TEAMDETAILIMPORTS = [
   AppPicture,
   AppDatePipe,
   TranslatePipe,
+  RouterLink,
 ] as const;

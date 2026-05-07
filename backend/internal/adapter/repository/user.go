@@ -19,6 +19,7 @@ type UserRepo interface {
 	DeleteById(ctx context.Context, id uuid.UUID) error
 	DeleteByIds(ctx context.Context, ids []uuid.UUID) error
 	UpdateById(ctx context.Context, newFields user.UpdateInput, id uuid.UUID) error
+	GetUserProfile(ctx context.Context, userId uuid.UUID) (user.Profile, error)
 }
 
 type userRepoImpl struct {
@@ -57,7 +58,7 @@ func (r *userRepoImpl) GetAll(ctx context.Context, f *user.Filters) ([]user.Row,
 	err = r.SelectContext(ctx, &res, `
 		SELECT
 			u.id, u.name, u.surname, u.email, u.username,
-			u.picture_name, u.permission_role,
+			u.avatar, u.permission_role,
 			u.disabled, u.created_at, u.updated_at,
 			er.name AS role
 		FROM users u
@@ -73,7 +74,7 @@ func (r *userRepoImpl) GetById(ctx context.Context, id uuid.UUID) (*user.Row, er
 	err := r.QueryRowContext(ctx, `
 		SELECT
 			u.id, u.name, u.surname, u.email, u.username,
-			u.picture_name, u.permission_role,
+			u.avatar, u.permission_role,
 			u.disabled, u.created_at, u.updated_at,
 			er.name AS role
 		FROM users u
@@ -111,4 +112,62 @@ func (r *userRepoImpl) DeleteByIds(ctx context.Context, ids []uuid.UUID) error {
   `, pq.Array(ids))
 
 	return err
+}
+
+func (r *userRepoImpl) GetUserProfile(ctx context.Context, userId uuid.UUID) (user.Profile, error) {
+	var res user.Profile
+
+	err := r.GetContext(ctx, &res, `
+		SELECT
+			u.id,
+			u.name,
+			u.surname,
+			u.username,
+			u.profile_description,
+			u.avatar,
+			u.backgroud_profile_picture,
+			er.name as role
+		FROM users u
+		LEFT JOIN employee_roles er ON u.role_id = er.id
+		WHERE u.id = $1
+	`, userId)
+	if err != nil {
+		return res, err
+	}
+
+	err = r.SelectContext(ctx, &res.Projects, `
+		SELECT
+			p.id,
+			p.picture_name as project_picture,
+			p.name,
+			COALESCE(SUM(t.total_minutes), 0) as spent_minutes,
+			COALESCE(SUM(CASE WHEN t.created_at >= NOW() - INTERVAL '14 days' THEN t.total_minutes ELSE 0 END), 0) as recent_minutes
+		FROM project_members pm
+		JOIN projects p ON p.id = pm.project_id
+		LEFT JOIN time_logs t ON t.user_id = $1 AND t.project_id = p.id
+		WHERE pm.user_id = $1
+		GROUP BY p.id, p.name
+	`, userId)
+	if err != nil {
+		return res, err
+	}
+
+	for i, p := range res.Projects {
+		res.RecentMinutes += p.RecentMinutes
+
+		var tasks []user.TaskRef
+		err = r.SelectContext(ctx, &tasks, `
+			SELECT id::text, identifier, title
+			FROM tasks
+			WHERE project_id = $1 AND assignee_id = $2
+			ORDER BY created_at DESC
+			LIMIT 3
+		`, p.ID, userId)
+		if err != nil {
+			return res, err
+		}
+		res.Projects[i].Tasks = tasks
+	}
+
+	return res, err
 }

@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS users (
     hashed_password TEXT NOT NULL,
     role_id BIGINT NOT NULL REFERENCES employee_roles(id),
     permission_role permissions NOT NULL,
-    picture_name TEXT,
+    avatar TEXT,
+    profile_description TEXT,
+    backgroud_profile_picture TEXT,
     disabled BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT current_timestamp,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT current_timestamp

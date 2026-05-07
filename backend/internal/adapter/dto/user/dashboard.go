@@ -39,7 +39,7 @@ type Row struct {
 	Surname     string              `db:"surname"         json:"surname"`
 	Email       string              `db:"email"           json:"email"`
 	Username    string              `db:"username"        json:"username"`
-	PictureName *string             `db:"picture_name"    json:"picture"`
+	PictureName *string             `db:"avatar"    json:"picture"`
 	Role        string              `db:"role"       json:"role"`
 	Permission  enum.PermissionRole `db:"permission_role" json:"permission"`
 	Disabled    bool                `db:"disabled"        json:"disabled"`

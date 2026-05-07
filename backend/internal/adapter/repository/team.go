@@ -65,7 +65,7 @@ func (r *teamRepoImpl) GetTeamMembersBy(ctx context.Context, id uuid.UUID) ([]us
 
 	err := r.SelectContext(ctx, &res, `
 		SELECT
-			u.name, u.surname, u.username, u.picture_name,
+			u.name, u.surname, u.username, u.avatar,
 		FROM teams t
 		LEFT JOIN team_members m ON t.id = m.team_id
 		LEFT JOIN users u ON u.id = m.user_id

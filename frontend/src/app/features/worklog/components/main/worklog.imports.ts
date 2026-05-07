@@ -14,6 +14,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AppDatePipe } from '../../../../common/pipes/app-date.pipe';
 import { TuiScrollbar } from '@taiga-ui/core';
+import { TuiBlockStatus } from '@taiga-ui/layout';
 
 export const WORKLOGIMPORTS = [
   TuiButton,
@@ -33,4 +34,5 @@ export const WORKLOGIMPORTS = [
   TuiLink,
   TuiElasticContainer,
   TuiScrollbar,
+  TuiBlockStatus,
 ];

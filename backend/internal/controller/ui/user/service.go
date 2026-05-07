@@ -57,3 +57,7 @@ func (s *service) deleteUserById(ctx context.Context, id uuid.UUID) error {
 func (s *service) deleteUsersByIds(ctx context.Context, ids []uuid.UUID) error {
 	return repository.GetUserRepo().DeleteByIds(ctx, ids)
 }
+
+func (s *service) getUserProfileBy(ctx context.Context, userId uuid.UUID) (user.Profile, error) {
+	return repository.GetUserRepo().GetUserProfile(ctx, userId)
+}

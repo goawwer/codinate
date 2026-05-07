@@ -39,7 +39,7 @@ func (r *commentRepoImpl) GetAllBy(ctx context.Context, entityId uuid.UUID) ([]c
 			u.name as employee_name,
 			u.surname as employee_surname,
 			u.username as employee_username,
-			u.picture_name as employee_profile_picture,
+			u.avatar as employee_profile_picture,
 			c.body,
 			COALESCE(
 				(SELECT json_agg(json_build_object('id', f.id, 'name', f.name))

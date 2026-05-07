@@ -87,14 +87,14 @@
           </div>
           <div class="widget-body">
             @for (member of t.members; track member.id) {
-              <div class="participant-row">
+              <a class="participant-row" [routerLink]="['/users', member.id]">
                 <div class="participant-avatar">
                   <app-picture [name]="member.name" size="s" entityType="users" pictureName="" />
                 </div>
                 <div class="participant-info">
                   <span class="participant-name">{{ member.name }} {{ member.surname }}</span>
                 </div>
-              </div>
+              </a>
             }
             @if (!t.members.length) {
               <span class="empty-text">{{ 'generic.statuses.empty' | translate }}</span>

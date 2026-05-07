@@ -210,7 +210,7 @@
           </div>
           <div class="widget-body">
             @for (member of p.members; track member.id) {
-              <div class="participant-row">
+              <a class="participant-row" [routerLink]="['/users', member.id]">
                 <div class="participant-avatar">
                   <app-picture [name]="member.name" [surname]="member.surname" size="s" entityType="users" pictureName="" />
                 </div>
@@ -218,7 +218,7 @@
                   <span class="participant-name">{{ member.name }} {{ member.surname }}</span>
                   <span class="participant-role">{{ member.role | employeeRole }}</span>
                 </div>
-              </div>
+              </a>
             }
             @if (!p.members.length) {
               <span class="empty-text">{{ 'generic.statuses.empty' | translate }}</span>

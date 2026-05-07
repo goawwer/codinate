@@ -16,6 +16,10 @@ func Register() {
 	ui.RegisterDelete("/users/delete", enum.AtLeastAdmin, reflect.TypeOf(service{}), deleteMany)
 	ui.RegisterGet("/users/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUser)
 	ui.RegisterGet("/users/all", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUsers)
+
+	// profile
+	ui.RegisterGet("/users/profile/{user_id}", enum.AnyUser, reflect.TypeOf(service{}), profile)
+	// ui.RegisterPatch("/users/profile/{user_id}", enum.AnyUser, reflect.TypeOf(service{}), updateProfile)
 }
 
 // create
@@ -151,6 +155,30 @@ func deleteMany(s ui.UIService) (any, error) {
 	return nil, s.GetService().(*service).deleteUsersByIds(s.GetRequest().Context(), input.IDs)
 }
 
+func profile(s ui.UIService) (any, error) {
+	userId, err := s.GetPathParameterAsString("user_id")
+	if err != nil {
+		return nil, err
+	}
+
+	return s.GetService().(*service).getUserProfileBy(s.GetRequest().Context(), uuid.MustParse(userId))
+}
+
+/*
+	func updateProfile(s ui.UIService) (any, error) {
+		user_id, err := s.GetPathParameterAsString("user_id")
+		if err != nil {
+			return nil, err
+		}
+
+		currentUser, err := s.GetCurrentUser()
+		if err != nil {
+			return nil, err
+		}
+
+		var
+	}
+*/
 func parseFilterParams(s ui.UIService) (*user.Filters, error) {
 	var f ui.FilterService[user.DashBoardInput, user.Filters]
 

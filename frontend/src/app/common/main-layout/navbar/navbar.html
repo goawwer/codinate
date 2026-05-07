@@ -24,7 +24,7 @@
       <tui-icon [icon]="this.theme.isDark() ? '@tui.sun' : '@tui.moon'" />
     </button>
 
-    <a>
+    <a [routerLink]="['/users', userStore.user()?.id]">
       <app-picture
         [name]="this.userStore.user()?.name ?? ''"
         [surname]="this.userStore.user()?.surname ?? ''"
