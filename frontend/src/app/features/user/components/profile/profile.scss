@@ -2,19 +2,20 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 75rem;
   margin: 0 auto;
-  padding: 1.25rem;
+  height: 100%;
+  overflow: hidden;
 }
 
 .profile-hero {
+  flex-shrink: 0;
   overflow: hidden;
   border-radius: 0.75rem;
   background: var(--tui-background-neutral-1);
 
   &__cover {
     position: relative;
-    height: 8rem;
+    height: 10rem;
     background: var(--tui-background-neutral-2);
   }
 
@@ -37,6 +38,7 @@
     flex: 0 0 6rem;
     flex-direction: column;
     align-items: center;
+    justify-content: space-around;
     gap: 0.625rem;
     margin-top: 1rem;
   }
@@ -68,6 +70,80 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  &__rank {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    height: 1.75rem;
+    padding: 0 0.65rem;
+
+    border-radius: 999px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+
+    border: 1px solid transparent;
+    box-shadow:
+      0 0.35rem 1rem rgb(0 0 0 / 0.1),
+      inset 0 1px 0 rgb(255 255 255 / 0.22);
+  }
+
+  &__rank-icon {
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+
+  &__rank-text {
+    line-height: 1;
+  }
+
+  &__rank--gold {
+    color: #fff7ed;
+    background:
+      radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.42), transparent 32%),
+      linear-gradient(135deg, #fbbf24, #f59e0b 45%, #b45309);
+    border-color: rgb(251 191 36 / 0.55);
+    box-shadow:
+      0 0.45rem 1.4rem rgb(245 158 11 / 0.32),
+      inset 0 1px 0 rgb(255 255 255 / 0.35);
+  }
+
+  &__rank--silver {
+    color: #111827;
+    background:
+      radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.6), transparent 32%),
+      linear-gradient(135deg, #f9fafb, #d1d5db 48%, #9ca3af);
+    border-color: rgb(209 213 219 / 0.8);
+    box-shadow:
+      0 0.45rem 1.2rem rgb(156 163 175 / 0.28),
+      inset 0 1px 0 rgb(255 255 255 / 0.65);
+  }
+
+  &__rank--bronze {
+    color: #fff7ed;
+    background:
+      radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.32), transparent 32%),
+      linear-gradient(135deg, #d97706, #92400e 52%, #451a03);
+    border-color: rgb(217 119 6 / 0.5);
+    box-shadow:
+      0 0.45rem 1.2rem rgb(146 64 14 / 0.3),
+      inset 0 1px 0 rgb(255 255 255 / 0.22);
+  }
+
+  &__rank--default {
+    color: var(--tui-text-secondary);
+    background: color-mix(in srgb, var(--app-bg) 82%, var(--app-brand-500));
+    border-color: color-mix(in srgb, var(--app-brand-500) 22%, transparent);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
   }
 
   &__identity {
@@ -122,10 +198,6 @@
     background 160ms ease;
 }
 
-.profile-stat--main {
-  background: color-mix(in srgb, var(--app-brand-500) 12%, var(--tui-background-base));
-}
-
 .profile-stat__value {
   font-size: clamp(1.25rem, 2vw, 1.75rem);
   font-weight: 700;
@@ -144,6 +216,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
+  flex: 1;
+  min-height: 0;
 
   &__nav {
     padding: 0 0.25rem;
@@ -157,16 +231,13 @@
 }
 
 .project-card {
+  position: relative;
   display: flex;
   gap: 1rem;
   padding: 1rem 1.25rem;
   border-radius: 0.75rem;
   background: var(--tui-background-neutral-1);
   transition: background 0.12s ease;
-
-  &:hover {
-    background: var(--tui-background-neutral-2);
-  }
 
   &__avatar {
     width: 5rem;
@@ -226,10 +297,12 @@
   }
 
   &__time {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    min-width: max-content;
 
     strong {
       font-size: 0.9rem;
@@ -289,6 +362,16 @@
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 0.7fr);
   gap: 0.75rem;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 11rem;
+}
+
+.activity-tab {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 1rem;
 }
 
 .results-card {
@@ -297,7 +380,6 @@
   background: var(--tui-background-neutral-1);
 
   &--large {
-    min-height: 20rem;
     display: flex;
     flex-direction: column;
   }
@@ -343,27 +425,17 @@
 }
 
 .work-dynamics-axes {
-  display: block;
+  --tui-chart-categorical-00: var(--app-brand-300, #6c47ff);
+  --tui-chart-categorical-01: #ea97c4;
+  --tui-chart-categorical-02: #a0c5df;
+
   flex: 1;
-  min-height: 13rem;
-  height: 14rem;
-  margin-top: 1rem;
-  overflow: hidden;
-
-  ::ng-deep text {
-    font-size: 0.6875rem;
-    fill: var(--tui-text-tertiary);
-  }
-
-  ::ng-deep line {
-    stroke: var(--tui-border-normal);
-    stroke-opacity: 0.45;
-  }
+  min-block-size: 0;
+  margin-block-start: 1rem;
 }
 
 .work-dynamics-chart {
-  display: block;
-  height: 100%;
+  block-size: 100%;
 }
 
 .work-dynamics-hint {

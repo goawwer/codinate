@@ -200,7 +200,7 @@ export class ProjectDetailComponent implements OnInit {
     this.dialogs
       .component<ProjectDialogComponent, void, ProjectDialogData>(ProjectDialogComponent, {
         label: this.translate.instant('admin.dashboard.projects.dialogs.editTitle'),
-        size: 'l',
+        size: 'fullscreen',
         data: { project },
       })
       .subscribe();

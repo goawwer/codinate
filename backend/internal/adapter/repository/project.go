@@ -84,7 +84,7 @@ func (r *projectRepoImpl) GetById(ctx context.Context, id int) (project.Row, err
 			p.id,
 			author.name AS author_name,
 			author.surname AS author_surname,
-			p.name, p.description, p.picture_name,
+			p.name, p.description, p.picture_name, p.about,
 			COALESCE(p.links, '[]'::jsonb) AS links,
 			p.archived_at, p.created_at, p.updated_at,
 			COALESCE(
@@ -93,7 +93,8 @@ func (r *projectRepoImpl) GetById(ctx context.Context, id int) (project.Row, err
 						'id',      mu.id,
 						'name',    mu.name,
 						'surname', mu.surname,
-						'role',    er.name
+						'role',    er.name,
+						'picture', mu.avatar
 					)
 				) FILTER (WHERE mu.id IS NOT NULL),
 				'[]'::json
@@ -131,10 +132,10 @@ func (r *projectRepoImpl) Create(ctx context.Context, input project.CreateProjec
 
 	err := r.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
 		if err := tx.QueryRowContext(ctx, `
-            INSERT INTO projects (author_id, name, description, picture_name)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO projects (author_id, name, description, picture_name, about)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING id
-        `, input.AuthorId, input.Core.Name, input.Core.Description, input.Core.PictureName).
+        `, input.AuthorId, input.Core.Name, input.Core.Description, input.Core.PictureName, input.Core.About).
 			Scan(&projectId); err != nil {
 			return err
 		}
@@ -223,7 +224,7 @@ func (r *projectRepoImpl) GetReleases(ctx context.Context, projectId int) ([]mod
 func (r *projectRepoImpl) AddNewRelease(ctx context.Context, release *model.Release) error {
 	_, err := r.NamedQueryContext(ctx, `
 		INSERT INTO project_releases (
-			project_id, title, decription, status, start_at, end_at
+			project_id, title, description, status, start_at, end_at
 		)
 		VALUES (
 			:project_id, :title, :description, :status, :start_at, :end_at

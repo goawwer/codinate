@@ -8,16 +8,18 @@ import (
 )
 
 type User struct {
-	Id             uuid.UUID           `db:"id"`
-	Name           string              `db:"name"`
-	Surname        string              `db:"surname"`
-	Email          string              `db:"email"`
-	Username       string              `db:"username"`
-	HashedPassword string              `db:"hashed_password"`
-	ProfilePicture string              `db:"avatar"`
-	RoleId         int64               `db:"role_id"`
-	Permission     enum.PermissionRole `db:"permission_role"`
-	Disabled       bool                `db:"disabled"`
-	CreatedAt      time.Time           `db:"created_at"`
-	UpdatedAt      time.Time           `db:"updated_at"`
+	Id                       uuid.UUID           `db:"id" json:"id"`
+	Name                     string              `db:"name" json:"name"`
+	Surname                  string              `db:"surname" json:"surname"`
+	Email                    string              `db:"email" json:"email"`
+	Username                 string              `db:"username" json:"username"`
+	HashedPassword           string              `db:"hashed_password" json:"-"`
+	ProfilePicture           string              `db:"avatar" json:"avatar"`
+	About                    string              `db:"about" json:"about"`
+	ProfileBackgroundPicture string              `db:"background_profile_picture" json:"backgroundPicture"`
+	RoleId                   int64               `db:"role_id" json:"roleId"`
+	Permission               enum.PermissionRole `db:"permission_role" json:"permissionRole"`
+	Disabled                 bool                `db:"disabled" json:"disabled"`
+	CreatedAt                time.Time           `db:"created_at" json:"createdAt"`
+	UpdatedAt                time.Time           `db:"updated_at" json:"updatedAt"`
 }

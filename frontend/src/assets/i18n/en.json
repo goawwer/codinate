@@ -48,11 +48,14 @@
     },
     "operations": {
       "success": "Completed",
-      "fail": "Failed"
+      "fail": "Failed",
+      "deleting": "Deleting",
+      "deletingEntity": "Deleting {{ entity }}"
     },
     "hints": {
       "changePicture": "Change picture",
-      "deletePicture": "Delete picture"
+      "deletePicture": "Delete picture",
+      "rank": "Activity ranking: #{{ rank }}. More time spent working can move you higher."
     },
     "titles": {
       "status": "Status",
@@ -63,7 +66,8 @@
       "info": "Info",
       "progress": "Progress",
       "feed": "Feed",
-      "period": "Period"
+      "period": "Period",
+      "others": "Others"
     },
     "tabs": {
       "general": "General",
@@ -76,6 +80,21 @@
       "thisWeek": "This week",
       "thisMonth": "This month",
       "allTime": "All time"
+    },
+    "widgets": {
+      "leaderboard": "LeaderBoard",
+      "season": {
+        "dayOne": "Day 1",
+        "days": "Day {{ days }}",
+        "hint": "Current monthly ranking season. The leaderboard resets at the beginning of each month."
+      }
+    },
+    "time": {
+      "hoursShort": "h",
+      "minutesShort": "m"
+    },
+    "warnings": {
+      "deleteEntity": "{{ entity }} \"{{ name }}\" will be permanently deleted. This action cannot be undone."
     }
   },
   "auth": {
@@ -109,7 +128,9 @@
     "main": "Main",
     "mine": "My tasks",
     "worklog": "Worklog",
-    "admin": "Admin-dashboard"
+    "admin": "Admin-dashboard",
+    "profile": "Profile",
+    "logout": "Log out"
   },
   "employee_roles": {
     "owner": "Owner",
@@ -138,12 +159,14 @@
     },
     "project": {
       "title": {
+        "all": "All projects",
         "default": "Project",
         "plural": "Projects"
       },
       "projectName": "Name",
       "projectDescription": "Description",
       "projectPictureName": "Picture",
+      "projectAbout": "About",
       "authorName": "Author",
       "members": "Members",
       "noAvailableMembers": "All users are already members",
@@ -178,7 +201,45 @@
       "disabled": "Disabled",
       "status": "Status",
       "createdAt": "Created at",
-      "updatedAt": "Update at"
+      "updatedAt": "Update at",
+      "profile": {
+        "createdAt": "Registered since",
+        "settings": "Profile settings",
+        "stats": {
+          "projects": "Projects",
+          "allSpent": "Total time",
+          "recentSpent": "Last 30 days"
+        },
+        "tabs": {
+          "activity": "Activity",
+          "results": "Results"
+        },
+        "projects": {
+          "totalSpent": "Total time spent on project",
+          "recentSpent": "Time spent in the last 2 weeks"
+        },
+        "results": {
+          "workDynamics": {
+            "title": "Work dynamics",
+            "subtitle": "Activity for the last 14 days",
+            "period": "For period",
+            "workingHours": "Working hours"
+          },
+          "focus": {
+            "title": "Focus",
+            "subtitle": "Time distribution between projects"
+          }
+        },
+        "tooltips": {
+          "allSpent": "Total logged time across all projects",
+          "recentSpent": "Logged time during the last 30 days"
+        },
+        "dialog": {
+          "description": "About me",
+          "changeBg": "Change background",
+          "language": "Language"
+        }
+      }
     },
     "task": {
       "title": {
@@ -198,7 +259,8 @@
       "categories": {
         "title": "Task categories",
         "subtitle": "Categories help organize tasks within this project. Each task can be assigned one category — use them to group work by feature, module, or any other logical area.",
-        "empty": "No categories provided"
+        "empty": "No categories provided",
+        "new": "New category"
       },
       "detailed": {
         "additionalInfo": "Additional Info",
@@ -268,6 +330,7 @@
         "dailyPlan": "Daily plan"
       },
       "dailyPlan": {
+        "create": "Create new record",
         "subtitle": "Arrange tasks in the order you plan to complete them.",
         "planned": "Planned",
         "done": "done",
@@ -328,7 +391,8 @@
           "editTitle": "Update team",
           "tabs": {
             "general": "General",
-            "members": "Members"
+            "members": "Members",
+            "danger": "Deletion"
           }
         }
       },
@@ -349,7 +413,8 @@
           "tabs": {
             "general": "General",
             "members": "Members",
-            "additional": "Additional"
+            "additional": "Additional",
+            "danger": "Deletion"
           }
         }
       },
@@ -457,6 +522,16 @@
         "createFailed": "Failed to log time",
         "updateFailed": "Failed to update time log",
         "deleteFailed": "Failed to delete time log"
+      }
+    },
+    "user": {
+      "profile": {
+        "success": {
+          "updated": "Profile updated successfully"
+        },
+        "errors": {
+          "updateFailed": "Failed to update profile"
+        }
       }
     }
   }

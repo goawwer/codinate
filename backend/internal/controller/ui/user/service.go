@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/goawwer/codinate/internal/adapter/dto"
+	"github.com/goawwer/codinate/internal/adapter/dto/filters"
 	"github.com/goawwer/codinate/internal/adapter/dto/user"
 	"github.com/goawwer/codinate/internal/adapter/model"
 	"github.com/goawwer/codinate/internal/adapter/repository"
@@ -60,4 +61,12 @@ func (s *service) deleteUsersByIds(ctx context.Context, ids []uuid.UUID) error {
 
 func (s *service) getUserProfileBy(ctx context.Context, userId uuid.UUID) (user.Profile, error) {
 	return repository.GetUserRepo().GetUserProfile(ctx, userId)
+}
+
+func (s *service) getUserProfileStats(ctx context.Context, userId, from, to string) (user.ProfileStats, error) {
+	return repository.GetUserRepo().GetUserProfileStats(ctx, uuid.MustParse(userId), filters.NewDateRange(from, to))
+}
+
+func (s *service) updateProfile(ctx context.Context, input user.UpdateProfileInput, userId uuid.UUID) error {
+	return repository.GetUserRepo().UpdateProfileBy(ctx, input, userId)
 }

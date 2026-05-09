@@ -11,6 +11,8 @@ import (
 
 func Register() {
 	ui.RegisterPost("/worklogs/add", enum.AnyUser, reflect.TypeOf(service{}), add)
+	ui.RegisterGet("/worklogs/leaderboard", enum.AnyUser, reflect.TypeOf(service{}), getLeaderboard)
+	ui.RegisterPost("/worklogs/leaderboard/recalculate", enum.AtLeastAdmin, reflect.TypeOf(service{}), recalculateLeaderboard)
 	ui.RegisterGet("/worklogs/{user_id}/all", enum.AnyUser, reflect.TypeOf(service{}), all)
 	ui.RegisterPatch("/worklogs/{log_id}/update", enum.AnyUser, reflect.TypeOf(service{}), update)
 	ui.RegisterDelete("/worklogs/{log_id}/delete", enum.AnyUser, reflect.TypeOf(service{}), deleteLog)
@@ -62,6 +64,14 @@ func deleteLog(s ui.UIService) (any, error) {
 	}
 
 	return nil, s.GetService().(*service).deleteBy(s.GetRequest().Context(), uuid.MustParse(id))
+}
+
+func getLeaderboard(s ui.UIService) (any, error) {
+	return s.GetService().(*service).getLeaderboard(s.GetRequest().Context())
+}
+
+func recalculateLeaderboard(s ui.UIService) (any, error) {
+	return nil, s.GetService().(*service).recalculateLeaderboard(s.GetRequest().Context())
 }
 
 func parseFilterParams(s ui.UIService) (*worklog.Filters, error) {

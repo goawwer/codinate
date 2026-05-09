@@ -1,12 +1,16 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CreateWorklogInput, WorklogRow } from '../types/worklog.model';
+import { CreateWorklogInput, LeaderboardEntry, WorklogRow } from '../types/worklog.model';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
   private readonly baseUrl = '/api/worklogs';
   private readonly http = inject(HttpClient);
+
+  getLeaderboard(): Observable<LeaderboardEntry[]> {
+    return this.http.get<LeaderboardEntry[]>(`${this.baseUrl}/leaderboard`);
+  }
 
   getAll(userId: string, params?: HttpParams, projectId?: number): Observable<WorklogRow[]> {
     let p = params ?? new HttpParams();

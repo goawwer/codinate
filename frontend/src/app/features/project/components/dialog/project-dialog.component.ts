@@ -1,15 +1,23 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  Signal,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TuiDialogContext } from '@taiga-ui/core';
 import { TUI_VALIDATION_ERRORS } from '@taiga-ui/kit';
-import { forkJoin, Observable, of, startWith } from 'rxjs';
+import { filter, forkJoin, Observable, of, startWith } from 'rxjs';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import { TranslateService } from '@ngx-translate/core';
 import { Project, ProjectMember } from '../../types/model/project.model';
 import { ProjectStore } from '../../store/project.store';
 import { ProjectApiService } from '../../service/project.service';
 import { AlertService } from '../../../../core/declarations/services/alert.service';
+import { AppDialogService } from '../../../../common/dialogs/dialog.service';
 import { CreateProjectInput, UpdateProjectInput } from '../../types/model/project-requests.model';
 import { PROJECT_DIALOG_IMPORTS } from './project-dialog.imports';
 import { loginValidationErrorsFactory } from '../../../auth/model/auth.validation';
@@ -23,6 +31,10 @@ import {
   UpdateReleaseInput,
 } from '../../service/release.service';
 import { TuiDay } from '@taiga-ui/cdk';
+import {
+  PendingEditorUploads,
+  PendingFile,
+} from '../../../../common/editor/pending-editor-uploads.service';
 
 export interface ProjectDialogData {
   project: Project | null;
@@ -52,11 +64,13 @@ export class ProjectDialogComponent {
   protected readonly context = injectContext<TuiDialogContext<void, ProjectDialogData>>();
   private readonly alert = inject(AlertService);
   private readonly translate = inject(TranslateService);
+  private readonly dialogs = inject(AppDialogService);
 
   protected readonly project = this.context.data.project;
   protected readonly isEdit = this.project !== null;
 
   protected readonly activeTab = signal(0);
+  protected readonly createStep = signal(0);
   protected readonly previewUrl = signal<string | null>(null);
   protected readonly selectedFile = signal<File | null>(null);
   protected readonly categoriesOpen = signal(false);
@@ -88,6 +102,9 @@ export class ProjectDialogComponent {
   protected readonly startAtOpen = signal(false);
   protected readonly endAtOpen = signal(false);
 
+  private readonly pendingUploads = inject(PendingEditorUploads);
+  protected readonly pendingFiles: Signal<PendingFile[]> = this.pendingUploads.pending;
+
   protected readonly releaseForm = new FormGroup({
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     description: new FormControl('', { nonNullable: true }),
@@ -116,6 +133,9 @@ export class ProjectDialogComponent {
       validators: [Validators.required],
     }),
     projectDescription: new FormControl(this.project?.projectDescription ?? '', {
+      nonNullable: true,
+    }),
+    projectAbout: new FormControl(this.project?.projectAbout ?? '', {
       nonNullable: true,
     }),
     memberIds: new FormControl<User[]>([], { nonNullable: true }),
@@ -159,6 +179,22 @@ export class ProjectDialogComponent {
     const reader = new FileReader();
     reader.onload = () => this.previewUrl.set(reader.result as string);
     reader.readAsDataURL(file);
+  }
+
+  protected isImage(type: string): boolean {
+    return type.startsWith('image/');
+  }
+
+  protected removeFile(blobUrl: string): void {
+    this.pendingUploads.remove(blobUrl);
+    const desc = this.form.controls.projectDescription.value;
+    const escaped = blobUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const cleaned = desc
+      .replace(new RegExp(`<img[^>]+src="${escaped}"[^>]*/?>`, 'gi'), '')
+      .replace(new RegExp(`<a[^>]+href="${escaped}"[^>]*>[\\s\\S]*?<\\/a>`, 'gi'), '');
+    if (cleaned !== desc) {
+      this.form.controls.projectDescription.setValue(cleaned);
+    }
   }
 
   protected removeMember(member: ProjectMember): void {
@@ -350,6 +386,33 @@ export class ProjectDialogComponent {
     }
   }
 
+  protected deleteProject(): void {
+    this.dialogs
+      .confirm({
+        label: this.translate.instant('admin.dashboard.projects.dialogs.deleteTitle'),
+        content: this.translate.instant('admin.dashboard.projects.dialogs.deleteContent', { count: 1 }),
+        yes: this.translate.instant('generic.actions.delete'),
+        no: this.translate.instant('generic.actions.cancel'),
+      })
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        this.store.deleteProjects([this.project!.id]);
+        this.context.completeWith();
+      });
+  }
+
+  protected nextCreateStep(): void {
+    if (this.createStep() === 0) {
+      this.form.controls.projectName.markAsTouched();
+      if (this.form.controls.projectName.invalid) return;
+    }
+    this.createStep.update((s) => s + 1);
+  }
+
+  protected previousCreateStep(): void {
+    this.createStep.update((s) => s - 1);
+  }
+
   protected submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -368,6 +431,9 @@ export class ProjectDialogComponent {
       if (value.projectDescription !== (this.project?.projectDescription ?? '')) {
         input.description = value.projectDescription;
       }
+      if (value.projectAbout !== (this.project?.projectAbout ?? '')) {
+        input.about = value.projectAbout;
+      }
       if (file) {
         input.pictureName = file.name;
       }
@@ -379,6 +445,7 @@ export class ProjectDialogComponent {
         projectName: value.projectName,
         projectDescription: value.projectDescription,
         projectPictureName: '',
+        projectAbout: value.projectAbout,
         memberIds: value.memberIds.map((u) => u.id),
       };
       this.store.createProject({

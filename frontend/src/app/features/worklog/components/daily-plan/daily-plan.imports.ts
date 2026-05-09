@@ -6,6 +6,7 @@ import { TuiButton, TuiIcon, TuiLoader, TuiTextfield } from '@taiga-ui/core';
 import { TuiBadge, TuiElasticContainer, TuiTiles } from '@taiga-ui/kit';
 import { TuiLink } from '@taiga-ui/core';
 import { TaskSuggestionsComponent } from '../../../task/components/task-suggestions/task-suggestions.component';
+import { TuiHint } from '@taiga-ui/core';
 
 export const DAILYPLANIMPORTS = [
   FormsModule,
@@ -21,4 +22,5 @@ export const DAILYPLANIMPORTS = [
   TuiLink,
   PlanTileHeightDirective,
   TaskSuggestionsComponent,
+  TuiHint,
 ];

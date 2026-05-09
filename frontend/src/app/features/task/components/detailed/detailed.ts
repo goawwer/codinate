@@ -322,17 +322,15 @@ export class Detailed implements OnInit {
   }
 
   protected openLogTimeDialog(): void {
-    console.log('asdsadas');
     const task = this.task();
     if (!task) {
-      console.log('bvbbbb');
       return;
     }
 
     this.dialogs
       .component<WorklogDialogComponent, boolean, WorklogDialogData>(WorklogDialogComponent, {
         label: this.translate.instant('models.worklog.logTime'),
-        size: 's',
+        size: 'l',
         data: {
           taskId: this.taskId,
           taskIdentifier: task.identifier,

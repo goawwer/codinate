@@ -5,29 +5,34 @@
       <p class="day-plan__subtitle">{{ 'models.worklog.dailyPlan.subtitle' | translate }}</p>
     </div>
 
-    <div class="day-plan__summary">
-      <span class="day-plan__summary-label">{{ 'models.worklog.dailyPlan.planned' | translate }}</span>
-      <strong>{{ minutesLabel(totalPlanned()) }}</strong>
-      @if (doneCount() > 0) {
-        <span class="day-plan__done-count">
-          {{ doneCount() }}/{{ items().length }} {{ 'models.worklog.dailyPlan.done' | translate }}
-        </span>
-      }
+    <div class="flex items-center gap-3">
+      <button
+        tuiButton
+        size="m"
+        [appearance]="isFormVisible() ? 'outline' : 'primary'"
+        type="button"
+        (click)="toggleForm()"
+        tuiHintAppearance="primary-tooltip"
+        tuiHintDirection="bottom"
+        [tuiHint]="'models.worklog.dailyPlan.create' | translate"
+      >
+        <tui-icon [icon]="isFormVisible() ? '@tui.x' : '@tui.plus'" />
+        {{ isFormVisible() ? ('generic.actions.cancel' | translate) : ""}}
+      </button>
+
+      <div class="day-plan__summary">
+        <span class="day-plan__summary-label">{{ 'models.worklog.dailyPlan.planned' | translate }}</span>
+        <strong>{{ minutesLabel(totalPlanned()) }}</strong>
+        @if (doneCount() > 0) {
+          <span class="day-plan__done-count">
+            {{ doneCount() }}/{{ items().length }} {{ 'models.worklog.dailyPlan.done' | translate }}
+          </span>
+        }
+      </div>
     </div>
   </header>
 
   <section class="day-plan__toolbar">
-    <button
-      tuiButton
-      size="m"
-      [appearance]="isFormVisible() ? 'outline' : 'primary'"
-      type="button"
-      (click)="toggleForm()"
-    >
-      <tui-icon [icon]="isFormVisible() ? '@tui.x' : '@tui.plus'" />
-      {{ isFormVisible() ? ('generic.actions.cancel' | translate) : ""}}
-    </button>
-
     @if (items().length && !isFormVisible()) {
       <button tuiButton size="m" appearance="ghost" type="button" (click)="clearPlan()">
         {{ 'models.worklog.dailyPlan.clearPlan' | translate }}

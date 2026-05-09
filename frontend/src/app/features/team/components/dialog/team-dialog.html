@@ -6,6 +6,7 @@
   >
     <button tuiTab>{{ 'admin.dashboard.teams.dialogs.tabs.general' | translate }}</button>
     <button tuiTab>{{ 'admin.dashboard.teams.dialogs.tabs.members' | translate }}</button>
+    <button tuiTab>{{ 'admin.dashboard.teams.dialogs.tabs.danger' | translate }}</button>
   </tui-tabs>
 
   @switch (activeTab()) {
@@ -115,6 +116,31 @@
       @if (!members().length) {
         <p class="text-sm text-center opacity-50 py-4">{{ 'models.team.noMembers' | translate }}</p>
       }
+    }
+
+    @case (2) {
+      <div class="flex flex-col gap-4 py-2">
+        <div class="p-4 rounded-xl border border-(--tui-status-negative) flex flex-col gap-3">
+          <div class="flex items-center gap-2">
+            <tui-icon icon="@tui.triangle-alert" style="color: var(--tui-status-negative)" />
+            <span class="font-semibold text-sm">{{ 'generic.operations.deleting' | translate }}</span>
+          </div>
+          <p class="text-sm text-(--tui-text-secondary) m-0">
+            {{ 'generic.warnings.deleteEntity' | translate: { entity: ('models.team.title.default' | translate | lowercase), name: team!.name } }}
+          </p>
+          <button
+            tuiButton
+            appearance="flat"
+            size="s"
+            type="button"
+            iconStart="@tui.trash-2"
+            style="color: var(--tui-status-negative); align-self: flex-start"
+            (click)="deleteTeam()"
+          >
+            {{ 'generic.actions.delete' | translate }} {{ team!.name }}
+          </button>
+        </div>
+      </div>
     }
   }
 }

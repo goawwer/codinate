@@ -26,6 +26,7 @@ type Service interface {
 	GetUrlParamAsStrings(name string) ([]string, error)
 	BindUrlParams(target any, prefix string) error
 	GetBasicSortingAndPagingParams() BasicQueryParams
+	GetDateRange() (string, string)
 }
 
 type CoreService struct {

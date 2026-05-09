@@ -17,6 +17,14 @@ func (s *service) getAll(ctx context.Context, userId uuid.UUID, f *worklog.Filte
 	return repository.GetWorklogRepo().GetAll(ctx, userId, f)
 }
 
+func (s *service) getLeaderboard(ctx context.Context) ([]worklog.LeaderboardEntry, error) {
+	return repository.GetWorklogRepo().GetLeaderboard(ctx, 10)
+}
+
+func (s *service) recalculateLeaderboard(ctx context.Context) error {
+	return repository.GetWorklogRepo().RecalculateLeaderboard(ctx)
+}
+
 func (s *service) update(ctx context.Context, id uuid.UUID, input worklog.UpdateLogInput) error {
 	return repository.GetWorklogRepo().UpdateBy(ctx, id, input)
 }

@@ -8,10 +8,13 @@ import (
 	"github.com/goawwer/codinate/internal/adapter/model"
 	"github.com/goawwer/codinate/pkg/util"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
 type WorklogRepo interface {
 	GetAll(ctx context.Context, userId uuid.UUID, f *worklog.Filters) ([]worklog.Row, error)
+	GetLeaderboard(ctx context.Context, limit int) ([]worklog.LeaderboardEntry, error)
+	RecalculateLeaderboard(ctx context.Context) error
 	Add(ctx context.Context, input model.Worklog) (uuid.UUID, error)
 	UpdateBy(ctx context.Context, id uuid.UUID, newLog worklog.UpdateLogInput) error
 	DeleteBy(ctx context.Context, id uuid.UUID) error
@@ -65,14 +68,14 @@ func (r *worklogRepoImpl) GetAll(ctx context.Context, userId uuid.UUID, f *workl
 		Eq("tk.identifier", f.Identifier).
 		Eq("t.project_id", f.ProjectId).
 		Like(searchCol, f.SearchBy.Value).
-		Order(orderCol, f.SortBy.Direction, "t.created_at", "DESC").
+		Order(orderCol, f.SortBy.Direction, "t.start_at", "DESC").
 		Limit(f.Paging.GetOffset(), f.Paging.GetLimit())
 
 	err = r.SelectContext(ctx, &result, `
 		SELECT
 			t.id,
 			t.task_id,
-			t.created_at AS date,
+			t.start_at AS date,
 			t.start_at,
 			t.end_at,
 			t.total_minutes,
@@ -85,6 +88,68 @@ func (r *worklogRepoImpl) GetAll(ctx context.Context, userId uuid.UUID, f *workl
 	`+qb.Build())
 
 	return result, err
+}
+
+func (r *worklogRepoImpl) GetLeaderboard(ctx context.Context, limit int) ([]worklog.LeaderboardEntry, error) {
+	result := make([]worklog.LeaderboardEntry, 0)
+	err := r.SelectContext(ctx, &result, `
+		SELECT user_id, username, name, surname, avatar, total_minutes, log_count, rank
+		FROM leaderboard_snapshots
+		ORDER BY rank ASC
+		LIMIT $1
+	`, limit)
+	if err != nil {
+		return nil, err
+	}
+	// Fallback to live query when snapshot table is empty (e.g. before first recalculation)
+	if len(result) == 0 {
+		err = r.SelectContext(ctx, &result, `
+			SELECT
+				u.id AS user_id,
+				u.username,
+				u.name,
+				u.surname,
+				COALESCE(u.avatar, '') AS avatar,
+				COALESCE(SUM(t.total_minutes), 0) AS total_minutes,
+				COUNT(t.id) AS log_count,
+				ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(t.total_minutes), 0) DESC)::int AS rank
+			FROM users u
+			JOIN time_logs t ON t.user_id = u.id AND t.created_at >= DATE_TRUNC('month', NOW())
+			WHERE u.disabled = false
+			GROUP BY u.id, u.username, u.name, u.surname, u.avatar
+			ORDER BY total_minutes DESC
+			LIMIT $1
+		`, limit)
+	}
+	return result, err
+}
+
+func (r *worklogRepoImpl) RecalculateLeaderboard(ctx context.Context) error {
+	return r.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
+		if _, err := tx.ExecContext(ctx, `DELETE FROM leaderboard_snapshots`); err != nil {
+			return err
+		}
+		_, err := tx.ExecContext(ctx, `
+			INSERT INTO leaderboard_snapshots
+				(user_id, username, name, surname, avatar, total_minutes, log_count, rank, calculated_at)
+			SELECT
+				u.id,
+				u.username,
+				COALESCE(u.name, '')    AS name,
+				COALESCE(u.surname, '') AS surname,
+				COALESCE(u.avatar, '')  AS avatar,
+				COALESCE(SUM(t.total_minutes), 0) AS total_minutes,
+				COUNT(t.id)             AS log_count,
+				ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(t.total_minutes), 0) DESC)::int AS rank,
+				NOW()
+			FROM users u
+			LEFT JOIN time_logs t
+				ON t.user_id = u.id AND t.created_at >= DATE_TRUNC('month', NOW())
+			WHERE u.disabled = false
+			GROUP BY u.id, u.username, u.name, u.surname, u.avatar
+		`)
+		return err
+	})
 }
 
 func (r *worklogRepoImpl) Add(ctx context.Context, input model.Worklog) (uuid.UUID, error) {

@@ -16,7 +16,7 @@
                     [name]="t.assigneeName"
                     [surname]="t.assigneeSurname"
                     size="m"
-                    pictureName=""
+                    [pictureName]="t.assigneePicture"
                     entityType="users"
                     tuiSlot="bottom"
                   ></app-picture>
@@ -25,7 +25,7 @@
                     size="xxl"
                     [pictureName]="t.projectPicture"
                     entityType="projects"
-                    [isAvatar]="true"
+                    [isRound]="false"
                   ></app-picture>
                 </tui-badged-content>
 
@@ -265,7 +265,7 @@
                     [name]="member.name"
                     [surname]="member.surname"
                     size="s"
-                    pictureName=""
+                    [pictureName]="member.picture"
                     entityType="users"
                   ></app-picture>
                 </div>

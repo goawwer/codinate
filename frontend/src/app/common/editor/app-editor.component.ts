@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
 import {
   provideTuiEditor,
+  provideTuiEditorOptions,
   TUI_ATTACH_FILES_LOADER,
   TUI_ATTACH_FILES_OPTIONS,
   TUI_IMAGE_LOADER,
@@ -84,7 +85,12 @@ import { EditorUploadService, editorFileLoader, editorImageLoader } from './edit
             transformCopiedText: true,
           }),
         ),
+      async () => import('@taiga-ui/editor').then(({ TuiMention }) => TuiMention),
     ),
+    provideTuiEditorOptions({
+      spellcheck: true,
+      translate: 'yes',
+    }),
   ],
 })
 export class AppEditorComponent implements ControlValueAccessor, OnInit {

@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
+import { TuiDay, TuiDayRange } from '@taiga-ui/cdk';
 import { filter } from 'rxjs';
 import { WorklogService } from '../../service/worklog.service';
 import { TranslateService } from '@ngx-translate/core';
@@ -92,6 +93,15 @@ export class WorklogComponent {
   readonly expandedDescriptions = signal<Set<string>>(new Set());
   readonly descriptionLimit = 180;
 
+  readonly calendarOpen = signal(false);
+  readonly customDateRange = signal<TuiDayRange | null>(null);
+
+  readonly dateLabel = computed(() => {
+    const range = this.customDateRange();
+    if (!range) return this.translate.instant('generic.titles.dateRange');
+    return `${this.fmtDay(range.from)} – ${this.fmtDay(range.to)}`;
+  });
+
   constructor() {
     this.projectStore.loadProjects();
 
@@ -99,7 +109,7 @@ export class WorklogComponent {
       const userId = this.userStore.user()?.id;
       if (!userId) return;
       const projectId = this.selectedProject().id || undefined;
-      this.store.loadLogs({ userId, params: this.buildParams(this.selectedPeriod()), projectId });
+      this.store.loadLogs({ userId, params: this.buildParams(), projectId });
     });
 
     effect(() => {
@@ -114,6 +124,20 @@ export class WorklogComponent {
 
   protected selectProject(project: Project | null): void {
     this.selectedProject.set(project ?? this.ALL_PROJECTS);
+  }
+
+  protected onPeriodChange(period: WorklogPeriod | null): void {
+    this.selectedPeriod.set(period ?? 'today');
+    this.customDateRange.set(null);
+  }
+
+  protected onDateRangeChange(range: TuiDayRange): void {
+    this.customDateRange.set(range);
+    this.calendarOpen.set(false);
+  }
+
+  protected clearDateRange(): void {
+    this.customDateRange.set(null);
   }
 
   protected toggleSort(col: 'date' | 'startAt'): void {
@@ -143,7 +167,7 @@ export class WorklogComponent {
       .pipe(filter(Boolean))
       .subscribe(() => {
         const projectId = this.selectedProject().id || undefined;
-        this.store.loadLogs({ userId, params: this.buildParams(this.selectedPeriod()), projectId });
+        this.store.loadLogs({ userId, params: this.buildParams(), projectId });
       });
   }
 
@@ -167,7 +191,7 @@ export class WorklogComponent {
       .pipe(filter(Boolean))
       .subscribe(() => {
         const projectId = this.selectedProject().id || undefined;
-        this.store.loadLogs({ userId, params: this.buildParams(this.selectedPeriod()), projectId });
+        this.store.loadLogs({ userId, params: this.buildParams(), projectId });
       });
   }
 
@@ -187,7 +211,7 @@ export class WorklogComponent {
         this.worklogService.delete(log.id).subscribe({
           next: () => {
             const projectId = this.selectedProject().id || undefined;
-            this.store.loadLogs({ userId, params: this.buildParams(this.selectedPeriod()), projectId });
+            this.store.loadLogs({ userId, params: this.buildParams(), projectId });
           },
         });
       });
@@ -227,10 +251,19 @@ export class WorklogComponent {
     });
   }
 
-  private buildParams(period: WorklogPeriod): HttpParams {
+  private buildParams(): HttpParams {
+    let params = new HttpParams().set('sortBy', 'date').set('sort', 'desc');
+
+    const customRange = this.customDateRange();
+    if (customRange) {
+      params = params.set('from', customRange.from.toLocalNativeDate().toISOString());
+      params = params.set('to', customRange.to.toLocalNativeDate().toISOString());
+      return params;
+    }
+
+    const period = this.selectedPeriod();
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
     let from: Date | null = null;
     let to: Date | null = null;
 
@@ -261,9 +294,13 @@ export class WorklogComponent {
         break;
     }
 
-    let params = new HttpParams().set('sortBy', 'date').set('sort', 'desc');
     if (from) params = params.set('from', from.toISOString());
     if (to) params = params.set('to', to.toISOString());
     return params;
+  }
+
+  private fmtDay(day: TuiDay): string {
+    const months: string[] = this.translate.instant('generic.months');
+    return `${months[day.month]} ${day.day}`;
   }
 }

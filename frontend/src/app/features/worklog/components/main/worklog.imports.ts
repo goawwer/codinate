@@ -7,7 +7,7 @@ import {
   TuiTextfield,
   TuiLink,
 } from '@taiga-ui/core';
-import { TuiChevron, TuiDataListWrapper, TuiSelect, TuiElasticContainer } from '@taiga-ui/kit';
+import { TuiCalendarRange, TuiChevron, TuiDataListWrapper, TuiSelect, TuiElasticContainer } from '@taiga-ui/kit';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
@@ -18,6 +18,7 @@ import { TuiBlockStatus } from '@taiga-ui/layout';
 
 export const WORKLOGIMPORTS = [
   TuiButton,
+  TuiCalendarRange,
   TuiDataList,
   TuiDropdown,
   TuiIcon,

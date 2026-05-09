@@ -17,6 +17,7 @@
         </div>
         <div class="project-header-info">
           <h1 class="project-name">{{ p.projectName }}</h1>
+          <span>{{ p.projectAbout }}</span>
           <div class="project-meta">
             <span class="meta-item">
               <span class="text-(--tui-text-tertiary)">
@@ -145,6 +146,10 @@
                       {{ release.status | releaseStatus }}</tui-badge>
                   </div>
 
+                  <div>
+                    {{ release.description }}
+                  </div>
+
                   @if (validDate(release.startAt) || validDate(release.endAt)) {
                     <div class="release-dates">
                       <tui-icon icon="@tui.calendar-range" />
@@ -212,7 +217,7 @@
             @for (member of p.members; track member.id) {
               <a class="participant-row" [routerLink]="['/users', member.id]">
                 <div class="participant-avatar">
-                  <app-picture [name]="member.name" [surname]="member.surname" size="s" entityType="users" pictureName="" />
+                  <app-picture [name]="member.name" [surname]="member.surname" size="s" entityType="users" [pictureName]="member.picture ?? ''" />
                 </div>
                 <div class="participant-info">
                   <span class="participant-name">{{ member.name }} {{ member.surname }}</span>

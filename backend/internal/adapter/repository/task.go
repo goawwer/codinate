@@ -140,13 +140,15 @@ func (r *taskRepoImpl) GetTaskBy(ctx context.Context, id uuid.UUID) (task.RowDet
 			asn.username AS assignee_username,
 			asn.name AS assignee_name,
 			asn.surname AS assignee_surname,
+			asn.avatar AS assignee_picture,
 			COALESCE(
 				json_agg(
 					json_build_object(
 						'id',      mu.id,
 						'name',    mu.name,
 						'surname', mu.surname,
-						'role',    er.name
+						'role',    er.name,
+						'picture', mu.avatar
 					)
 				) FILTER (WHERE mu.id IS NOT NULL),
 				'[]'::json

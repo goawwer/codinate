@@ -34,6 +34,7 @@ func serve(configPath string) {
 	}
 
 	worker.InitRefreshTokensWorker(ctx)
+	worker.InitLeaderboardWorker(ctx)
 	uploads.InitializeUploadsDir(ctx)
 	srv.Start(ctx)
 }

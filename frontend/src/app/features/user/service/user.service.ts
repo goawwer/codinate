@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from '../types/model/user.model';
 import { CreateUserInput, UpdateUserInput, UserFilters } from '../types/model/dashboard.model';
-import { UserProfile } from '../types/model/profile.model';
+import { UpdateProfileInput, UserProfile, UserProfileStats } from '../types/model/profile.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserApiService {
@@ -21,6 +21,12 @@ export class UserApiService {
 
   getById(id: string): Observable<User> {
     return this.httpClient.get<User>(`${this.baseURL}/${id}`);
+  }
+
+  getProfileStats(userId: string, from: string, to: string): Observable<UserProfileStats> {
+    return this.httpClient.get<UserProfileStats>(`${this.baseURL}/profile/${userId}/stats`, {
+      params: { from, to },
+    });
   }
 
   create(body: CreateUserInput): Observable<void> {
@@ -45,5 +51,18 @@ export class UserApiService {
 
   getProfile(userId: string): Observable<UserProfile> {
     return this.httpClient.get<UserProfile>(`${this.baseURL}/profile/${userId}`);
+  }
+
+  updateProfile(
+    userId: string,
+    body: UpdateProfileInput,
+    avatar?: File,
+    background?: File,
+  ): Observable<void> {
+    const formData = new FormData();
+    if (avatar) formData.append('avatar', avatar);
+    if (background) formData.append('background', background);
+    formData.append('payload', JSON.stringify(body));
+    return this.httpClient.patch<void>(`${this.baseURL}/profile/${userId}`, formData);
   }
 }

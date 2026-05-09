@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/goawwer/codinate/internal/adapter/database"
+	"github.com/goawwer/codinate/internal/adapter/dto/filters"
 	"github.com/goawwer/codinate/internal/adapter/dto/user"
 	"github.com/goawwer/codinate/internal/adapter/model"
 	models "github.com/goawwer/codinate/internal/adapter/model"
@@ -20,6 +21,8 @@ type UserRepo interface {
 	DeleteByIds(ctx context.Context, ids []uuid.UUID) error
 	UpdateById(ctx context.Context, newFields user.UpdateInput, id uuid.UUID) error
 	GetUserProfile(ctx context.Context, userId uuid.UUID) (user.Profile, error)
+	GetUserProfileStats(ctx context.Context, userId uuid.UUID, d *filters.DateRange) (user.ProfileStats, error)
+	UpdateProfileBy(ctx context.Context, input user.UpdateProfileInput, id uuid.UUID) error
 }
 
 type userRepoImpl struct {
@@ -123,9 +126,10 @@ func (r *userRepoImpl) GetUserProfile(ctx context.Context, userId uuid.UUID) (us
 			u.name,
 			u.surname,
 			u.username,
-			u.profile_description,
+			u.about,
 			u.avatar,
-			u.backgroud_profile_picture,
+			u.background_profile_picture,
+			u.created_at,
 			er.name as role
 		FROM users u
 		LEFT JOIN employee_roles er ON u.role_id = er.id
@@ -139,9 +143,10 @@ func (r *userRepoImpl) GetUserProfile(ctx context.Context, userId uuid.UUID) (us
 		SELECT
 			p.id,
 			p.picture_name as project_picture,
+			p.about as project_about,
 			p.name,
 			COALESCE(SUM(t.total_minutes), 0) as spent_minutes,
-			COALESCE(SUM(CASE WHEN t.created_at >= NOW() - INTERVAL '14 days' THEN t.total_minutes ELSE 0 END), 0) as recent_minutes
+			COALESCE(SUM(CASE WHEN t.created_at >= NOW() - INTERVAL '30 days' THEN t.total_minutes ELSE 0 END), 0) as recent_minutes
 		FROM project_members pm
 		JOIN projects p ON p.id = pm.project_id
 		LEFT JOIN time_logs t ON t.user_id = $1 AND t.project_id = p.id
@@ -155,7 +160,7 @@ func (r *userRepoImpl) GetUserProfile(ctx context.Context, userId uuid.UUID) (us
 	for i, p := range res.Projects {
 		res.RecentMinutes += p.RecentMinutes
 
-		var tasks []user.TaskRef
+		tasks := make([]user.TaskRef, 0)
 		err = r.SelectContext(ctx, &tasks, `
 			SELECT id::text, identifier, title
 			FROM tasks
@@ -170,4 +175,65 @@ func (r *userRepoImpl) GetUserProfile(ctx context.Context, userId uuid.UUID) (us
 	}
 
 	return res, err
+}
+
+func (r *userRepoImpl) GetUserProfileStats(ctx context.Context, userId uuid.UUID, d *filters.DateRange) (user.ProfileStats, error) {
+	var res user.ProfileStats
+
+	err := r.SelectContext(ctx, &res.WorkDynamics, `
+		WITH days AS (
+			SELECT generate_series(
+				$2::date,
+				$3::date,
+				interval '1 day'
+			)::date AS date
+		)
+		SELECT
+			d.date::text AS date,
+			COALESCE(SUM(t.total_minutes), 0)::int AS spent_minutes
+		FROM days d
+		LEFT JOIN time_logs t
+			ON t.user_id = $1
+			AND t.created_at >= d.date
+			AND t.created_at < d.date + interval '1 day'
+		GROUP BY d.date
+		ORDER BY d.date
+	`, userId, d.From, d.To)
+	if err != nil {
+		return res, err
+	}
+
+	err = r.SelectContext(ctx, &res.ProjectFocus, `
+		SELECT
+			p.id AS project_id,
+			p.name AS project_name,
+			COALESCE(SUM(t.total_minutes), 0)::int AS spent_minutes
+		FROM project_members pm
+		JOIN projects p ON p.id = pm.project_id
+		LEFT JOIN time_logs t
+			ON t.user_id = $1
+			AND t.project_id = p.id
+			AND t.created_at >= $2::date
+			AND t.created_at < ($3::date + interval '1 day')
+		WHERE pm.user_id = $1
+		GROUP BY p.id, p.name
+		HAVING COALESCE(SUM(t.total_minutes), 0) > 0
+		ORDER BY spent_minutes DESC, p.name ASC
+	`, userId, d.From, d.To)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (r *userRepoImpl) UpdateProfileBy(ctx context.Context, input user.UpdateProfileInput, id uuid.UUID) error {
+	var qb QueryFiltersBuilder
+
+	clause := qb.Update(util.GetDBColumnsFiltersValuesMap(nil, model.User{}, &input)).
+		Eq("id", id).
+		Build()
+
+	_, err := r.ExecContext(ctx, "UPDATE users "+clause, qb.Args()...)
+	return err
 }

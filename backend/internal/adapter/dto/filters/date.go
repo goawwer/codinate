@@ -9,9 +9,18 @@ type DateRange struct {
 	To   time.Time `json:"to" required:"true"`
 }
 
+func parseDate(s string) time.Time {
+	for _, layout := range []string{time.RFC3339Nano, time.RFC3339, "2006-01-02"} {
+		if t, err := time.Parse(layout, s); err == nil {
+			return t
+		}
+	}
+	return time.Time{}
+}
+
 func NewDateRange(dateFrom, dateTo string) *DateRange {
-	dateTimeFrom, _ := time.Parse(time.RFC3339Nano, dateFrom)
-	dateTimeTo, _ := time.Parse(time.RFC3339Nano, dateTo)
+	dateTimeFrom := parseDate(dateFrom)
+	dateTimeTo := parseDate(dateTo)
 
 	if !dateTimeTo.IsZero() {
 		dateTimeTo = dateTimeTo.Add(24 * time.Hour).Add(-1 * time.Millisecond)

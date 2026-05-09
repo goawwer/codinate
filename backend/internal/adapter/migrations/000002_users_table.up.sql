@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
     role_id BIGINT NOT NULL REFERENCES employee_roles(id),
     permission_role permissions NOT NULL,
     avatar TEXT,
-    profile_description TEXT,
-    backgroud_profile_picture TEXT,
+    about TEXT,
+    background_profile_picture TEXT,
     disabled BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT current_timestamp,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT current_timestamp

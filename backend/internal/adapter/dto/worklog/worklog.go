@@ -17,3 +17,14 @@ type Row struct {
 	ProjectName    string `db:"project_name" json:"projectName"`
 	TaskIdentifier int    `db:"task_identifier" json:"taskIdentifier"`
 }
+
+type LeaderboardEntry struct {
+	UserId       uuid.UUID `db:"user_id" json:"userId"`
+	Username     string    `db:"username" json:"username"`
+	Name         string    `db:"name" json:"name"`
+	Surname      string    `db:"surname" json:"surname"`
+	Avatar       string    `db:"avatar" json:"avatar"`
+	TotalMinutes int64     `db:"total_minutes" json:"totalMinutes"`
+	LogCount     int       `db:"log_count" json:"logCount"`
+	Rank         int       `db:"rank" json:"rank"`
+}

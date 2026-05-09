@@ -1,6 +1,6 @@
 <div class="h-screen flex flex-col overflow-hidden bg-app-bg">
   <header class="sticky top-0 z-10 py-4 bg-app-bg">
-    <div class="mx-auto w-full max-w-362.5 px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto w-full max-w-362.5 px-4 sm:px-6 lg:px-30">
       <div class="rounded-3xl bg-(--app-grey-100) overflow-hidden">
         <app-navbar></app-navbar>
         @if (isAdminSection()) {
@@ -56,7 +56,7 @@
     </div>
   </header>
 
-  <main class="flex-1 overflow-hidden mx-auto w-full h-full max-w-362.5 px-4 sm:px-6 lg:px-8">
+  <main class="flex-1 overflow-hidden mx-auto w-full h-full max-w-362.5 px-4 sm:px-6 lg:px-30 mt-2">
     <router-outlet></router-outlet>
   </main>
 </div>

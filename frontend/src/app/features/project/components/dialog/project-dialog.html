@@ -7,6 +7,7 @@
     <button tuiTab>{{ 'admin.dashboard.projects.dialogs.tabs.general' | translate }}</button>
     <button tuiTab>{{ 'admin.dashboard.projects.dialogs.tabs.members' | translate }}</button>
     <button tuiTab>{{ 'admin.dashboard.projects.dialogs.tabs.additional' | translate }}</button>
+    <button tuiTab>{{ 'admin.dashboard.projects.dialogs.tabs.danger' | translate }}</button>
   </tui-tabs>
 
   @switch (activeTab()) {
@@ -58,15 +59,47 @@
         </tui-textfield>
         <tui-error formControlName="projectName" [error]="[] | tuiFieldError | async" />
 
-        <tui-textfield>
+        <tui-textfield class="mb-4">
           <label tuiLabel>
-            {{ 'models.project.projectDescription' | translate }}
+            {{ 'models.project.projectAbout' | translate }}
             <span class="tui-text_body-xs tui-space_left-1" style="opacity: 0.6">
               ({{ 'generic.validation.optional' | translate }})
             </span>
           </label>
-          <input tuiTextfield formControlName="projectDescription" autocomplete="off" />
+          <input tuiTextfield formControlName="projectAbout" autocomplete="off" />
         </tui-textfield>
+
+        <div>
+          <app-editor
+            formControlName="projectDescription"
+            class="project-dialog-editor"
+            [placeholder]="'models.project.projectDescription' | translate"
+            entityType="projects"
+          />
+          @if (pendingFiles().length) {
+            <div class="pending-chips">
+              @for (item of pendingFiles(); track item.blobUrl) {
+                <div class="pending-chip">
+                  @if (isImage(item.type)) {
+                    <img [src]="item.blobUrl" class="pending-chip-thumb" [alt]="item.name" />
+                  } @else {
+                    <tui-icon icon="@tui.file" class="pending-chip-icon" />
+                  }
+                  <span class="pending-chip-name" [title]="item.name">{{ item.name }}</span>
+                  <button
+                    tuiIconButton
+                    appearance="ghost"
+                    type="button"
+                    size="xs"
+                    iconStart="@tui.x"
+                    (click)="removeFile(item.blobUrl)"
+                  ></button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
       </form>
     }
 
@@ -137,7 +170,7 @@
                 <input
                   tuiTextfield
                   [formControl]="categoryToAdd"
-                  [placeholder]="'generic.actions.add' | translate"
+                  [placeholder]="'models.task.categories.new' | translate"
                 />
               </tui-textfield>
               <button
@@ -185,15 +218,10 @@
           <div class="flex flex-col">
             @for (release of releases(); track release.id) {
               @if (editingReleaseId() === release.id) {
-                <div class="p-4 flex flex-col gap-3 border-b border-(--tui-border-normal) bg-(--tui-background-neutral-1)">
+                <div class="p-4 flex flex-col gap-3 border-b border-(--tui-border-normal) bg-(--tui-background-neutral-1) rounded-2xl mt-2">
                   <tui-textfield>
                     <label tuiLabel>{{ 'models.project.releases.fields.title' | translate }}</label>
                     <input tuiTextfield [formControl]="releaseForm.controls.title" autocomplete="off" />
-                  </tui-textfield>
-
-                  <tui-textfield>
-                    <label tuiLabel>{{ 'models.project.releases.fields.description' | translate }}</label>
-                    <input tuiTextfield [formControl]="releaseForm.controls.description" autocomplete="off" />
                   </tui-textfield>
 
                   <div class="grid grid-cols-3 gap-3">
@@ -214,6 +242,11 @@
                       <input tuiInputDate [formControl]="releaseForm.controls.endAt" />
                       <tui-calendar *tuiTextfieldDropdown />
                     </tui-textfield>
+                  </div>
+
+                  <div class="flex flex-col gap-1">
+                    <label tuiLabel>{{ 'models.project.releases.fields.description' | translate }}</label>
+                    <textarea class="release-description" [formControl]="releaseForm.controls.description" autocomplete="off"></textarea>
                   </div>
 
                   <div class="flex justify-end gap-2 pt-1">
@@ -277,11 +310,6 @@
                   <input tuiTextfield [formControl]="releaseForm.controls.title" autocomplete="off" />
                 </tui-textfield>
 
-                <tui-textfield>
-                  <label tuiLabel>{{ 'models.project.releases.fields.description' | translate }}</label>
-                  <input tuiTextfield [formControl]="releaseForm.controls.description" autocomplete="off" />
-                </tui-textfield>
-
                 <div class="grid grid-cols-3 gap-3">
                   <tui-textfield tuiChevron [stringify]="stringifyReleaseStatus">
                     <label tuiLabel>{{ 'generic.titles.status' | translate }}</label>
@@ -300,6 +328,11 @@
                     <input tuiInputDate [formControl]="releaseForm.controls.endAt" />
                     <tui-calendar *tuiTextfieldDropdown />
                   </tui-textfield>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label tuiLabel>{{ 'models.project.releases.fields.description' | translate }}</label>
+                  <textarea class="release-description" [formControl]="releaseForm.controls.description" autocomplete="off"></textarea>
                 </div>
 
                 <div class="flex justify-end gap-2 pt-1">
@@ -345,211 +378,321 @@
         </tui-expand>
       </tui-accordion>
     }
+
+    @case (3) {
+      <div class="flex flex-col gap-4 py-2">
+        <div class="p-4 rounded-xl border border-(--tui-status-negative) flex flex-col gap-3">
+          <div class="flex items-center gap-2">
+            <tui-icon icon="@tui.triangle-alert" style="color: var(--tui-status-negative)" />
+            <span class="font-semibold text-sm">{{ 'generic.operations.deleting' | translate }}</span>
+          </div>
+          <p class="text-sm text-(--tui-text-secondary) m-0">
+            {{ 'generic.warnings.deleteEntity' | translate: { entity: ('generic.titles.project' | translate | lowercase), name: project!.projectName } }}
+          </p>
+          <button
+            tuiButton
+            appearance="flat"
+            size="s"
+            type="button"
+            iconStart="@tui.trash-2"
+            style="color: var(--tui-status-negative); align-self: flex-start"
+            (click)="deleteProject()"
+          >
+            {{ 'generic.actions.delete' | translate }} {{ project!.projectName }}
+          </button>
+        </div>
+      </div>
+    }
   }
 }
 
 @if (!isEdit) {
-  <div class="flex flex-col items-center gap-3 pb-5">
-    <div class="w-28 h-28 rounded-full overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
-      @if (previewUrl(); as url) {
-        <img [src]="url" alt="Preview" class="w-full h-full object-cover" />
-      } @else {
-        <tui-icon icon="@tui.image" class="text-(--tui-text-tertiary)" style="font-size: 4rem" />
-      }
-    </div>
-    <button
-      tuiButton
-      appearance="flat"
-      size="xs"
-      type="button"
-      iconStart="@tui.camera"
-      (click)="fileInput.click()"
-      tuiHintAppearance="primary-tooltip"
-      tuiHintDirection="bottom"
-      [tuiHint]="'generic.hints.changePicture' | translate"
-    ></button>
-    <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelected($event)" />
-  </div>
+  <tui-stepper class="py-1 mb-3" [activeItemIndex]="createStep()">
+    <button tuiStep type="button" [disabled]="true">
+      {{ 'admin.dashboard.projects.dialogs.tabs.general' | translate }}
+    </button>
+    <button tuiStep type="button" [disabled]="true">
+      {{ 'admin.dashboard.projects.dialogs.tabs.members' | translate }}
+    </button>
+    <button tuiStep type="button" [disabled]="true">
+      {{ 'admin.dashboard.projects.dialogs.tabs.additional' | translate }}
+    </button>
+  </tui-stepper>
 
-  <form class="flex flex-col gap-3" [formGroup]="form">
-    <tui-textfield>
-      <label tuiLabel>{{ 'models.project.projectName' | translate }}</label>
-      <input tuiTextfield formControlName="projectName" autocomplete="off" />
-    </tui-textfield>
-    <tui-error formControlName="projectName" [error]="[] | tuiFieldError | async" />
-
-    <tui-textfield>
-      <label tuiLabel>
-        {{ 'models.project.projectDescription' | translate }}
-        <span class="tui-text_body-xs tui-space_left-1" style="opacity: 0.6">
-          ({{ 'generic.validation.optional' | translate }})
-        </span>
-      </label>
-      <input tuiTextfield formControlName="projectDescription" autocomplete="off" />
-    </tui-textfield>
-
-    <label tuiLabel>
-      <tui-textfield multi tuiChevron [stringify]="stringify">
-        <input
-          tuiInputChip
-          formControlName="memberIds"
-          [placeholder]="form.getRawValue().memberIds.length ? '' : ('models.project.members' | translate)"
-        />
-        <tui-input-chip *tuiItem />
-        <tui-data-list *tuiTextfieldDropdown>
-          @for (group of userGroups(); track group.role) {
-            <tui-opt-group [label]="group.role | employeeRole" tuiMultiSelectGroup>
-              @for (user of group.users | tuiFilterByInput; track user.id) {
-                <button new tuiOption [value]="user">
-                  {{ user.name }} {{ user.surname }}
-                </button>
-              }
-            </tui-opt-group>
-          }
-        </tui-data-list>
-      </tui-textfield>
-    </label>
-
-    <div class="flex flex-col gap-2">
-      <div class="flex items-center gap-2">
-        <tui-textfield class="flex-1">
-          <input
-            size="s"
-            tuiTextfield
-            [formControl]="newCategoryInput"
-            [placeholder]="'models.task.categories.title' | translate"
-            (keydown.enter)="addNewCategory()"
-          />
-
-          <tui-icon
-            icon="@tui.circle-question-mark"
-            tuiHintDirection="top-right"
-	          tuiHintAppearance="primary-tooltip"
-            [tuiHint]="'models.task.categories.subtitle' | translate"
-          />
-        </tui-textfield>
-        <button
-          appearance="action"
-          iconStart="@tui.plus"
-          size="m"
-          tuiIconButton
-          type="button"
-          [disabled]="!newCategoryInput.value.trim()"
-          (click)="addNewCategory()"
-        ></button>
-      </div>
-
-      @if (newCategories().length) {
-        <div class="flex flex-wrap gap-2">
-          @for (cat of newCategories(); track cat) {
-            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-(--tui-background-neutral-2)">
-              {{ cat }}
-              <button type="button" class="opacity-50 hover:opacity-100 leading-none" (click)="removeNewCategory(cat)">×</button>
-            </span>
+  <div [formGroup]="form">
+    <div [hidden]="createStep() !== 0">
+      <div class="flex flex-col items-center gap-3 pb-5 mt-2">
+        <div class="w-28 h-28 rounded-full overflow-hidden bg-(--tui-background-neutral-1) flex items-center justify-center">
+          @if (previewUrl(); as url) {
+            <img [src]="url" alt="Preview" class="w-full h-full object-cover" />
+          } @else {
+            <tui-icon icon="@tui.image" class="text-(--tui-text-tertiary)" style="font-size: 4rem" />
           }
         </div>
-      } @else {
-        <p class="text-sm opacity-40">{{ 'models.task.categories.empty' | translate }}</p>
-      }
-    </div>
-
-    <div class="flex flex-col gap-2">
-      @if (showReleaseForm()) {
-        <div class="flex flex-col gap-3 p-3 rounded-xl border border-(--tui-border-normal)">
-          <tui-textfield>
-            <label tuiLabel>{{ 'models.project.releases.fields.title' | translate }}</label>
-            <input tuiTextfield [formControl]="releaseForm.controls.title" autocomplete="off" />
-          </tui-textfield>
-
-          <tui-textfield>
-            <label tuiLabel>{{ 'models.project.releases.fields.description' | translate }}</label>
-            <input tuiTextfield [formControl]="releaseForm.controls.description" autocomplete="off" />
-          </tui-textfield>
-
-          <div class="grid grid-cols-3 gap-3">
-            <tui-textfield tuiChevron [stringify]="stringifyReleaseStatus">
-              <label tuiLabel>{{ 'generic.titles.status' | translate }}</label>
-              <input tuiSelect [formControl]="releaseForm.controls.status" />
-              <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="RELEASE_STATUSES" />
-            </tui-textfield>
-
-            <tui-textfield>
-              <label tuiLabel>{{ 'models.project.releases.fields.startAt' | translate }}</label>
-              <input tuiInputDate [formControl]="releaseForm.controls.startAt" />
-              <tui-calendar *tuiTextfieldDropdown />
-            </tui-textfield>
-
-            <tui-textfield>
-              <label tuiLabel>{{ 'models.project.releases.fields.endAt' | translate }}</label>
-              <input tuiInputDate [formControl]="releaseForm.controls.endAt" />
-              <tui-calendar *tuiTextfieldDropdown />
-            </tui-textfield>
-          </div>
-
-          <div class="flex justify-end gap-2">
-            <button
-              tuiButton
-              appearance="flat"
-              size="s"
-              type="button"
-              (click)="showReleaseForm.set(false); releaseForm.reset({status: 'active'})"
-            >
-              {{ 'generic.actions.cancel' | translate }}
-            </button>
-            <button
-              tuiButton
-              class="btn-primary"
-              size="s"
-              type="button"
-              [disabled]="!releaseForm.controls.title.value.trim()"
-              (click)="addNewRelease()"
-            >
-              {{ 'generic.actions.add' | translate }}
-            </button>
-          </div>
-        </div>
-      } @else {
         <button
           tuiButton
           appearance="flat"
-          size="s"
+          size="xs"
           type="button"
-          iconStart="@tui.plus"
-          (click)="showReleaseForm.set(true)"
-        >
-          {{ 'models.project.releases.add' | translate }}
-        </button>
-      }
+          iconStart="@tui.camera"
+          (click)="fileInput.click()"
+          tuiHintAppearance="primary-tooltip"
+          tuiHintDirection="bottom"
+          [tuiHint]="'generic.hints.changePicture' | translate"
+        ></button>
+        <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelected($event)" />
+      </div>
 
-      @if (newReleases().length) {
-        <div class="flex flex-wrap gap-2">
-          @for (rel of newReleases(); track $index; let i = $index) {
-            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-(--tui-background-neutral-2)">
-              {{ rel.title }}
-              <button type="button" class="opacity-50 hover:opacity-100 leading-none" (click)="removeNewRelease(i)">×</button>
+      <div class="flex flex-col gap-3">
+        <tui-textfield>
+          <label tuiLabel>{{ 'models.project.projectName' | translate }}</label>
+          <input tuiTextfield formControlName="projectName" autocomplete="off" />
+        </tui-textfield>
+        <tui-error formControlName="projectName" [error]="[] | tuiFieldError | async" />
+
+        <tui-textfield>
+          <label tuiLabel>
+            {{ 'models.project.projectAbout' | translate }}
+            <span class="tui-text_body-xs tui-space_left-1" style="opacity: 0.6">
+              ({{ 'generic.validation.optional' | translate }})
             </span>
+          </label>
+          <input tuiTextfield formControlName="projectAbout" autocomplete="off" />
+        </tui-textfield>
+
+        <div>
+          <app-editor
+            formControlName="projectDescription"
+            class="project-dialog-editor"
+            [placeholder]="'models.project.projectDescription' | translate"
+            entityType="projects"
+          />
+          @if (pendingFiles().length) {
+            <div class="pending-chips">
+              @for (item of pendingFiles(); track item.blobUrl) {
+                <div class="pending-chip">
+                  @if (isImage(item.type)) {
+                    <img [src]="item.blobUrl" class="pending-chip-thumb" [alt]="item.name" />
+                  } @else {
+                    <tui-icon icon="@tui.file" class="pending-chip-icon" />
+                  }
+                  <span class="pending-chip-name" [title]="item.name">{{ item.name }}</span>
+                  <button
+                    tuiIconButton
+                    appearance="ghost"
+                    type="button"
+                    size="xs"
+                    iconStart="@tui.x"
+                    (click)="removeFile(item.blobUrl)"
+                  ></button>
+                </div>
+              }
+            </div>
           }
         </div>
-      } @else if (!showReleaseForm()) {
-        <p class="text-sm opacity-40">{{ 'models.project.releases.empty' | translate }}</p>
-      }
+      </div>
+
+      <footer class="flex justify-end gap-2 pt-5">
+        <button tuiButton appearance="flat" type="button" (click)="context.completeWith()">
+          {{ 'generic.actions.cancel' | translate }}
+        </button>
+        <button tuiButton class="btn-primary" type="button" (click)="nextCreateStep()">
+          {{ 'generic.actions.next' | translate }}
+        </button>
+      </footer>
     </div>
-  </form>
+
+    <div [hidden]="createStep() !== 1">
+      <label tuiLabel>
+        <tui-textfield multi tuiChevron [stringify]="stringify">
+          <input
+            tuiInputChip
+            formControlName="memberIds"
+            [placeholder]="form.getRawValue().memberIds.length ? '' : ('models.project.members' | translate)"
+          />
+          <tui-input-chip *tuiItem />
+          <tui-data-list *tuiTextfieldDropdown>
+            @for (group of userGroups(); track group.role) {
+              <tui-opt-group [label]="group.role | employeeRole" tuiMultiSelectGroup>
+                @for (user of group.users | tuiFilterByInput; track user.id) {
+                  <button new tuiOption [value]="user">
+                    {{ user.name }} {{ user.surname }}
+                  </button>
+                }
+              </tui-opt-group>
+            }
+          </tui-data-list>
+        </tui-textfield>
+      </label>
+
+      <footer class="flex justify-end gap-2 pt-5">
+        <button tuiButton appearance="flat" type="button" (click)="previousCreateStep()">
+          {{ 'generic.actions.back' | translate }}
+        </button>
+        <button tuiButton class="btn-primary" type="button" (click)="nextCreateStep()">
+          {{ 'generic.actions.next' | translate }}
+        </button>
+      </footer>
+    </div>
+
+    <div [hidden]="createStep() !== 2">
+      <div class="flex flex-col gap-2 mb-4">
+        <div class="flex items-center gap-2">
+          <tui-textfield class="flex-1">
+            <input
+              size="s"
+              tuiTextfield
+              [formControl]="newCategoryInput"
+              [placeholder]="'models.task.categories.title' | translate"
+              (keydown.enter)="addNewCategory()"
+            />
+            <tui-icon
+              icon="@tui.circle-question-mark"
+              tuiHintDirection="top-right"
+              tuiHintAppearance="primary-tooltip"
+              [tuiHint]="'models.task.categories.subtitle' | translate"
+            />
+          </tui-textfield>
+          <button
+            appearance="action"
+            iconStart="@tui.plus"
+            size="m"
+            tuiIconButton
+            type="button"
+            [disabled]="!newCategoryInput.value.trim()"
+            (click)="addNewCategory()"
+          ></button>
+        </div>
+
+        @if (newCategories().length) {
+          <div class="flex flex-wrap gap-2">
+            @for (cat of newCategories(); track cat) {
+              <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-(--tui-background-neutral-2)">
+                {{ cat }}
+                <button type="button" class="opacity-50 hover:opacity-100 leading-none" (click)="removeNewCategory(cat)">×</button>
+              </span>
+            }
+          </div>
+        } @else {
+          <p class="text-sm opacity-40">{{ 'models.task.categories.empty' | translate }}</p>
+        }
+      </div>
+
+      <div class="flex flex-col gap-2">
+        @if (showReleaseForm()) {
+          <div class="flex flex-col gap-3 p-3 rounded-xl border border-(--tui-border-normal)">
+            <tui-textfield>
+              <label tuiLabel>{{ 'models.project.releases.fields.title' | translate }}</label>
+              <input tuiTextfield [formControl]="releaseForm.controls.title" autocomplete="off" />
+            </tui-textfield>
+
+            <tui-textfield>
+              <label tuiLabel>{{ 'models.project.releases.fields.description' | translate }}</label>
+              <input tuiTextfield [formControl]="releaseForm.controls.description" autocomplete="off" />
+            </tui-textfield>
+
+            <div class="grid grid-cols-3 gap-3">
+              <tui-textfield tuiChevron [stringify]="stringifyReleaseStatus">
+                <label tuiLabel>{{ 'generic.titles.status' | translate }}</label>
+                <input tuiSelect [formControl]="releaseForm.controls.status" />
+                <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="RELEASE_STATUSES" />
+              </tui-textfield>
+
+              <tui-textfield>
+                <label tuiLabel>{{ 'models.project.releases.fields.startAt' | translate }}</label>
+                <input tuiInputDate [formControl]="releaseForm.controls.startAt" />
+                <tui-calendar *tuiTextfieldDropdown />
+              </tui-textfield>
+
+              <tui-textfield>
+                <label tuiLabel>{{ 'models.project.releases.fields.endAt' | translate }}</label>
+                <input tuiInputDate [formControl]="releaseForm.controls.endAt" />
+                <tui-calendar *tuiTextfieldDropdown />
+              </tui-textfield>
+            </div>
+
+            <div class="flex justify-end gap-2">
+              <button
+                tuiButton
+                appearance="flat"
+                size="s"
+                type="button"
+                (click)="showReleaseForm.set(false); releaseForm.reset({status: 'active'})"
+              >
+                {{ 'generic.actions.cancel' | translate }}
+              </button>
+              <button
+                tuiButton
+                class="btn-primary"
+                size="s"
+                type="button"
+                [disabled]="!releaseForm.controls.title.value.trim()"
+                (click)="addNewRelease()"
+              >
+                {{ 'generic.actions.add' | translate }}
+              </button>
+            </div>
+          </div>
+        } @else {
+          <button
+            tuiButton
+            appearance="flat"
+            size="s"
+            type="button"
+            iconStart="@tui.plus"
+            (click)="showReleaseForm.set(true)"
+          >
+            {{ 'models.project.releases.add' | translate }}
+          </button>
+        }
+
+        @if (newReleases().length) {
+          <div class="flex flex-wrap gap-2">
+            @for (rel of newReleases(); track $index; let i = $index) {
+              <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-(--tui-background-neutral-2)">
+                {{ rel.title }}
+                <button type="button" class="opacity-50 hover:opacity-100 leading-none" (click)="removeNewRelease(i)">×</button>
+              </span>
+            }
+          </div>
+        } @else if (!showReleaseForm()) {
+          <p class="text-sm opacity-40">{{ 'models.project.releases.empty' | translate }}</p>
+        }
+      </div>
+
+      <footer class="flex justify-end gap-2 pt-5">
+        <button tuiButton appearance="flat" type="button" (click)="previousCreateStep()">
+          {{ 'generic.actions.back' | translate }}
+        </button>
+        <button
+          tuiButton
+          class="btn-primary"
+          type="submit"
+          [disabled]="store.isLoading()"
+          (click)="submit()"
+        >
+          {{ 'generic.actions.add' | translate }}
+        </button>
+      </footer>
+    </div>
+  </div>
 }
 
-<footer class="flex justify-end gap-2 pt-5">
-  <button tuiButton appearance="flat" type="button" (click)="context.completeWith()">
-    {{ 'generic.actions.cancel' | translate }}
-  </button>
-  @if (!isEdit || activeTab() === 0) {
-    <button
-      tuiButton
-      class="btn-primary"
-      type="submit"
-      [disabled]="store.isLoading() || (isEdit && !hasChanges())"
-      (click)="submit()"
-    >
-      {{ (isEdit ? 'generic.actions.save' : 'generic.actions.add') | translate }}
+@if (isEdit) {
+  <footer class="flex justify-end gap-2 pt-5">
+    <button tuiButton appearance="flat" type="button" (click)="context.completeWith()">
+      {{ 'generic.actions.cancel' | translate }}
     </button>
-  }
-</footer>
+    @if (activeTab() === 0) {
+      <button
+        tuiButton
+        class="btn-primary"
+        type="submit"
+        [disabled]="store.isLoading() || !hasChanges()"
+        (click)="submit()"
+      >
+        {{ 'generic.actions.save' | translate }}
+      </button>
+    }
+  </footer>
+}

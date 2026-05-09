@@ -1,4 +1,4 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, LowerCasePipe } from '@angular/common';
 import { AppPicture } from '../../../../common/picture/app-picture';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -30,6 +30,7 @@ import { EmployeeRolePipe } from '../../../../common/pipes/employee-role.pipe';
 export const TEAM_DIALOG_IMPORTS = [
   AppPicture,
   AsyncPipe,
+  LowerCasePipe,
   FormsModule,
   ReactiveFormsModule,
   TranslatePipe,

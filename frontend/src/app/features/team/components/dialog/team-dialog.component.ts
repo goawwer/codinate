@@ -3,13 +3,14 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TuiDialogContext } from '@taiga-ui/core';
 import { TUI_VALIDATION_ERRORS } from '@taiga-ui/kit';
 import { TUI_MULTI_SELECT_TEXTS } from '@taiga-ui/kit/tokens';
-import { of, startWith } from 'rxjs';
+import { filter, of, startWith } from 'rxjs';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import { TranslateService } from '@ngx-translate/core';
 import { Team, TeamMember } from '../../types/model/team.model';
 import { TeamStore } from '../../store/team.store';
 import { TeamApiService } from '../../service/team.service';
 import { AlertService } from '../../../../core/declarations/services/alert.service';
+import { AppDialogService } from '../../../../common/dialogs/dialog.service';
 import { CreateTeamInput, UpdateTeamInput } from '../../types/model/team-dashboard.model';
 import { TEAM_DIALOG_IMPORTS } from './team-dialog.imports';
 import { loginValidationErrorsFactory } from '../../../auth/model/auth.validation';
@@ -42,6 +43,7 @@ export class TeamDialogComponent {
   protected readonly context = injectContext<TuiDialogContext<void, TeamDialogData>>();
   private readonly alert = inject(AlertService);
   private readonly translate = inject(TranslateService);
+  private readonly dialogs = inject(AppDialogService);
 
   protected readonly team = this.context.data.team;
   protected readonly isEdit = this.team !== null;
@@ -157,6 +159,21 @@ export class TeamDialogComponent {
         },
       });
     }
+  }
+
+  protected deleteTeam(): void {
+    this.dialogs
+      .confirm({
+        label: this.translate.instant('admin.dashboard.teams.dialogs.deleteTitle'),
+        content: this.translate.instant('admin.dashboard.teams.dialogs.deleteContent', { count: 1 }),
+        yes: this.translate.instant('generic.actions.delete'),
+        no: this.translate.instant('generic.actions.cancel'),
+      })
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        this.store.deleteTeams([this.team!.id]);
+        this.context.completeWith();
+      });
   }
 
   protected submit(): void {

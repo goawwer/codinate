@@ -26,4 +26,5 @@ type Core struct {
 	Name        string  `db:"name" json:"projectName"`
 	Description *string `db:"description" json:"projectDescription"`
 	PictureName *string `db:"picture_name" json:"projectPictureName"`
+	About       *string `db:"about" json:"projectAbout"`
 }

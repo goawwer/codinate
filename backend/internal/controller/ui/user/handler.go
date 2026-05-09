@@ -19,7 +19,8 @@ func Register() {
 
 	// profile
 	ui.RegisterGet("/users/profile/{user_id}", enum.AnyUser, reflect.TypeOf(service{}), profile)
-	// ui.RegisterPatch("/users/profile/{user_id}", enum.AnyUser, reflect.TypeOf(service{}), updateProfile)
+	ui.RegisterGet("/users/profile/{user_id}/stats", enum.AnyUser, reflect.TypeOf(service{}), profileStats)
+	ui.RegisterPatch("/users/profile/{user_id}", enum.AnyUser, reflect.TypeOf(service{}), updateProfile)
 }
 
 // create
@@ -164,21 +165,42 @@ func profile(s ui.UIService) (any, error) {
 	return s.GetService().(*service).getUserProfileBy(s.GetRequest().Context(), uuid.MustParse(userId))
 }
 
-/*
-	func updateProfile(s ui.UIService) (any, error) {
-		user_id, err := s.GetPathParameterAsString("user_id")
-		if err != nil {
-			return nil, err
-		}
-
-		currentUser, err := s.GetCurrentUser()
-		if err != nil {
-			return nil, err
-		}
-
-		var
+func profileStats(s ui.UIService) (any, error) {
+	userId, err := s.GetPathParameterAsString("user_id")
+	if err != nil {
+		return nil, err
 	}
-*/
+
+	from, to := s.GetDateRange()
+
+	return s.GetService().(*service).getUserProfileStats(s.GetRequest().Context(), userId, from, to)
+}
+
+func updateProfile(s ui.UIService) (any, error) {
+	id, err := s.GetPathParameterAsString("user_id")
+	if err != nil {
+		return nil, err
+	}
+
+	input, avatarPictureName, err := ui.ParseMultipartPayload[user.UpdateProfileInput](s, "avatar", "users")
+	if err != nil {
+		return nil, err
+	}
+	if avatarPictureName != "" {
+		input.ProfilePicture = &avatarPictureName
+	}
+
+	_, backgroundPictureName, err := ui.ParseMultipartPayload[user.UpdateProfileInput](s, "background", "users/backgrounds", id)
+	if err != nil {
+		return nil, err
+	}
+	if backgroundPictureName != "" {
+		input.ProfileBackgroundPicture = &backgroundPictureName
+	}
+
+	return nil, s.GetService().(*service).updateProfile(s.GetRequest().Context(), input, uuid.MustParse(id))
+}
+
 func parseFilterParams(s ui.UIService) (*user.Filters, error) {
 	var f ui.FilterService[user.DashBoardInput, user.Filters]
 

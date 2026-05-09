@@ -61,7 +61,7 @@ export class AppPicture {
 
   protected readonly src = computed(() =>
     this.pictureName()
-      ? `${this.apiConfig.rootUrl}/apipublic/${this.entityType()}?filename=${this.pictureName()}`
+      ? `${this.apiConfig.rootUrl}/apipublic/${this.entityType()}/avatars?filename=${this.pictureName()}`
       : '',
   );
 

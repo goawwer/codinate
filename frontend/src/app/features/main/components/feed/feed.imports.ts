@@ -1,5 +1,6 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { AppPicture } from '../../../../common/picture/app-picture';
 import { RouterLink } from '@angular/router';
 import {
   TuiButton,
@@ -26,9 +27,13 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { LowerCasePipe } from '@angular/common';
 import { StripHtmlPipe } from '../../../../common/pipes/strip-html.pipe';
 import { AppDatePipe } from '../../../../common/pipes/app-date.pipe';
+import { AppRankBadge } from '../../../../common/rank-badge/app-rank-badge';
 
 export const FEEDIMPORTS = [
+  AppPicture,
+  AppRankBadge,
   DatePipe,
+  DecimalPipe,
   ReactiveFormsModule,
   RouterLink,
   TuiScrollbar,
@@ -53,4 +58,5 @@ export const FEEDIMPORTS = [
   TuiHint,
   StripHtmlPipe,
   AppDatePipe,
+  AppRankBadge,
 ];

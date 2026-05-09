@@ -22,6 +22,8 @@ import { Project } from '../../../project/types/model/project.model';
 import { TranslateService } from '@ngx-translate/core';
 import { AppDialogService } from '../../../../common/dialogs/dialog.service';
 import { TaskDialogComponent } from '../../../task/components/dialog/task-dialog.component';
+import { WorklogService } from '../../../worklog/service/worklog.service';
+import { LeaderboardEntry } from '../../../worklog/types/worklog.model';
 
 const PAGE_SIZE = 10;
 
@@ -44,12 +46,26 @@ export class MainFeedComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly dialogService = inject(AppDialogService);
 
+  private readonly worklogService = inject(WorklogService);
+
   protected readonly currentPage = signal(0);
   protected readonly allTasks = signal<Task[]>([]);
   protected readonly isLoading = signal(false);
   protected readonly statuses = signal<TaskStatus[]>([]);
   protected readonly priorities = signal<TaskPriority[]>([]);
   protected readonly projects = signal<Project[]>([]);
+  protected readonly leaderboard = signal<LeaderboardEntry[]>([]);
+  protected readonly seasonHint = (() => {
+    const now = new Date();
+    const daysIn = now.getDate();
+    const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const daysLeft = totalDays - daysIn;
+    const fmt = (days: number) =>
+      days === 1
+        ? this.translate.instant('generic.widgets.season.dayOne')
+        : this.translate.instant('generic.widgets.season.days', { days });
+    return `${fmt(daysIn)} · ${fmt(daysLeft)}`;
+  })();
 
   protected readonly form = new FormGroup({
     search: new FormControl(''),
@@ -144,6 +160,8 @@ export class MainFeedComponent implements OnInit {
       this.priorities.set(priorities);
       this.projects.set(projects);
     });
+
+    this.worklogService.getLeaderboard().subscribe((entries) => this.leaderboard.set(entries));
 
     this.form.valueChanges.pipe(startWith(this.form.value), debounceTime(300)).subscribe(() => {
       this.currentPage.set(0);

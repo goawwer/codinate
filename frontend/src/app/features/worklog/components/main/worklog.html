@@ -3,7 +3,7 @@
     <div class="worklog-top-left">
       <tui-textfield tuiChevron [tuiTextfieldSize]="'m'" class="w-1/3" [stringify]="stringifyPeriod" [tuiTextfieldCleaner]="selectedPeriod() !== 'today'">
         <label tuiLabel>{{ 'generic.titles.period' | translate }}</label>
-        <input tuiSelect [ngModel]="selectedPeriod()" (ngModelChange)="selectedPeriod.set($event ?? 'today')"/>
+        <input tuiSelect [ngModel]="selectedPeriod()" (ngModelChange)="onPeriodChange($event)"/>
         <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="periods" />
       </tui-textfield>
 
@@ -12,6 +12,37 @@
         <input tuiSelect [ngModel]="selectedProject()" (ngModelChange)="selectProject($event)"/>
         <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="projectItems()" />
       </tui-textfield>
+
+      <button
+        appearance="secondary-grayscale"
+        iconStart="@tui.calendar"
+        size="s"
+        tuiButton
+        type="button"
+        [tuiDropdown]="calendarDropdown"
+        [tuiDropdownOpen]="calendarOpen()"
+        (tuiDropdownOpenChange)="calendarOpen.set($event)"
+      >
+        {{ dateLabel() }}
+      </button>
+
+      @if (customDateRange()) {
+        <button
+          tuiIconButton
+          appearance="ghost"
+          size="s"
+          type="button"
+          iconStart="@tui.x"
+          (click)="clearDateRange()"
+        ></button>
+      }
+
+      <ng-template #calendarDropdown>
+        <tui-calendar-range
+          [value]="customDateRange()"
+          (valueChange)="onDateRangeChange($event!)"
+        />
+      </ng-template>
 
       @if (!store.isLoading()) {
         <div class="worklog-total">

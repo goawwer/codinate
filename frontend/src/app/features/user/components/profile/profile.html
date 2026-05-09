@@ -18,6 +18,7 @@
               size="xxl"
               class="profile-hero__avatar"
               [pictureName]="profile()?.avatar ?? ''"
+              entityType="users"
             />
           </div>
 
@@ -25,11 +26,21 @@
             <tui-badge
               size="m"
               class="profile-hero__badge"
-              [style.background]="'var(--app-brand-100)'"
+              [style.background]="'var(--tui-chart-categorical-01)'"
             >
               {{ profile()?.role ?? '' | employeeRole }}
             </tui-badge>
           }
+
+         	<label class="flex gap-0.5">
+            <div tuiTitle="s">
+              <div tuiSubtitle
+                tuiHintAppearance="primary-tooltip"
+                tuiHintDirection="bottom"
+                [tuiHint]="'models.user.profile.createdAt' | translate"
+              >{{ profile()?.createdAt | appDate: 'dd MMMM yyyy' }}</div>
+            </div>
+          </label>
         </div>
 
       <div class="profile-hero__main">
@@ -38,10 +49,26 @@
             <h1 class="profile-hero__name">{{ fullName() }}</h1>
             <p class="profile-hero__username">@{{ profile()?.username }}</p>
           </div>
+          <div class="profile-hero__actions">
+            <app-rank-badge [userId]="profile()?.id ?? ''" />
+            @if (isOwnProfile()) {
+              <button
+                appearance="action"
+                iconStart="@tui.settings"
+                size="m"
+                tuiIconButton
+                tuiHintAppearance="primary-tooltip"
+                tuiHintDirection="bottom"
+                [tuiHint]="'models.user.profile.settings' | translate"
+                type="button"
+                (click)="openSettings()"
+              ></button>
+            }
+          </div>
         </div>
 
         <p class="profile-hero__description">
-          {{ profile()?.description }}
+          {{ profile()?.about }}
         </p>
 
         <div class="profile-hero__stats">
@@ -50,7 +77,7 @@
             class="profile-stat"
           >
             <span class="profile-stat__value">{{ projects().length }}</span>
-            <span class="profile-stat__label">проектов</span>
+            <span class="profile-stat__label">{{ 'models.user.profile.stats.projects' | translate }}</span>
           </div>
 
           <div
@@ -58,7 +85,7 @@
             class="profile-stat profile-stat--main"
           >
             <span class="profile-stat__value">{{ spentLabel(totalSpentMinutes()) }}</span>
-            <span class="profile-stat__label">всего времени</span>
+            <span class="profile-stat__label">{{ 'models.user.profile.stats.allSpent' | translate }}</span>
           </div>
 
           <div
@@ -66,7 +93,7 @@
             class="profile-stat"
           >
             <span class="profile-stat__value">{{ recentLabel() }}</span>
-            <span class="profile-stat__label">всего за 2 недели</span>
+            <span class="profile-stat__label">{{ 'models.user.profile.stats.recentSpent' | translate }}</span>
           </div>
         </div>
       </div>
@@ -79,75 +106,95 @@
       [activeItemIndex]="activeTab()"
       (activeItemIndexChange)="activeTab.set($event)"
     >
-      <button tuiTab>Активность</button>
-      <button tuiTab>Результаты</button>
+      <button tuiTab>{{ 'models.user.profile.tabs.activity' | translate }}</button>
+       <button tuiTab>{{ 'models.user.profile.tabs.results' | translate }}</button>
     </tui-tabs>
 
     @if (activeTab() === 0) {
-      @if (projects().length) {
-        <div class="project-feed">
-          @for (project of projects(); track project.id) {
-            <article class="project-card">
-              <div class="project-card__avatar">
-                <app-picture
-                  [routerLink]="['/projects', project.id]"
-                  [name]="project.name"
-                  [pictureName]="project.picture ?? ''"
-                  entityType="projects"
-                  size="xxl"
-                  [isRound]="false"
-                  class="project-card__picture"
-                />
-              </div>
-
-              <div class="project-card__content">
-                <div class="project-card__header">
-                  <div class="project-card__title-box">
-                    <h3 class="project-card__title">
-                      <a [routerLink]="['/projects', project.id]">
-                        {{ project.name }}
-                      </a>
-                    </h3>
+      <tui-scrollbar [hidden]="true">
+        <div class="activity-tab">
+          @if (projects().length) {
+            <div class="project-feed">
+              @for (project of projects(); track project.id) {
+                <article class="project-card">
+                  <div class="project-card__avatar">
+                    <app-picture
+                      [routerLink]="['/projects', project.id]"
+                      [name]="project.name"
+                      [pictureName]="project.picture ?? ''"
+                      entityType="projects"
+                      size="xxl"
+                      [isRound]="false"
+                      class="project-card__picture"
+                    />
                   </div>
 
-                  <div class="project-card__time">
-                    <strong>{{ spentLabel(project.spentMinutes) }}</strong>
+                  <div class="project-card__content">
+                    <div class="project-card__header">
+                      <div class="project-card__title-box">
+                        <h3 class="project-card__title">
+                          <a [routerLink]="['/projects', project.id]">
+                            {{ project.name }}
+                          </a>
+                        </h3>
+                      </div>
 
-                    @if (project.recentMinutes > 0) {
-                      <span>{{ spentLabel(project.recentMinutes) }}</span>
+                      <div class="project-card__time">
+                        <strong
+                          tuiHintAppearance="primary-tooltip"
+                          tuiHintDirection="right"
+                          [tuiHint]="'models.user.profile.projects.totalSpent' | translate"
+                        >
+                          {{ spentLabel(project.spentMinutes) }}
+                        </strong>
+
+                        @if (project.recentMinutes > 0) {
+                          <span
+                            tuiHintAppearance="primary-tooltip"
+                            tuiHintDirection="right"
+                            [tuiHint]="'models.user.profile.projects.recentSpent' | translate"
+                          >
+                            {{ spentLabel(project.recentMinutes) }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+
+                    @if (project.about) {
+                      <span>{{ project.about }}</span>
+                    }
+
+                    @if (project.tasks.length) {
+                      <div class="project-card__tasks">
+                        @for (task of project.tasks; track task.id) {
+                          <a
+                            class="task-ref"
+                            [routerLink]="['/tasks', task.id]"
+                            (click)="$event.stopPropagation()"
+                          >
+                            #{{ task.identifier }}
+                          </a>
+                        }
+                      </div>
                     }
                   </div>
-                </div>
-
-                @if (project.tasks.length) {
-                  <div class="project-card__tasks">
-                    @for (task of project.tasks; track task.id) {
-                      <a
-                        class="task-ref"
-                        [routerLink]="['/tasks', task.id]"
-                        (click)="$event.stopPropagation()"
-                      >
-                        #{{ task.identifier }}
-                      </a>
-                    }
-                  </div>
-                }
-              </div>
-            </article>
+                </article>
+              }
+            </div>
+          } @else {
+            <tui-block-status>
+              <img
+                alt="{{ 'generic.statuses.notFound' | translate }}"
+                src="assets/images/not-found.svg"
+                tuiSlot="top"
+                class="image"
+              />
+              <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
+              <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
+            </tui-block-status>
           }
         </div>
-      } @else {
-        <tui-block-status>
-          <img
-            alt="{{ 'generic.statuses.notFound' | translate }}"
-            src="assets/images/not-found.svg"
-            tuiSlot="top"
-            class="image"
-          />
-          <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
-          <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
-        </tui-block-status>
-      }
+      </tui-scrollbar>
     }
 
     @if (activeTab() === 1) {
@@ -155,21 +202,21 @@
       <article class="results-card results-card--large">
         <div class="results-card__head">
           <div>
-            <h3 class="results-card__title">Динамика работы</h3>
-            <p class="results-card__subtitle">Активность за последние 14 дней</p>
-          </div>
-
-          <div class="results-card__metric">
-            <strong>{{ workDynamicsTotalLabel() }}</strong>
-            <span>за период</span>
-          </div>
+                <h3 class="results-card__title">
+                  {{ 'models.user.profile.results.workDynamics.title' | translate }}
+                </h3>
+                <p class="results-card__subtitle">
+                  {{ 'models.user.profile.results.workDynamics.subtitle' | translate }}
+                </p>
+              </div>
         </div>
 
         <tui-axes
           axisY="none"
           class="work-dynamics-axes"
           [axisXLabels]="workDynamicsLabelsX()"
-          [axisYSecondaryLabels]="workDynamicsLabelsY"
+          [axisYLabels]="workDynamicsLabelsY()"
+          [axisYName]="'models.user.profile.results.workDynamics.workingHours' | translate"
           [horizontalLines]="2"
           [verticalLines]="3"
         >
@@ -190,9 +237,11 @@
       </article>
 
       <article class="results-card">
-        <h3 class="results-card__title">Фокус</h3>
+        <h3 class="results-card__title">
+          {{ 'models.user.profile.results.focus.title' | translate }}
+        </h3>
         <p class="results-card__subtitle">
-          Распределение времени между проектами
+          {{ 'models.user.profile.results.focus.subtitle' | translate }}
         </p>
 
         @if (focusValue().length) {

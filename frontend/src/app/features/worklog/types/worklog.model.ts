@@ -28,6 +28,17 @@ export interface WorklogDialogData {
   description?: string;
 }
 
+export interface LeaderboardEntry {
+  userId: string;
+  username: string;
+  name: string;
+  surname: string;
+  avatar: string;
+  totalMinutes: number;
+  logCount: number;
+  rank: number;
+}
+
 export interface DayPlanItem {
   id: string;
   taskId: string;

@@ -3,6 +3,7 @@ export interface TaskMember {
   name: string;
   surname: string;
   role: string;
+  picture: string;
 }
 
 export interface TaskFile {
@@ -38,6 +39,7 @@ export interface TaskDetailed extends Task {
   assigneeId: string;
   assigneeName: string;
   assigneeSurname: string;
+  assigneePicture: string;
   members: TaskMember[];
   attachedFiles: TaskFile[];
   updatedAt: string;

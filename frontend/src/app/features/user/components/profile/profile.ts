@@ -1,12 +1,14 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { UserProfile } from '../../types/model/profile.model';
+import { UserProfile, UserProfileStats } from '../../types/model/profile.model';
 import { UserStore } from '../../store/user.store';
 import { UserApiService } from '../../service/user.service';
+import { AppDialogService } from '../../../../common/dialogs/dialog.service';
+import { ProfileDialogComponent } from '../profile-dialog/profile-dialog';
+import { TranslateService } from '@ngx-translate/core';
 import { PROFILEIMPORTS } from './profile.imports';
-
-const PUBLIC_URL = '/api/public/';
+import { API_CONFIG } from '../../../../core/declarations/tokens/api-config.token';
 
 @Component({
   selector: 'app-profile',
@@ -16,7 +18,17 @@ const PUBLIC_URL = '/api/public/';
 })
 export class UserProfileComponent {
   protected readonly profile = signal<UserProfile | null>(null);
+  protected readonly stats = signal<UserProfileStats | null>(null);
   protected readonly activeTab = signal(0);
+  private readonly userStore = inject(UserStore);
+  private readonly dialogs = inject(AppDialogService);
+  private readonly translate = inject(TranslateService);
+  private readonly apiService = inject(UserApiService);
+  private readonly apiConfig = inject(API_CONFIG);
+
+  protected readonly isOwnProfile = computed(
+    () => this.profile()?.id === this.userStore.user()?.id,
+  );
 
   protected readonly fullName = computed(() => {
     const user = this.profile();
@@ -33,11 +45,6 @@ export class UserProfileComponent {
     return `${name}${surname}`.toUpperCase();
   });
 
-  protected readonly avatarSrc = computed(() => {
-    const avatar = this.profile()?.avatar;
-    return avatar ? PUBLIC_URL + avatar : this.initials();
-  });
-
   protected readonly recentLabel = computed(() => {
     const minutes = this.profile()?.recentMinutes ?? 0;
     return minutes > 0 ? this.spentLabel(minutes) : '—';
@@ -45,7 +52,9 @@ export class UserProfileComponent {
 
   protected readonly backgroundSrc = computed(() => {
     const bg = this.profile()?.backgroundPicture;
-    return bg ? PUBLIC_URL + bg : null;
+    return bg
+      ? `${this.apiConfig.rootUrl}/apipublic/users/backgrounds/${this.profile()!.id}?filename=` + bg
+      : null;
   });
 
   protected readonly totalSpentMinutes = computed(
@@ -62,10 +71,12 @@ export class UserProfileComponent {
     this.projects().filter((p) => p.recentMinutes > 0),
   );
 
-  // ── Bar chart: work dynamics over last 14 days ──────────────────────────
-  protected readonly workDynamicsMax = 600; // 10 hours in minutes
+  protected readonly workDynamicsMax = 600;
 
-  protected readonly workDynamicsLabelsY = ['0', '2ч', '4ч', '6ч', '8ч', '10ч'];
+  protected readonly workDynamicsLabelsY = computed(() => {
+    const h = this.translate.instant('generic.time.hoursShort');
+    return ['0', `2${h}`, `4${h}`, `6${h}`, `8${h}`, `10${h}`];
+  });
 
   protected readonly workDynamicsLabelsX = computed((): string[] => {
     const today = new Date();
@@ -77,49 +88,47 @@ export class UserProfileComponent {
   });
 
   protected readonly workDynamicsValue = computed((): ReadonlyArray<ReadonlyArray<number>> => {
-    const recentMinutes = this.profile()?.recentMinutes ?? 0;
+    const dynamics = this.stats()?.workDynamics ?? [];
+    const lookup = new Map(dynamics.map((s) => [s.date.substring(0, 10), s.spentMinutes]));
     const today = new Date();
-    const weekdayFactors = [1.0, 1.15, 0.9, 1.1, 0.95]; // Mon–Fri
-
-    const weights = Array.from({ length: 14 }, (_, i) => {
+    const values = Array.from({ length: 14 }, (_, i) => {
       const d = new Date(today);
       d.setDate(d.getDate() - 13 + i);
-      const dow = d.getDay();
-      if (dow === 0 || dow === 6) return 0.12;
-      const factor = weekdayFactors[dow - 1] ?? 1.0;
-      return i === 13 ? factor * 0.5 : factor;
+      const key = this.toDateStr(d);
+      return Math.min(lookup.get(key) ?? 0, this.workDynamicsMax);
     });
-
-    const total = weights.reduce((a, b) => a + b, 0);
-    const values = weights.map((w) =>
-      recentMinutes ? Math.min(Math.round((w / total) * recentMinutes), this.workDynamicsMax) : 0,
-    );
     return [values];
   });
 
-  // ── Ring chart: time distribution across projects ───────────────────────
   protected readonly focusActiveIndex = signal(NaN);
 
+  private readonly focusStats = computed(() => {
+    const sorted = [...(this.stats()?.projectFocus ?? [])].sort(
+      (a, b) => b.spentMinutes - a.spentMinutes,
+    );
+    const top = sorted.slice(0, 5);
+    const rest = sorted.slice(5).reduce((acc, p) => acc + p.spentMinutes, 0);
+    return { top, rest };
+  });
+
   protected readonly focusValue = computed((): ReadonlyArray<number> => {
-    const projs = this.projects();
-    if (!projs.length) return [];
-    const top = projs.slice(0, 5);
-    const rest = projs.slice(5).reduce((acc, p) => acc + p.spentMinutes, 0);
+    const { top, rest } = this.focusStats();
+    if (!top.length) return [];
     const values = top.map((p) => p.spentMinutes);
     if (rest > 0) values.push(rest);
     return values;
   });
 
   protected readonly focusLabels = computed((): string[] => {
-    const projs = this.projects();
-    const labels = projs.slice(0, 5).map((p) => p.name);
-    if (projs.length > 5) labels.push('Другие');
+    const { top, rest } = this.focusStats();
+    const labels = top.map((p) => p.projectName);
+    if (rest > 0) labels.push(this.translate.instant('generic.titles.others'));
     return labels;
   });
 
   protected readonly focusActiveLabel = computed((): string => {
     const i = this.focusActiveIndex();
-    if (isNaN(i)) return 'Все проекты';
+    if (isNaN(i)) return this.translate.instant('models.project.title.all');
     return this.focusLabels()[i] ?? '';
   });
 
@@ -132,22 +141,52 @@ export class UserProfileComponent {
 
   constructor() {
     const routeId = inject(ActivatedRoute).snapshot.paramMap.get('id');
-    const userId = routeId ?? inject(UserStore).user()?.id;
+    const userId = routeId ?? this.userStore.user()?.id;
     if (userId) {
-      inject(UserApiService)
+      this.apiService
         .getProfile(userId)
         .pipe(takeUntilDestroyed())
         .subscribe((data) => this.profile.set(data));
+
+      const today = new Date();
+      const from = new Date(today);
+      from.setDate(from.getDate() - 13);
+      this.apiService
+        .getProfileStats(userId, this.toDateStr(from), this.toDateStr(today))
+        .pipe(takeUntilDestroyed())
+        .subscribe((data) => this.stats.set(data));
     }
   }
 
+  private toDateStr(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  protected openSettings(): void {
+    const current = this.profile();
+    if (!current) return;
+    this.dialogs
+      .component<ProfileDialogComponent, boolean, UserProfile>(ProfileDialogComponent, {
+        label: this.translate.instant('models.user.profile.settings'),
+        size: 'l',
+        data: current,
+      })
+      .subscribe((updated) => {
+        if (updated) {
+          this.apiService.getProfile(current.id).subscribe((data) => this.profile.set(data));
+        }
+      });
+  }
+
   protected spentLabel(minutes: number): string {
-    if (minutes <= 0) return '0ч';
+    const h = this.translate.instant('generic.time.hoursShort');
+    const m = this.translate.instant('generic.time.minutesShort');
+    if (minutes <= 0) return `0${h}`;
     const hours = Math.floor(minutes / 60);
     const rest = minutes % 60;
-    if (!hours) return `${rest}м`;
-    if (!rest) return `${hours}ч`;
-    return `${hours}ч ${rest}м`;
+    if (!hours) return `${rest}${m}`;
+    if (!rest) return `${hours}${h}`;
+    return `${hours}${h} ${rest}${m}`;
   }
 
   protected workDynamicsFullLabel(index: number): string {

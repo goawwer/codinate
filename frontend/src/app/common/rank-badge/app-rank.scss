@@ -1,0 +1,65 @@
+:host {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 1.75rem;
+  padding: 0 0.65rem;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  border: 1px solid transparent;
+  z-index: 1;
+  cursor: default;
+}
+
+.rank-hint-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.rank-text {
+  line-height: 1;
+}
+
+:host.rank--gold {
+  color: #fff7ed;
+  background:
+    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.42), transparent 32%),
+    linear-gradient(135deg, #fbbf24, #f59e0b 45%, #b45309);
+  border-color: rgb(251 191 36 / 0.55);
+  box-shadow:
+    0 0.45rem 1.4rem rgb(245 158 11 / 0.32),
+    inset 0 1px 0 rgb(255 255 255 / 0.35);
+}
+
+:host.rank--silver {
+  color: #111827;
+  background:
+    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.6), transparent 32%),
+    linear-gradient(135deg, #f9fafb, #d1d5db 48%, #9ca3af);
+  border-color: rgb(209 213 219 / 0.8);
+  box-shadow:
+    0 0.45rem 1.2rem rgb(156 163 175 / 0.28),
+    inset 0 1px 0 rgb(255 255 255 / 0.65);
+}
+
+:host.rank--bronze {
+  color: #fff7ed;
+  background:
+    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.32), transparent 32%),
+    linear-gradient(135deg, #d97706, #92400e 52%, #451a03);
+  border-color: rgb(217 119 6 / 0.5);
+  box-shadow:
+    0 0.45rem 1.2rem rgb(146 64 14 / 0.3),
+    inset 0 1px 0 rgb(255 255 255 / 0.22);
+}
+
+:host.rank--default {
+  color: var(--tui-text-secondary);
+  background: color-mix(in srgb, var(--app-bg) 82%, var(--app-brand-500));
+  border-color: color-mix(in srgb, var(--app-brand-500) 22%, transparent);
+  box-shadow:
+    0 0.35rem 1rem rgb(0 0 0 / 0.1),
+    inset 0 1px 0 rgb(255 255 255 / 0.22);
+}

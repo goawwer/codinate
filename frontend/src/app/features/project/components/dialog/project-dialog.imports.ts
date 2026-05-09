@@ -30,10 +30,13 @@ import {
   TuiSelect,
   TuiTab,
   TuiTabs,
+  TuiStepper,
 } from '@taiga-ui/kit';
 import { TuiCell } from '@taiga-ui/layout';
 import { EmployeeRolePipe } from '../../../../common/pipes/employee-role.pipe';
 import { ReleaseStatusPipe } from '../../../../common/pipes/release-status.pipe';
+import { AppEditorComponent } from '../../../../common/editor/app-editor.component';
+import { LowerCasePipe } from '@angular/common';
 
 export const PROJECT_DIALOG_IMPORTS = [
   AsyncPipe,
@@ -65,8 +68,11 @@ export const PROJECT_DIALOG_IMPORTS = [
   TuiSelect,
   TuiTab,
   TuiTabs,
+  TuiStepper,
   TuiInputDate,
   TuiTextfield,
   TuiHint,
   TuiTitle,
+  AppEditorComponent,
+  LowerCasePipe,
 ];

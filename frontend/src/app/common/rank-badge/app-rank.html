@@ -1,0 +1,7 @@
+<span class="rank-text">{{ rank() }}</span>
+<span
+  class="rank-hint-overlay"
+  tuiHintAppearance="primary-tooltip"
+  tuiHintDirection="bottom"
+  [tuiHint]="'generic.hints.rank' | translate: { rank: rank() }"
+></span>

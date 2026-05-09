@@ -1,0 +1,170 @@
+<div class="profile-dialog-shell">
+  <div class="profile-dialog">
+    <div class="profile-dialog__cover">
+      @if (backgroundPreview(); as bg) {
+        <img [src]="bg" class="profile-dialog__cover-img" alt="" />
+      } @else {
+        <div class="profile-dialog__cover-fallback"></div>
+      }
+
+      <div class="profile-dialog__cover-vignette"></div>
+
+      <div class="profile-dialog__cover-actions">
+        <button
+          tuiButton
+          appearance="action"
+          class="profile-dialog__cover-action"
+          size="m"
+          type="button"
+          iconStart="@tui.camera"
+          (click)="bgInput.click()"
+          tuiHintAppearance="primary-tooltip"
+          tuiHintDirection="bottom"
+          [tuiHint]="'models.user.profile.dialog.changeBg' | translate"
+        ></button>
+
+        @if (backgroundPreview()) {
+          <button
+            tuiButton
+            appearance="action"
+            class="profile-dialog__cover-action"
+            size="m"
+            type="button"
+            iconStart="@tui.trash-2"
+            (click)="removeBackground()"
+            tuiHintAppearance="primary-tooltip"
+            tuiHintDirection="bottom"
+            [tuiHint]="'generic.hints.deletePicture' | translate"
+          ></button>
+        }
+      </div>
+
+      <input #bgInput type="file" hidden accept="image/*" (change)="onBackgroundSelected($event)" />
+    </div>
+
+    <div class="profile-dialog__avatar-section">
+      <div class="profile-dialog__avatar-shell">
+        @if (selectedAvatar() && avatarPreview(); as url) {
+          <img [src]="url" alt="Preview" class="profile-dialog__avatar-img" />
+        } @else {
+          <app-picture
+            [name]="profile.name"
+            [surname]="profile.surname"
+            [pictureName]="profile.avatar ?? ''"
+            entityType="users"
+            size="xxl"
+          />
+        }
+      </div>
+
+      <div class="profile-dialog__avatar-btns">
+        <button
+          tuiButton
+          appearance="action"
+          size="m"
+          type="button"
+          iconStart="@tui.camera"
+          (click)="avatarInput.click()"
+          tuiHintAppearance="primary-tooltip"
+          tuiHintDirection="bottom"
+          [tuiHint]="'generic.hints.changePicture' | translate"
+        ></button>
+
+        @if (avatarPreview()) {
+          <button
+            tuiButton
+            appearance="action"
+            size="m"
+            type="button"
+            iconStart="@tui.trash-2"
+            (click)="removeAvatar()"
+            tuiHintAppearance="primary-tooltip"
+            tuiHintDirection="bottom"
+            [tuiHint]="'generic.hints.deletePicture' | translate"
+          ></button>
+        }
+      </div>
+
+      <input #avatarInput type="file" hidden accept="image/*" (change)="onAvatarSelected($event)" />
+    </div>
+
+    <form class="profile-dialog__form" [formGroup]="form">
+
+      <div class="flex items-center justify-between gap-1">
+        <tui-textfield class="flex-1">
+          <label tuiLabel>{{ 'models.user.username' | translate }}</label>
+          <input tuiTextfield formControlName="username" autocomplete="off" />
+        </tui-textfield>
+
+        <tui-error formControlName="username" [error]="[] | tuiFieldError | async" />
+
+        <div class="profile-dialog__lang">
+          <tui-badged-content>
+            <img
+              alt=""
+              size="m"
+              tuiBadge
+              tuiSlot="bottom"
+              class="bg-transparent"
+              [src]="(currentLang() === 'ru' ? 'ru' : 'gb') | tuiFlag"
+            />
+
+            <button
+              tuiButton
+              tuiButtonSelect
+              appearance="outline-grayscale"
+              size="l"
+              type="button"
+              iconStart="@tui.languages"
+              [open]="open"
+              [formControl]="language"
+              (openChange)="open = $event"
+            >
+              <tui-data-list *tuiTextfieldDropdown>
+                <tui-opt-group [label]="'models.user.profile.dialog.language' | translate">
+                  <button tuiOption new type="button" value="ru" (click)="setLang('ru')">
+                    <img alt="" class="profile-dialog__flag" [src]="'ru' | tuiFlag" />
+                    Русский
+                  </button>
+
+                  <button tuiOption new type="button" value="en" (click)="setLang('en')">
+                    <img alt="" class="profile-dialog__flag" [src]="'gb' | tuiFlag" />
+                    English
+                  </button>
+                </tui-opt-group>
+              </tui-data-list>
+            </button>
+          </tui-badged-content>
+        </div>
+      </div>
+
+      <div class="profile-dialog__description">
+        <label class="profile-dialog__description-label">
+          {{ 'models.user.profile.dialog.description' | translate }}
+        </label>
+
+        <textarea
+          class="profile-dialog__description-input"
+          formControlName="about"
+          rows="4"
+        ></textarea>
+      </div>
+    </form>
+  </div>
+
+  <footer class="profile-dialog__footer">
+    <button tuiButton appearance="flat" type="button" (click)="context.completeWith(false)">
+      {{ 'generic.actions.cancel' | translate }}
+    </button>
+
+    <button
+      tuiButton
+      class="btn-primary"
+      type="submit"
+      [disabled]="loading()"
+      (click)="submit()"
+    >
+      {{ 'generic.actions.save' | translate }}
+    </button>
+  </footer>
+</div>

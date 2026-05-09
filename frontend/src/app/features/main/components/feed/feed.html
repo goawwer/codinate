@@ -226,13 +226,45 @@
     <div class="widget">
       <div class="widget-header">
         <tui-icon icon="@tui.trophy" />
-        <span>Leaderboard</span>
+        <span>{{ 'generic.widgets.leaderboard' | translate}}</span>
+        <div class="widget-header-season"
+          [tuiHint]="'generic.widgets.season.hint' | translate"
+          tuiHintAppearance="primary-tooltip"
+          tuiHintDirection="bottom-left"
+        >
+          <tui-icon [style.font-size.rem]="0.875" icon="@tui.calendar-days" />
+          <span>{{ seasonHint }}</span>
+        </div>
       </div>
-      <div class="widget-placeholder">
-        <tui-icon icon="@tui.chart-no-axes-combined" class="widget-placeholder-icon" />
-        <p>Most active users</p>
-        <span>Available once time logs are added</span>
-      </div>
+      @if (leaderboard().length) {
+        <div class="leaderboard-list">
+          @for (entry of leaderboard(); track entry.userId; let i = $index) {
+            <div class="leaderboard-entry" [routerLink]="['/users', entry.userId]">
+              <app-rank-badge [userId]="entry.userId" />
+              <div class="leaderboard-avatar">
+                <app-picture
+                  [name]="entry.name"
+                  [surname]="entry.surname"
+                  [pictureName]="entry.avatar"
+                  entityType="users"
+                  size="s"
+                />
+              </div>
+              <div class="leaderboard-info">
+                <span class="leaderboard-name">{{ entry.name }} {{ entry.surname }}</span>
+                <span class="leaderboard-sub">&#64;{{ entry.username }}</span>
+              </div>
+              <span class="leaderboard-hours">{{ entry.totalMinutes / 60 | number: '1.1-1' }}h</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="widget-placeholder">
+          <tui-icon icon="@tui.chart-no-axes-combined" class="widget-placeholder-icon" />
+          <p>Most active users</p>
+          <span>No time logs recorded yet</span>
+        </div>
+      }
     </div>
 
     <div class="widget">
