@@ -60,7 +60,7 @@
 
           @if (project.projectDescription) {
             <div class="text-sm text-(--tui-text-secondary) truncate mt-0.5">
-              {{ project.projectDescription }}
+              {{ project.projectDescription | stripHtml }}
             </div>
           }
 

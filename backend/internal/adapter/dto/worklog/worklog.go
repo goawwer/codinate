@@ -18,6 +18,19 @@ type Row struct {
 	TaskIdentifier int    `db:"task_identifier" json:"taskIdentifier"`
 }
 
+type TaskRow struct {
+	Id           uuid.UUID `db:"id" json:"id"`
+	TaskId       uuid.UUID `db:"task_id" json:"taskId"`
+	StartAt      time.Time `db:"start_at" json:"startAt"`
+	EndAt        time.Time `db:"end_at" json:"endAt"`
+	TotalMinutes int       `db:"total_minutes" json:"totalMinutes"`
+	Description  string    `db:"description" json:"description"`
+	UserId       uuid.UUID `db:"user_id" json:"userId"`
+	UserName     string    `db:"user_name" json:"userName"`
+	UserSurname  string    `db:"user_surname" json:"userSurname"`
+	UserAvatar   string    `db:"user_avatar" json:"userAvatar"`
+}
+
 type LeaderboardEntry struct {
 	UserId       uuid.UUID `db:"user_id" json:"userId"`
 	Username     string    `db:"username" json:"username"`

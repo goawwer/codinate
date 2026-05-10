@@ -10,12 +10,13 @@ import {
 import { filter } from 'rxjs';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TuiButton, TuiIcon } from '@taiga-ui/core';
+import { TuiBadge } from '@taiga-ui/kit';
 import { RouterLink } from '@angular/router';
 import { provideTuiEditor } from '@taiga-ui/editor';
 import { AppPicture } from '../../picture/app-picture';
 import { AppDatePipe } from '../../pipes/app-date.pipe';
 import { AppEditorComponent } from '../../editor/app-editor.component';
-import { Comment, CommentAttachedFile, UpdateCommentInput } from '../comment.model';
+import { Comment, CommentAttachedFile, HistoryChange, UpdateCommentInput } from '../comment.model';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PendingEditorUploads } from '../../editor/pending-editor-uploads.service';
 import { FileService } from '../../file/file.service';
@@ -30,6 +31,7 @@ import { AppDialogService } from '../../dialogs/dialog.service';
     AppDatePipe,
     TuiButton,
     TuiIcon,
+    TuiBadge,
     ReactiveFormsModule,
     AppEditorComponent,
     TranslatePipe,
@@ -66,6 +68,47 @@ export class CommentItem {
 
   protected get canModify(): boolean {
     return this.comment.employeeId === this.currentUserId || this.isAdmin;
+  }
+
+  protected get hasChanges(): boolean {
+    return (this.comment.changes?.length ?? 0) > 0;
+  }
+
+  private static readonly FIELD_ICONS: Record<string, string> = {
+    status:      '@tui.circle-dot',
+    assignee:    '@tui.user',
+    category:    '@tui.folder',
+    priority:    '@tui.flame',
+    release:     '@tui.tag',
+    title:       '@tui.pencil',
+    description: '@tui.file-text',
+    dueAt:       '@tui.clock',
+    closed:      '@tui.circle-check',
+  };
+
+  protected fieldIcon(fieldName: string): string {
+    return CommentItem.FIELD_ICONS[fieldName] ?? '@tui.activity';
+  }
+
+  protected changeLabel(change: HistoryChange): string {
+    if (change.fieldName === 'closed') {
+      return change.newValue === true
+        ? this.translate.instant('models.task.activity.closed')
+        : this.translate.instant('models.task.activity.reopened');
+    }
+    return `${change.oldValue} → ${change.newValue}`;
+  }
+
+  protected changeBadgeAppearance(change: HistoryChange): string {
+    if (change.fieldName === 'closed') {
+      return change.newValue === true ? 'success' : 'primary';
+    }
+    return 'info';
+  }
+
+  protected changeFieldLabel(fieldName: string): string {
+    if (fieldName === 'closed') return '';
+    return this.translate.instant(`models.task.activity.fields.${fieldName}`) + ': ';
   }
 
   protected toggleTime(): void {

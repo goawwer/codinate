@@ -28,7 +28,8 @@ import { AlertService } from '../../../../core/declarations/services/alert.servi
 import { AppDialogService } from '../../../../common/dialogs/dialog.service';
 import { tuiScrollbarOptionsProvider } from '@taiga-ui/core';
 import { WorklogDialogComponent } from '../../../worklog/components/dialog/worklog-dialog.component';
-import { WorklogDialogData } from '../../../worklog/types/worklog.model';
+import { WorklogDialogData, TaskWorklogRow } from '../../../worklog/types/worklog.model';
+import { WorklogService } from '../../../worklog/service/worklog.service';
 
 @Component({
   selector: 'app-detailed',
@@ -52,12 +53,15 @@ export class Detailed implements OnInit {
   private readonly translate = inject(TranslateService);
   protected readonly userStore = inject(UserStore);
   private readonly dialogs = inject(AppDialogService);
+  private readonly worklogService = inject(WorklogService);
 
   protected readonly task = signal<TaskDetailed | null>(null);
   protected readonly isLoading = signal(true);
   protected readonly isSaving = signal(false);
   protected readonly isDeleting = signal(false);
   protected readonly infoExpanded = signal(false);
+  protected readonly worklogs = signal<TaskWorklogRow[]>([]);
+  protected readonly activeTab = signal(0);
 
   protected readonly attachedFilesExpanded = signal(false);
   protected readonly deleteConfirmPending = signal(false);
@@ -70,6 +74,20 @@ export class Detailed implements OnInit {
   protected readonly removedFileIds = signal<string[]>([]);
   protected readonly isAddingParticipant = signal(false);
   protected readonly participantControl = new FormControl<User | null>(null);
+
+  protected readonly totalMinutes = computed(() =>
+    this.worklogs().reduce((sum, w) => sum + w.totalMinutes, 0),
+  );
+
+  protected formatMinutes(minutes: number): string {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    const hStr = this.translate.instant('generic.time.hoursShort');
+    const mStr = this.translate.instant('generic.time.minutesShort');
+    if (h === 0) return `${m}${mStr}`;
+    if (m === 0) return `${h}${hStr}`;
+    return `${h}${hStr} ${m}${mStr}`;
+  }
 
   protected readonly availableParticipants = computed(() => {
     const task = this.task();
@@ -174,6 +192,7 @@ export class Detailed implements OnInit {
         this.priorities.set(priorities);
         this.users.set(users);
         this.isLoading.set(false);
+        this.loadWorklogs();
 
         forkJoin([
           this.releaseService.getByProject(task.projectId),
@@ -230,6 +249,12 @@ export class Detailed implements OnInit {
       releaseId: v.release?.id,
       categoryId: v.category?.id,
       dueAt: v.dueAt ? v.dueAt.toLocalNativeDate().toISOString() : undefined,
+      // Names for history display
+      statusName: v.status?.name,
+      priorityName: v.priority?.name,
+      assigneeName: v.assignee ? `${v.assignee.name} ${v.assignee.surname}` : undefined,
+      categoryName: v.category?.name,
+      releaseName: v.release?.title,
     };
 
     this.isSaving.set(true);
@@ -321,6 +346,10 @@ export class Detailed implements OnInit {
     this.taskService.getById(this.taskId).subscribe((task) => this.task.set(task));
   }
 
+  private loadWorklogs(): void {
+    this.worklogService.getByTask(this.taskId).subscribe((rows) => this.worklogs.set(rows));
+  }
+
   protected openLogTimeDialog(): void {
     const task = this.task();
     if (!task) {
@@ -337,7 +366,8 @@ export class Detailed implements OnInit {
           taskTitle: task.title,
         },
       })
-      .subscribe();
+      .pipe(filter(Boolean))
+      .subscribe(() => this.loadWorklogs());
   }
 
   protected toggleFiles(): void {

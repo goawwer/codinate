@@ -147,3 +147,10 @@
   flex-shrink: 0;
   align-self: flex-start;
 }
+
+.comment-changes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 0.625rem;
+}

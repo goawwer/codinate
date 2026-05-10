@@ -95,6 +95,11 @@ func add(s ui.UIService) (any, error) {
 //	@Failure	500	{object}	string	"Internal Server Error"
 //	@Router		/api/tasks/{id}/update [patch]
 func update(s ui.UIService) (any, error) {
+	u, err := s.GetCurrentUser()
+	if err != nil {
+		return nil, err
+	}
+
 	id, err := s.GetPathParameterAsString("id")
 	if err != nil {
 		return nil, err
@@ -106,7 +111,7 @@ func update(s ui.UIService) (any, error) {
 		return nil, err
 	}
 
-	return nil, s.GetService().(*service).updateTask(s.GetRequest().Context(), input, uuid.MustParse(id))
+	return nil, s.GetService().(*service).updateTask(s.GetRequest().Context(), input, uuid.MustParse(id), u.Id)
 }
 
 // close
@@ -121,12 +126,17 @@ func update(s ui.UIService) (any, error) {
 //	@Failure	500	{object}	string	"Internal Server Error"
 //	@Router		/api/tasks/{id}/close [post]
 func close(s ui.UIService) (any, error) {
+	u, err := s.GetCurrentUser()
+	if err != nil {
+		return nil, err
+	}
+
 	id, err := s.GetPathParameterAsString("id")
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, s.GetService().(*service).closeTask(s.GetRequest().Context(), uuid.MustParse(id))
+	return nil, s.GetService().(*service).closeTask(s.GetRequest().Context(), uuid.MustParse(id), u.Id)
 }
 
 // reopen
@@ -141,12 +151,17 @@ func close(s ui.UIService) (any, error) {
 //	@Failure	500	{object}	string	"Internal Server Error"
 //	@Router		/api/tasks/{id}/reopen [post]
 func reopen(s ui.UIService) (any, error) {
+	u, err := s.GetCurrentUser()
+	if err != nil {
+		return nil, err
+	}
+
 	id, err := s.GetPathParameterAsString("id")
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, s.GetService().(*service).reopenTask(s.GetRequest().Context(), uuid.MustParse(id))
+	return nil, s.GetService().(*service).reopenTask(s.GetRequest().Context(), uuid.MustParse(id), u.Id)
 }
 
 // deleteById

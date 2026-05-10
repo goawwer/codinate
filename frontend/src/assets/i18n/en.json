@@ -73,7 +73,20 @@
       "general": "General",
       "details": "Details"
     },
-    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "months": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
     "timePeriods": {
       "today": "Today",
       "yesterday": "Yesterday",
@@ -269,6 +282,7 @@
         "closedAt": "Closed",
         "noDescription": "No description provided",
         "comments": "Comments",
+        "worklogs": "Worklogs",
         "participants": "Participants",
         "assignee": "Assignee",
         "author": "Author",
@@ -286,6 +300,23 @@
         "createdEmptySub": "Everything is ahead!",
         "historyEmptyLabel": "Your tasks history is empty",
         "historyEmptySub": "Histore just have started"
+      },
+      "activity": {
+        "closed": "Task closed",
+        "reopened": "Task reopened",
+        "changed": "changed",
+        "commentPlaceholder": "Add a comment about these changes (optional)...",
+        "fields": {
+          "status": "Status",
+          "assignee": "Assignee",
+          "category": "Category",
+          "priority": "Priority",
+          "release": "Release",
+          "title": "Title",
+          "description": "Description",
+          "dueAt": "Due date",
+          "closed": "Task"
+        }
       }
     },
     "release": {

@@ -21,6 +21,7 @@ type TaskRepo interface {
 	GetTaskBy(ctx context.Context, id uuid.UUID) (task.RowDetailed, error)
 	GetTaskAuthorId(ctx context.Context, taskId uuid.UUID) (uuid.UUID, error)
 	GetTaskProjectId(ctx context.Context, taskId uuid.UUID) (int, error)
+	GetTaskSnapshot(ctx context.Context, id uuid.UUID) (model.TaskSnapshot, error)
 	AddNewTask(ctx context.Context, input model.Task) (uuid.UUID, error)
 	GetNextTaskIdentifier(ctx context.Context, releaseId int) (int, error)
 	GetTasksSuggestion(ctx context.Context, b controller.BasicQueryParams) ([]task.Suggestion, error)
@@ -31,6 +32,7 @@ type TaskRepo interface {
 	CloseTaskBy(ctx context.Context, id uuid.UUID) error
 	ReopenTaskBy(ctx context.Context, id uuid.UUID) error
 	DeleteTaskBy(ctx context.Context, id uuid.UUID) error
+	RecordHistoryBatch(ctx context.Context, entries []model.TaskHistory) error
 
 	// Priorities
 	GetTaskPriorities(ctx context.Context) ([]shared.IdWithName, error)
@@ -203,6 +205,46 @@ func (r *taskRepoImpl) GetTaskAuthorId(ctx context.Context, taskId uuid.UUID) (u
 	err := r.QueryRowContext(ctx, "SELECT author_id FROM tasks WHERE id = $1", taskId).Scan(&authorId)
 
 	return authorId, err
+}
+
+func (r *taskRepoImpl) GetTaskSnapshot(ctx context.Context, id uuid.UUID) (model.TaskSnapshot, error) {
+	var s model.TaskSnapshot
+	err := r.GetContext(ctx, &s, `
+		SELECT
+			t.id, t.assignee_id, t.project_id, t.release_id, t.category_id,
+			t.priority_id, t.status_id, t.title, t.description, t.due_at,
+			COALESCE(u.name, '')   AS assignee_name,
+			COALESCE(u.surname, '') AS assignee_surname,
+			COALESCE(ts.name, '')  AS status_name,
+			COALESCE(tc.name, '')  AS category_name,
+			COALESCE(tp.name, '')  AS priority_name,
+			COALESCE(pr.title, '') AS release_name
+		FROM tasks t
+		LEFT JOIN users u             ON t.assignee_id  = u.id
+		LEFT JOIN task_statuses ts    ON t.status_id    = ts.id
+		LEFT JOIN task_categories tc  ON t.category_id  = tc.id
+		LEFT JOIN task_priorities tp  ON t.priority_id  = tp.id
+		LEFT JOIN project_releases pr ON t.release_id   = pr.id
+		WHERE t.id = $1
+	`, id)
+	return s, err
+}
+
+func (r *taskRepoImpl) RecordHistoryBatch(ctx context.Context, entries []model.TaskHistory) error {
+	if len(entries) == 0 {
+		return nil
+	}
+	return r.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
+		for _, e := range entries {
+			if _, err := tx.ExecContext(ctx, `
+				INSERT INTO task_history (id, task_id, user_id, comment_id, field_name, old_value, new_value)
+				VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb)
+			`, e.Id, e.TaskId, e.UserId, e.CommentId, e.FieldName, e.OldValue, e.NewValue); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (r *taskRepoImpl) GetTaskProjectId(ctx context.Context, taskId uuid.UUID) (int, error) {

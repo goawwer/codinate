@@ -108,7 +108,19 @@
         </div>
       </div>
     } @else {
-      <div class="comment-body" [innerHTML]="comment.body"></div>
+      @if (hasChanges) {
+        <div class="comment-changes">
+          @for (change of comment.changes; track change.id) {
+            <tui-badge [appearance]="changeBadgeAppearance(change)" size="s">
+              <tui-icon [icon]="fieldIcon(change.fieldName)" [style.font-size.rem]="0.75"/>
+              <span>{{ changeFieldLabel(change.fieldName) }}{{ changeLabel(change) }}</span>
+            </tui-badge>
+          }
+        </div>
+      }
+      @if (comment.body) {
+        <div class="comment-body" [innerHTML]="comment.body"></div>
+      }
       @if (comment.attachedFiles.length) {
         <div class="comment-files">
           @for (file of comment.attachedFiles; track file.id) {

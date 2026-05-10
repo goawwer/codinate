@@ -22,6 +22,7 @@ import {
   TuiInputDate,
   TuiSelect,
   TuiBadgedContent,
+  TuiTabs,
 } from '@taiga-ui/kit';
 import { TuiBlockStatus, TuiCard, TuiHeader } from '@taiga-ui/layout';
 import { TuiEditor } from '@taiga-ui/editor';
@@ -30,6 +31,7 @@ import { EmployeeRolePipe } from '../../../../common/pipes/employee-role.pipe';
 import { AppEditorComponent } from '../../../../common/editor/app-editor.component';
 import { CommentList } from '../../../../common/comment/comment-list/comment-list';
 import { AppDatePipe } from '../../../../common/pipes/app-date.pipe';
+import { TaskCommentComposerComponent } from '../task-comment-composer/task-comment-composer';
 
 export const DETAILED_IMPORTS = [
   AsyncPipe,
@@ -60,7 +62,9 @@ export const DETAILED_IMPORTS = [
   TuiTitle,
   AppPicture,
   TuiBadgedContent,
+  TuiTabs,
   AppEditorComponent,
   CommentList,
   AppDatePipe,
+  TaskCommentComposerComponent,
 ];

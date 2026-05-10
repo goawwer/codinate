@@ -49,6 +49,7 @@ import { AlertService } from '../../../core/declarations/services/alert.service'
 export class CommentList implements OnInit {
   @Input({ required: true }) entityType!: CommentEntityType;
   @Input({ required: true }) entityId!: string;
+  @Input() hideComposer = false;
   @Output() filesChanged = new EventEmitter<void>();
 
   @ViewChild('commentTop') private commentTop!: ElementRef<HTMLElement>;
@@ -71,6 +72,10 @@ export class CommentList implements OnInit {
   protected readonly isAdmin = computed(() => this.userStore.isAtLeastAdmin());
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  reload(): void {
     this.load();
   }
 

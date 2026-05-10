@@ -2,9 +2,11 @@ package tasks
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/goawwer/codinate/internal/adapter/dto/filters"
@@ -60,7 +62,12 @@ func (s *service) addTask(ctx context.Context, input task.CreateTaskInput) (uuid
 	})
 }
 
-func (s *service) updateTask(ctx context.Context, input task.UpdateTaskInput, id uuid.UUID) error {
+func (s *service) updateTask(ctx context.Context, input task.UpdateTaskInput, id, userId uuid.UUID) error {
+	current, err := repository.GetTaskRepo().GetTaskSnapshot(ctx, id)
+	if err != nil {
+		return err
+	}
+
 	dueAt, _ := time.Parse(time.RFC3339Nano, input.DueAt)
 	var closedAt time.Time
 	if input.ClosedAt != nil {
@@ -85,19 +92,89 @@ func (s *service) updateTask(ctx context.Context, input task.UpdateTaskInput, id
 		return err
 	}
 
-	return repository.GetTaskRepo().AddParticipant(ctx, id, assigneeId)
+	if err := repository.GetTaskRepo().AddParticipant(ctx, id, assigneeId); err != nil {
+		return err
+	}
+
+	changes := detectTaskChanges(current, input, id, userId)
+
+	if len(changes) == 0 && input.CommentBody == "" {
+		return nil
+	}
+
+	commentId := uuid.New()
+	if _, err := repository.GetCommentRepo().Create(ctx, model.Comment{
+		Id:         commentId,
+		EntityType: enum.TaskCommentEntity,
+		EntityId:   id,
+		UserId:     userId,
+		Body:       input.CommentBody,
+	}); err != nil {
+		return err
+	}
+
+	for i := range changes {
+		changes[i].CommentId = &commentId
+	}
+	return repository.GetTaskRepo().RecordHistoryBatch(ctx, changes)
 }
 
 func (s *service) addParticipant(ctx context.Context, taskId, userId uuid.UUID) error {
 	return repository.GetTaskRepo().AddParticipant(ctx, taskId, userId)
 }
 
-func (s *service) closeTask(ctx context.Context, id uuid.UUID) error {
-	return repository.GetTaskRepo().CloseTaskBy(ctx, id)
+func (s *service) closeTask(ctx context.Context, id, userId uuid.UUID) error {
+	if err := repository.GetTaskRepo().CloseTaskBy(ctx, id); err != nil {
+		return err
+	}
+
+	commentId := uuid.New()
+	if _, err := repository.GetCommentRepo().Create(ctx, model.Comment{
+		Id:         commentId,
+		EntityType: enum.TaskCommentEntity,
+		EntityId:   id,
+		UserId:     userId,
+		Body:       "",
+	}); err != nil {
+		return err
+	}
+
+	return repository.GetTaskRepo().RecordHistoryBatch(ctx, []model.TaskHistory{{
+		Id:        uuid.New(),
+		TaskId:    id,
+		UserId:    userId,
+		CommentId: &commentId,
+		FieldName: "closed",
+		OldValue:  `false`,
+		NewValue:  `true`,
+	}})
 }
 
-func (s *service) reopenTask(ctx context.Context, id uuid.UUID) error {
-	return repository.GetTaskRepo().ReopenTaskBy(ctx, id)
+func (s *service) reopenTask(ctx context.Context, id, userId uuid.UUID) error {
+	if err := repository.GetTaskRepo().ReopenTaskBy(ctx, id); err != nil {
+		return err
+	}
+
+	commentId := uuid.New()
+	if _, err := repository.GetCommentRepo().Create(ctx, model.Comment{
+		Id:         commentId,
+		EntityType: enum.TaskCommentEntity,
+		EntityId:   id,
+		UserId:     userId,
+		Body:       "",
+	}); err != nil {
+		return err
+	}
+
+	return repository.GetTaskRepo().RecordHistoryBatch(ctx, []model.TaskHistory{{
+		Id:        uuid.New(),
+		TaskId:    id,
+		UserId:    userId,
+		CommentId: &commentId,
+		FieldName: "closed",
+		OldValue:  `true`,
+		NewValue:  `false`,
+	}})
 }
 
 func (s *service) deleteTask(ctx context.Context, taskId, userId uuid.UUID, userRole enum.PermissionRole) error {
@@ -115,6 +192,59 @@ func (s *service) deleteTask(ctx context.Context, taskId, userId uuid.UUID, user
 
 func (s *service) suggestionsBy(ctx context.Context, b controller.BasicQueryParams) ([]task.Suggestion, error) {
 	return repository.GetTaskRepo().GetTasksSuggestion(ctx, b)
+}
+
+// detectTaskChanges builds history entries comparing snapshot (with resolved names) against
+// the incoming input. String names are stored directly so the frontend can display them
+// without needing to resolve IDs.
+func detectTaskChanges(current model.TaskSnapshot, input task.UpdateTaskInput, taskId, userId uuid.UUID) []model.TaskHistory {
+	var entries []model.TaskHistory
+
+	addStr := func(field, oldName, newName string) {
+		if oldName == newName {
+			return
+		}
+		oldJSON, _ := json.Marshal(oldName)
+		newJSON, _ := json.Marshal(newName)
+		entries = append(entries, model.TaskHistory{
+			Id:        uuid.New(),
+			TaskId:    taskId,
+			UserId:    userId,
+			FieldName: field,
+			OldValue:  string(oldJSON),
+			NewValue:  string(newJSON),
+		})
+	}
+
+	oldAssignee := strings.TrimSpace(current.AssigneeName + " " + current.AssigneeSurname)
+	if newAssignee := uuid.MustParse(input.AssigneeId); current.AssigneeId != newAssignee {
+		addStr("assignee", oldAssignee, input.AssigneeName)
+	}
+	if current.StatusId != input.StatusId {
+		addStr("status", current.StatusName, input.StatusName)
+	}
+	if current.CategoryId != input.CategoryId {
+		addStr("category", current.CategoryName, input.CategoryName)
+	}
+	if current.PriotiryId != input.PriorityId {
+		addStr("priority", current.PriorityName, input.PriorityName)
+	}
+	if current.ReleaseId != input.ReleaseId {
+		addStr("release", current.ReleaseName, input.ReleaseName)
+	}
+	if current.Title != input.Title {
+		addStr("title", current.Title, input.Title)
+	}
+	if newDue, err := time.Parse(time.RFC3339Nano, input.DueAt); err == nil {
+		if !current.DueAt.Equal(newDue) {
+			addStr("dueAt",
+				current.DueAt.Format("2006-01-02"),
+				newDue.Format("2006-01-02"),
+			)
+		}
+	}
+
+	return entries
 }
 
 func uniqueUUIDs(ids ...uuid.UUID) []uuid.UUID {

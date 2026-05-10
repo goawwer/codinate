@@ -5,6 +5,13 @@ export interface CommentAttachedFile {
   name: string;
 }
 
+export interface HistoryChange {
+  id: string;
+  fieldName: string;
+  oldValue: string | boolean;
+  newValue: string | boolean;
+}
+
 export interface Comment {
   id: string;
   entityType: CommentEntityType;
@@ -16,6 +23,7 @@ export interface Comment {
   employeePicture: string;
   body: string;
   attachedFiles: CommentAttachedFile[];
+  changes: HistoryChange[];
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

@@ -14,6 +14,7 @@ func Register() {
 	ui.RegisterGet("/worklogs/leaderboard", enum.AnyUser, reflect.TypeOf(service{}), getLeaderboard)
 	ui.RegisterPost("/worklogs/leaderboard/recalculate", enum.AtLeastAdmin, reflect.TypeOf(service{}), recalculateLeaderboard)
 	ui.RegisterGet("/worklogs/{user_id}/all", enum.AnyUser, reflect.TypeOf(service{}), all)
+	ui.RegisterGet("/worklogs/tasks/{task_id}", enum.AnyUser, reflect.TypeOf(service{}), getByTask)
 	ui.RegisterPatch("/worklogs/{log_id}/update", enum.AnyUser, reflect.TypeOf(service{}), update)
 	ui.RegisterDelete("/worklogs/{log_id}/delete", enum.AnyUser, reflect.TypeOf(service{}), deleteLog)
 }
@@ -64,6 +65,14 @@ func deleteLog(s ui.UIService) (any, error) {
 	}
 
 	return nil, s.GetService().(*service).deleteBy(s.GetRequest().Context(), uuid.MustParse(id))
+}
+
+func getByTask(s ui.UIService) (any, error) {
+	taskId, err := s.GetPathParameterAsString("task_id")
+	if err != nil {
+		return nil, err
+	}
+	return s.GetService().(*service).getByTask(s.GetRequest().Context(), uuid.MustParse(taskId))
 }
 
 func getLeaderboard(s ui.UIService) (any, error) {

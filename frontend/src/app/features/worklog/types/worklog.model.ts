@@ -10,6 +10,19 @@ export interface WorklogRow {
   taskIdentifier: number;
 }
 
+export interface TaskWorklogRow {
+  id: string;
+  taskId: string;
+  startAt: string;
+  endAt: string;
+  totalMinutes: number;
+  description: string;
+  userId: string;
+  userName: string;
+  userSurname: string;
+  userAvatar: string;
+}
+
 export interface CreateWorklogInput {
   userId: string;
   startAt: string;

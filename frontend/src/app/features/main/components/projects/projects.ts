@@ -22,6 +22,7 @@ import {
   ProjectDialogData,
 } from '../../../project/components/dialog/project-dialog.component';
 import { AppDialogService } from '../../../../common/dialogs/dialog.service';
+import { StripHtmlPipe } from '../../../../common/pipes/strip-html.pipe';
 
 @Component({
   selector: 'app-projects',
@@ -36,6 +37,7 @@ import { AppDialogService } from '../../../../common/dialogs/dialog.service';
     TranslatePipe,
     TuiLoader,
     TuiButton,
+    StripHtmlPipe,
   ],
   templateUrl: './projects.html',
   styleUrl: './projects.scss',

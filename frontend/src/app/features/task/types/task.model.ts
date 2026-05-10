@@ -68,6 +68,12 @@ export interface CreateTaskInput {
 
 export interface UpdateTaskInput extends Partial<CreateTaskInput> {
   closedAt?: string | null;
+  commentBody?: string;
+  assigneeName?: string;
+  statusName?: string;
+  categoryName?: string;
+  priorityName?: string;
+  releaseName?: string;
 }
 
 export interface TaskSuggestion {

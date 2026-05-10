@@ -47,6 +47,17 @@ func (r *commentRepoImpl) GetAllBy(ctx context.Context, entityId uuid.UUID) ([]c
 				 WHERE f.id = ANY(c.attached_files_ids)),
 				'[]'::json
 			) AS attached_files,
+			COALESCE(
+				(SELECT json_agg(json_build_object(
+					'id',        th.id,
+					'fieldName', th.field_name,
+					'oldValue',  th.old_value,
+					'newValue',  th.new_value
+				) ORDER BY th.created_at ASC)
+				 FROM task_history th
+				 WHERE th.comment_id = c.id),
+				'[]'::json
+			) AS changes,
 			c.created_at,
 			c.updated_at
 		FROM comments c

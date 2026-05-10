@@ -17,6 +17,10 @@ func (s *service) getAll(ctx context.Context, userId uuid.UUID, f *worklog.Filte
 	return repository.GetWorklogRepo().GetAll(ctx, userId, f)
 }
 
+func (s *service) getByTask(ctx context.Context, taskId uuid.UUID) ([]worklog.TaskRow, error) {
+	return repository.GetWorklogRepo().GetByTask(ctx, taskId)
+}
+
 func (s *service) getLeaderboard(ctx context.Context) ([]worklog.LeaderboardEntry, error) {
 	return repository.GetWorklogRepo().GetLeaderboard(ctx, 10)
 }

@@ -13,6 +13,7 @@ import (
 
 type WorklogRepo interface {
 	GetAll(ctx context.Context, userId uuid.UUID, f *worklog.Filters) ([]worklog.Row, error)
+	GetByTask(ctx context.Context, taskId uuid.UUID) ([]worklog.TaskRow, error)
 	GetLeaderboard(ctx context.Context, limit int) ([]worklog.LeaderboardEntry, error)
 	RecalculateLeaderboard(ctx context.Context) error
 	Add(ctx context.Context, input model.Worklog) (uuid.UUID, error)
@@ -87,6 +88,28 @@ func (r *worklogRepoImpl) GetAll(ctx context.Context, userId uuid.UUID, f *workl
 		LEFT JOIN tasks tk ON tk.id = t.task_id
 	`+qb.Build())
 
+	return result, err
+}
+
+func (r *worklogRepoImpl) GetByTask(ctx context.Context, taskId uuid.UUID) ([]worklog.TaskRow, error) {
+	result := make([]worklog.TaskRow, 0)
+	err := r.SelectContext(ctx, &result, `
+		SELECT
+			t.id,
+			t.task_id,
+			t.start_at,
+			t.end_at,
+			t.total_minutes,
+			COALESCE(t.description, '') AS description,
+			u.id AS user_id,
+			COALESCE(u.name, '') AS user_name,
+			COALESCE(u.surname, '') AS user_surname,
+			COALESCE(u.avatar, '') AS user_avatar
+		FROM time_logs t
+		LEFT JOIN users u ON u.id = t.user_id
+		WHERE t.task_id = $1
+		ORDER BY t.start_at ASC
+	`, taskId)
 	return result, err
 }
 

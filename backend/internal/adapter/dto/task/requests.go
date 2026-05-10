@@ -19,5 +19,11 @@ type CreateTaskInput struct {
 
 type UpdateTaskInput struct {
 	*CreateTaskInput
-	ClosedAt *string `json:"closedAt"`
+	ClosedAt     *string `json:"closedAt"`
+	CommentBody  string  `json:"commentBody"`
+	AssigneeName string  `json:"assigneeName"`
+	StatusName   string  `json:"statusName"`
+	CategoryName string  `json:"categoryName"`
+	PriorityName string  `json:"priorityName"`
+	ReleaseName  string  `json:"releaseName"`
 }

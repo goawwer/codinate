@@ -28,8 +28,11 @@
     }
   }
 
+  <div #commentBottom></div>
+
+  @if (!hideComposer) {
   <div class="compose-wrapper">
-    <div #commentBottom class="comment-compose">
+    <div class="comment-compose">
       @if (!isInputActive()) {
         <button
           type="button"
@@ -94,4 +97,5 @@
       }
     </div>
   </div>
+  }
 </div>

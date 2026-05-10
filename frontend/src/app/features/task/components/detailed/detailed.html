@@ -95,15 +95,20 @@
                         size="s"
                         (click)="toggleEditing()"
                       ></button>
-                      <button
-                        tuiIconButton
-                        class="btn-primary"
-                        type="button"
-                        iconStart="@tui.plus"
-                        size="s"
-                        [title]="'models.worklog.logTime' | translate"
-                        (click)="openLogTimeDialog()"
-                      ></button>
+                      <div class="log-time-wrap">
+                        <button
+                          tuiIconButton
+                          class="btn-primary"
+                          type="button"
+                          iconStart="@tui.plus"
+                          size="xs"
+                          [title]="'models.worklog.logTime' | translate"
+                          (click)="openLogTimeDialog()"
+                        ></button>
+                      </div>
+                      @if (totalMinutes() > 0) {
+                        <span class="log-time-total">{{ formatMinutes(totalMinutes()) }}</span>
+                      }
                     </div>
                   </div>
                   @if (isEditing()) {
@@ -217,7 +222,59 @@
               }
             </div>
 
-            <app-comment-list entityType="task" [entityId]="taskId" (filesChanged)="reloadTask()" />
+            <div class="activity-tabs">
+              <tui-tabs [activeItemIndex]="activeTab()" (activeItemIndexChange)="activeTab.set($event)">
+                <button tuiTab>{{ 'models.task.detailed.comments' | translate }}</button>
+                <button tuiTab>{{ 'models.task.detailed.worklogs' | translate }}</button>
+              </tui-tabs>
+
+              @if (activeTab() === 0) {
+                <app-task-comment-composer
+                  [taskId]="taskId"
+                  [task]="task()"
+                  [statuses]="statuses()"
+                  [categories]="categories()"
+                  [priorities]="priorities()"
+                  [releases]="releases()"
+                  [users]="users()"
+                  (submitted)="reloadTask()"
+                />
+                <app-comment-list entityType="task" [entityId]="taskId" [hideComposer]="true" (filesChanged)="reloadTask()" />
+              }
+
+              @if (activeTab() === 1) {
+                <div class="worklog-list">
+                  @if (!worklogs().length) {
+                    <div class="worklog-empty">{{ 'generic.statuses.empty' | translate }}</div>
+                  }
+                  @for (log of worklogs(); track log.id) {
+                    <div class="worklog-item">
+                      <div class="worklog-header">
+                        <div class="flex items-center justify-between gap-2">
+                          <div class="w-10 h-10">
+                            <app-picture
+                              [name]="log.userName"
+                              [surname]="log.userSurname"
+                              [pictureName]="log.userAvatar"
+                              size="m"
+                              entityType="users"
+                            />
+                          </div>
+                          <div class="flex flex-col">
+                            <span class="worklog-name">{{ log.userName }} {{ log.userSurname }}</span>
+                            <span class="worklog-time">{{ log.startAt | appDate }} — {{ log.endAt | appDate }}</span>
+                          </div>
+                        </div>
+                        <span class="worklog-duration">{{ formatMinutes(log.totalMinutes) }}</span>
+                      </div>
+                      @if (log.description) {
+                        <p class="worklog-description">{{ log.description }}</p>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
           </div>
         </div>
       </tui-scrollbar>
