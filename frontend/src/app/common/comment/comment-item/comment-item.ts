@@ -41,7 +41,7 @@ import { AppDialogService } from '../../dialogs/dialog.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './comment-item.html',
   styleUrl: './comment-item.scss',
-  providers: [provideTuiEditor(), PendingEditorUploads],
+  providers: [provideTuiEditor(), PendingEditorUploads, AppDatePipe],
 })
 export class CommentItem {
   @Input({ required: true }) comment!: Comment;
@@ -52,6 +52,7 @@ export class CommentItem {
   @Output() updated = new EventEmitter<{ id: string } & UpdateCommentInput>();
 
   private readonly pendingUploads = inject(PendingEditorUploads);
+  private readonly appDate = inject(AppDatePipe);
   protected readonly fileService = inject(FileService);
   protected readonly dialogs = inject(AppDialogService);
   protected readonly translate = inject(TranslateService);
@@ -74,16 +75,18 @@ export class CommentItem {
     return (this.comment.changes?.length ?? 0) > 0;
   }
 
+  private static readonly DATE_FIELDS = new Set(['dueAt']);
+
   private static readonly FIELD_ICONS: Record<string, string> = {
-    status:      '@tui.circle-dot',
-    assignee:    '@tui.user',
-    category:    '@tui.folder',
-    priority:    '@tui.flame',
-    release:     '@tui.tag',
-    title:       '@tui.pencil',
+    status: '@tui.circle-dot',
+    assignee: '@tui.user',
+    category: '@tui.folder',
+    priority: '@tui.flame',
+    release: '@tui.tag',
+    title: '@tui.pencil',
     description: '@tui.file-text',
-    dueAt:       '@tui.clock',
-    closed:      '@tui.circle-check',
+    dueAt: '@tui.clock',
+    closed: '@tui.circle-check',
   };
 
   protected fieldIcon(fieldName: string): string {
@@ -96,6 +99,9 @@ export class CommentItem {
         ? this.translate.instant('models.task.activity.closed')
         : this.translate.instant('models.task.activity.reopened');
     }
+    if (CommentItem.DATE_FIELDS.has(change.fieldName)) {
+      return `${this.appDate.transform(change.oldValue as string)} → ${this.appDate.transform(change.newValue as string)}`;
+    }
     return `${change.oldValue} → ${change.newValue}`;
   }
 
@@ -103,7 +109,7 @@ export class CommentItem {
     if (change.fieldName === 'closed') {
       return change.newValue === true ? 'success' : 'primary';
     }
-    return 'info';
+    return 'action-grayscale';
   }
 
   protected changeFieldLabel(fieldName: string): string {
@@ -145,21 +151,23 @@ export class CommentItem {
 
     const pendingFiles = this.pendingUploads.pending();
 
-    this.pendingUploads.flush(this.comment.entityType + 's', this.comment.entityId, rawBody).subscribe((body) => {
-      const added: CommentAttachedFile[] = pendingFiles.map((f) => ({
-        id: f.fileId,
-        name: f.name,
-      }));
-      this.updated.emit({
-        id: this.comment.id,
-        entityType: this.comment.entityType,
-        entityId: this.comment.entityId,
-        body,
-        attachedFiles: [...this.existingFiles(), ...added],
-        newAttachedFiles: added,
+    this.pendingUploads
+      .flush(this.comment.entityType + 's', this.comment.entityId, rawBody)
+      .subscribe((body) => {
+        const added: CommentAttachedFile[] = pendingFiles.map((f) => ({
+          id: f.fileId,
+          name: f.name,
+        }));
+        this.updated.emit({
+          id: this.comment.id,
+          entityType: this.comment.entityType,
+          entityId: this.comment.entityId,
+          body,
+          attachedFiles: [...this.existingFiles(), ...added],
+          newAttachedFiles: added,
+        });
+        this.isEditing.set(false);
       });
-      this.isEditing.set(false);
-    });
   }
 
   protected confirmDelete(commentId: string): void {

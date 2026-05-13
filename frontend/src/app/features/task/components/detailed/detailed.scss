@@ -352,7 +352,10 @@
 .log-time-total {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--tui-text-secondary);
+  color: var(--tui-text-action);
+  background: var(--tui-background-neutral-1);
+  border-radius: 1rem;
+  padding: 0.125rem 0.5rem;
   white-space: nowrap;
 }
 

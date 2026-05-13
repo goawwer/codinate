@@ -87,24 +87,26 @@
                         </button>
                       </div>
                       }
-                      <button
-                        tuiIconButton
-                        appearance="action"
-                        type="button"
-                        [iconStart]="isEditing() ? '@tui.x' : '@tui.pencil'"
-                        size="s"
-                        (click)="toggleEditing()"
-                      ></button>
-                      <div class="log-time-wrap">
+                      <div class="flex items-center mr-1">
                         <button
                           tuiIconButton
-                          class="btn-primary"
+                          appearance="action"
                           type="button"
-                          iconStart="@tui.plus"
-                          size="xs"
-                          [title]="'models.worklog.logTime' | translate"
-                          (click)="openLogTimeDialog()"
+                          [iconStart]="isEditing() ? '@tui.x' : '@tui.pencil'"
+                          size="s"
+                          (click)="toggleEditing()"
                         ></button>
+                        <div class="log-time-wrap">
+                          <button
+                            tuiIconButton
+                            appearance="action"
+                            type="button"
+                            iconStart="@tui.plus"
+                            size="xs"
+                            [title]="'models.worklog.logTime' | translate"
+                            (click)="openLogTimeDialog()"
+                          ></button>
+                        </div>
                       </div>
                       @if (totalMinutes() > 0) {
                         <span class="log-time-total">{{ formatMinutes(totalMinutes()) }}</span>
