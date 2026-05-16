@@ -1,34 +1,6 @@
 <div class="comment-list">
-  <div #commentTop class="flex justify-between p-1 text-(--tui-text-secondary)">
-    <div class="flex gap-1.5 items-center">
-      <tui-icon icon="@tui.message-circle-more" [style.font-size.rem]="1"/>
-      <span>{{ 'models.task.detailed.comments' | translate }}</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span>({{ comments().length }})</span>
-      @if (canScroll()) {
-        <button class="scroll-btn" type="button" (click)="scrollToBottom()">
-          <tui-icon icon="@tui.arrow-down" />
-        </button>
-      }
-    </div>
+  <div #commentTop>
   </div>
-
-  @if (isLoading()) {
-    <tui-loader />
-  } @else if (comments().length > 0) {
-    @for (comment of comments(); track comment.id) {
-      <app-comment-item
-        [comment]="comment"
-        [currentUserId]="currentUserId()"
-        [isAdmin]="isAdmin()"
-        (deleted)="onDeleted($event)"
-        (updated)="onUpdated($event)"
-      />
-    }
-  }
-
-  <div #commentBottom></div>
 
   @if (!hideComposer) {
   <div class="compose-wrapper">
@@ -98,4 +70,35 @@
     </div>
   </div>
   }
+
+  <div class="flex justify-between p-1 text-(--tui-text-secondary)">
+    <div class="flex gap-1.5 items-center">
+      <tui-icon icon="@tui.message-circle-more" [style.font-size.rem]="1"/>
+      <span>{{ 'models.task.detailed.comments' | translate }}</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span>({{ comments().length }})</span>
+      @if (canScroll()) {
+        <button class="scroll-btn" type="button" (click)="scrollToBottom()">
+          <tui-icon icon="@tui.arrow-down" />
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <tui-loader />
+  } @else if (comments().length > 0) {
+    @for (comment of comments(); track comment.id) {
+      <app-comment-item
+        [comment]="comment"
+        [currentUserId]="currentUserId()"
+        [isAdmin]="isAdmin()"
+        (deleted)="onDeleted($event)"
+        (updated)="onUpdated($event)"
+      />
+    }
+  }
+
+  <div #commentBottom></div>
 </div>

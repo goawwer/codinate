@@ -12,7 +12,7 @@ import { UserStore } from '../../features/user/store/user.store';
 import { StoreStatus } from '../../core/declarations/types/store-statuses.type';
 import { TuiItem } from '@taiga-ui/cdk/directives/item';
 
-const ADMIN_ROUTES = ['/admin/users', '/admin/teams', '/admin/projects', '/admin/settings'];
+const ADMIN_ROUTES = ['/admin/users', '/admin/settings'];
 const MAIN_ROUTES = ['/main/feed', '/main/projects', '/main/teams'];
 const MINE_ROUTES = ['/mine/assigned', '/mine/created', '/mine/history'];
 const WORKLOG_SUBNAV = ['/worklog/general', '/worklog/tasks'];

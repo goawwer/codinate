@@ -4,15 +4,14 @@ import (
 	"context"
 
 	"github.com/goawwer/codinate/internal/adapter/dto/team"
-	"github.com/goawwer/codinate/internal/adapter/dto/user"
 	"github.com/goawwer/codinate/internal/adapter/repository"
 	"github.com/google/uuid"
 )
 
 type service struct{}
 
-func (s *service) getTeamMembersBy(ctx context.Context, id uuid.UUID) ([]user.TeamMember, error) {
-	return repository.GetTeamRepo().GetTeamMembersBy(ctx, id)
+func (s *service) getTeam(ctx context.Context, id uuid.UUID) (team.Row, error) {
+	return repository.GetTeamRepo().GetTeamBy(ctx, id)
 }
 
 func (s *service) getAllTeams(ctx context.Context) ([]team.Row, error) {
@@ -37,6 +36,10 @@ func (s *service) remMember(ctx context.Context, teamId int, memberId uuid.UUID)
 
 func (s *service) delete(ctx context.Context, teamId int) error {
 	return repository.GetTeamRepo().DeleteBy(ctx, teamId)
+}
+
+func (s *service) updateLinks(ctx context.Context, id int, links team.TeamLinks) error {
+	return repository.GetTeamRepo().UpdateLinks(ctx, id, links)
 }
 
 func (s *service) deletePicture(ctx context.Context, projectId int) error {

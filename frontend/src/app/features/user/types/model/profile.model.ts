@@ -48,3 +48,8 @@ export interface ProjectFocusStat {
   projectName: string;
   spentMinutes: number;
 }
+
+export interface UserHoursStat {
+  userId: string;
+  totalMinutes: number;
+}

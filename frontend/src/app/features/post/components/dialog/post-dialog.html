@@ -1,0 +1,117 @@
+<div class="post-dialog">
+
+  <div class="post-meta">
+    <div class="w-10 h-10">
+      <app-picture
+        [name]="post.authorName"
+        [surname]="post.authorSurname"
+        size="m"
+        entityType="users"
+        [pictureName]="post.authorPicture"
+      />
+    </div>
+
+    <div class="post-meta-info">
+      <div class="flex items-center gap-2">
+         <span class="post-author">{{ post.authorName }} {{ post.authorSurname }}</span>
+         <span class="post-sep">·</span>
+         <span class="post-date">{{ post.createdAt | appDate: 'dd MMMM yyyy' }}</span>
+      </div>
+      <span class="post-username">@{{ post.authorUsername }}</span>
+    </div>
+
+    @if (canModify() && !isEditing()) {
+      <div class="post-actions">
+        <button
+          tuiIconButton
+          type="button"
+          appearance="ghost"
+          size="s"
+          iconStart="@tui.pencil"
+          (click)="startEdit()"
+        ></button>
+        <button
+          tuiIconButton
+          type="button"
+          appearance="ghost"
+          size="s"
+          iconStart="@tui.trash-2"
+          class="btn-danger-ghost"
+          (click)="confirmDelete()"
+        ></button>
+      </div>
+    }
+  </div>
+
+  @if (isEditing()) {
+    <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form">
+      <div class="flex items-center gap-2">
+        <tui-textfield [tuiTextfieldSize]="'m'" class="flex-1">
+          <label tuiLabel>{{ 'feed.posts.form.title' | translate }}</label>
+          <input tuiTextfield formControlName="title" autocomplete="off" />
+        </tui-textfield>
+
+        <div class="parent-selector">
+          @if (isLoadingEntities()) {
+            <tui-loader />
+          } @else {
+            <button
+              tuiButton
+              tuiButtonSelect
+              type="button"
+              appearance="secondary-grayscale"
+              iconStart="@tui.folder"
+              size="m"
+              [formControl]="editForm.controls.parents"
+            >
+              {{ parentLabel() }}
+              <tui-data-list *tuiTextfieldDropdown>
+                <tui-opt-group [label]="'models.project.title.plural' | translate" tuiMultiSelectGroup>
+                  @for (project of projects(); track project.id) {
+                    <button new tuiOption type="button" [value]="project">{{ project.projectName }}</button>
+                  }
+                </tui-opt-group>
+                <tui-opt-group [label]="'models.team.title.plural' | translate" tuiMultiSelectGroup>
+                  @for (team of teams(); track team.id) {
+                    <button new tuiOption type="button" [value]="team">{{ team.name }}</button>
+                  }
+                </tui-opt-group>
+              </tui-data-list>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="edit-body-field">
+        <app-editor formControlName="body" entityType="posts" />
+      </div>
+
+      <div class="edit-actions">
+        <button tuiButton type="button" appearance="flat" size="s" (click)="cancelEdit()">
+          {{ 'generic.actions.cancel' | translate }}
+        </button>
+        <button tuiButton type="submit" class="btn-primary" size="s" [disabled]="isSaving()">
+          {{ 'generic.actions.save' | translate }}
+        </button>
+      </div>
+    </form>
+  } @else {
+    <div class="post-body" [innerHTML]="post.body | safeHtml" appMentionLinks></div>
+  }
+
+  <div class="comments-section">
+
+    @if (isLoadingComments()) {
+      <div class="comments-loader">
+        <tui-loader />
+      </div>
+    } @else {
+      <div class="comments-list">
+        <app-comment-list
+          [entityId]="post.id"
+          entityType="post"
+        ></app-comment-list>
+      </div>
+    }
+  </div>
+</div>

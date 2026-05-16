@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { filter } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { AppDialogService } from '../../../../../common/dialogs/dialog.service';
@@ -8,12 +8,17 @@ import { EmployeeRolesStore } from '../../../../employee/store/employee-roles.st
 import { USERSDASHBOARDIMPORTS } from './admin-users.imports';
 import { APP_SIZE, AppSize } from '../../../../../core/declarations/tokens/size.token';
 import { UserDialogComponent, UserDialogData } from '../dialog/user-dialog.component';
+import { UserApiService } from '../../../../user/service/user.service';
+
+export type Period = 'last-month' | 'current-month' | 'first-20-days';
+type UserColumnKey = keyof User | 'hours';
 
 type Column = {
-  key: keyof User;
+  key: UserColumnKey;
   isDate?: boolean;
   isRole?: boolean;
   isStatus?: boolean;
+  isHours?: boolean;
   width?: string;
 };
 
@@ -29,19 +34,41 @@ export class AdminUsers implements OnInit {
   readonly rolesStore = inject(EmployeeRolesStore);
   private readonly dialogs = inject(AppDialogService);
   private readonly translate = inject(TranslateService);
+  private readonly userApi = inject(UserApiService);
   protected readonly tableSize = inject(APP_SIZE);
   protected readonly inputSize: AppSize = 'm';
+
+  protected isUserKey(key: UserColumnKey): key is keyof User {
+    return key !== 'hours';
+  }
+
+  protected getUserValue(user: User, key: UserColumnKey): User[keyof User] | null {
+    return this.isUserKey(key) ? user[key] : null;
+  }
 
   protected readonly columns: Column[] = [
     { key: 'name', width: '8rem' },
     { key: 'surname', width: '8rem' },
     { key: 'username', width: '8rem' },
-    { key: 'email', width: '8rem' },
+    { key: 'email', width: '10rem' },
     { key: 'role', isRole: true, width: '8rem' },
     { key: 'disabled', isStatus: true, width: '6rem' },
-    { key: 'createdAt', isDate: true, width: '10rem' },
-    { key: 'updatedAt', isDate: true, width: '10rem' },
+    { key: 'createdAt', isDate: true, width: '9rem' },
+    { key: 'hours', isHours: true, width: '9rem' },
   ];
+
+  protected readonly periods: Period[] = ['last-month', 'current-month', 'first-20-days'];
+  protected readonly activePeriod = signal<Period>('last-month');
+  protected readonly hoursMap = signal(new Map<string, number>());
+
+  constructor() {
+    effect(() => {
+      const { from, to } = this.getPeriodDates(this.activePeriod());
+      this.userApi.getAllUsersHours(from, to).subscribe((stats) => {
+        this.hoursMap.set(new Map(stats.map((s) => [s.userId, s.totalMinutes])));
+      });
+    });
+  }
 
   protected readonly searchQuery = signal('');
   protected readonly filteredUsers = computed(() => {
@@ -96,6 +123,15 @@ export class AdminUsers implements OnInit {
     });
   }
 
+  protected getUserHours(userId: string): string {
+    return this.formatMinutes(this.hoursMap().get(userId) ?? 0);
+  }
+
+  protected periodLabel(period: Period): string {
+    const key = period.replace(/-/g, '_');
+    return this.translate.instant(`admin.dashboard.users.periods.${key}`);
+  }
+
   protected openCreateDialog(): void {
     this.dialogs
       .component<UserDialogComponent, void, UserDialogData>(UserDialogComponent, {
@@ -135,5 +171,37 @@ export class AdminUsers implements OnInit {
   ngOnInit(): void {
     this.rolesStore.load();
     this.store.loadUsers({});
+  }
+
+  private getPeriodDates(period: Period): { from: string; to: string } {
+    const now = new Date();
+    const fmt = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    switch (period) {
+      case 'last-month': {
+        const from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const to = new Date(now.getFullYear(), now.getMonth(), 0);
+        return { from: fmt(from), to: fmt(to) };
+      }
+      case 'current-month': {
+        const from = new Date(now.getFullYear(), now.getMonth(), 1);
+        return { from: fmt(from), to: fmt(now) };
+      }
+      case 'first-20-days': {
+        const from = new Date(now.getFullYear(), now.getMonth(), 1);
+        const to = new Date(now.getFullYear(), now.getMonth(), 20);
+        return { from: fmt(from), to: fmt(to) };
+      }
+    }
+  }
+
+  private formatMinutes(minutes: number): string {
+    if (minutes <= 0) return '0h';
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+    if (!hours) return `${rest}m`;
+    if (!rest) return `${hours}h`;
+    return `${hours}h ${rest}m`;
   }
 }

@@ -220,7 +220,7 @@
                   [entityId]="taskId"
                 />
               } @else {
-                <div class="task-description" [innerHTML]="t.description" (click)="handleDescriptionClick($event)"></div>
+                <div class="task-description" [innerHTML]="t.description | safeHtml" appMentionLinks (click)="handleDescriptionClick($event)"></div>
               }
             </div>
 

@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   CreateTaskInput,
+  DeadlinePressure,
   Task,
   TaskDetailed,
   TaskSuggestion,
@@ -58,5 +59,9 @@ export class TaskCoreService {
 
   addParticipant(taskId: string, userId: string): Observable<void> {
     return this.http.post<void>(`${this.baseURL}/${taskId}/participants/${userId}/add`, {});
+  }
+
+  getDeadlinePressure(): Observable<DeadlinePressure> {
+    return this.http.get<DeadlinePressure>(`${this.baseURL}/metrics/deadline`);
   }
 }

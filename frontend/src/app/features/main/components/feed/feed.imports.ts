@@ -21,8 +21,12 @@ import {
   TuiMultiSelect,
   TuiSegmented,
   TuiStatus,
+  TuiTabs,
+  TuiCarousel,
+  TuiPagination,
 } from '@taiga-ui/kit';
 import { TuiBlockStatus, TuiSearch } from '@taiga-ui/layout';
+import { TuiAxes, TuiLineDaysChart } from '@taiga-ui/addon-charts';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LowerCasePipe } from '@angular/common';
 import { StripHtmlPipe } from '../../../../common/pipes/strip-html.pipe';
@@ -50,6 +54,7 @@ export const FEEDIMPORTS = [
   TuiMultiSelect,
   TuiSegmented,
   TuiStatus,
+  TuiTabs,
   TuiBlockStatus,
   TuiSearch,
   TranslatePipe,
@@ -59,4 +64,8 @@ export const FEEDIMPORTS = [
   StripHtmlPipe,
   AppDatePipe,
   AppRankBadge,
+  TuiCarousel,
+  TuiPagination,
+  TuiAxes,
+  TuiLineDaysChart,
 ];

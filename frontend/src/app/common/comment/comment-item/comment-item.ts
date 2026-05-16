@@ -21,7 +21,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PendingEditorUploads } from '../../editor/pending-editor-uploads.service';
 import { FileService } from '../../file/file.service';
 import { LowerCasePipe } from '@angular/common';
+import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
 import { AppDialogService } from '../../dialogs/dialog.service';
+import { MentionLinksDirective } from '../../directives/mention-link.directive';
 
 @Component({
   selector: 'app-comment-item',
@@ -37,6 +39,8 @@ import { AppDialogService } from '../../dialogs/dialog.service';
     TranslatePipe,
     LowerCasePipe,
     RouterLink,
+    SafeHtmlPipe,
+    MentionLinksDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './comment-item.html',

@@ -67,6 +67,10 @@ func (s *service) getUserProfileStats(ctx context.Context, userId, from, to stri
 	return repository.GetUserRepo().GetUserProfileStats(ctx, uuid.MustParse(userId), filters.NewDateRange(from, to))
 }
 
+func (s *service) getAllUsersHours(ctx context.Context, from, to string) ([]user.UserHoursStat, error) {
+	return repository.GetUserRepo().GetAllUsersHours(ctx, filters.NewDateRange(from, to))
+}
+
 func (s *service) updateProfile(ctx context.Context, input user.UpdateProfileInput, userId uuid.UUID) error {
 	return repository.GetUserRepo().UpdateProfileBy(ctx, input, userId)
 }

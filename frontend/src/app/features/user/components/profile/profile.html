@@ -26,7 +26,8 @@
             <tui-badge
               size="m"
               class="profile-hero__badge"
-              [style.background]="'var(--tui-chart-categorical-01)'"
+
+              [style.background]="'var(--app-badge-color)'"
             >
               {{ profile()?.role ?? '' | employeeRole }}
             </tui-badge>
@@ -166,15 +167,22 @@
 
                     @if (project.tasks.length) {
                       <div class="project-card__tasks">
-                        @for (task of project.tasks; track task.id) {
-                          <a
-                            class="task-ref"
-                            [routerLink]="['/tasks', task.id]"
-                            (click)="$event.stopPropagation()"
-                          >
-                            #{{ task.identifier }}
-                          </a>
-                        }
+                        <span
+                          class="project-card__tasks-inner"
+                          tuiHintAppearance="primary-tooltip"
+                          tuiHintDirection="bottom"
+                          [tuiHint]="'models.user.profile.recentTasks' | translate"
+                        >
+                          @for (task of project.tasks; track task.id) {
+                            <a
+                              class="task-ref"
+                              [routerLink]="['/tasks', task.id]"
+                              (click)="$event.stopPropagation()"
+                            >
+                              #{{ task.identifier }}
+                            </a>
+                          }
+                        </span>
                       </div>
                     }
                   </div>

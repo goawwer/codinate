@@ -334,10 +334,15 @@
   }
 
   &__tasks {
-    display: flex;
+    display: block;
+    margin-top: 0.625rem;
+  }
+
+  &__tasks-inner {
+    display: inline-flex;
     flex-wrap: wrap;
     gap: 0.375rem;
-    margin-top: 0.625rem;
+    max-width: 100%;
   }
 }
 

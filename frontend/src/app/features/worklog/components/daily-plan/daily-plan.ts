@@ -58,7 +58,9 @@ export class DailyPlanComponent implements OnInit {
   );
 
   readonly totalPlanned = computed(() =>
-    this.items().reduce((sum, item) => sum + (item.plannedMinutes ?? 0), 0),
+    this.items().reduce((sum, item) => {
+      return sum + Number(item.plannedMinutes ?? 0);
+    }, 0),
   );
 
   readonly doneCount = computed(() => this.items().filter((item) => item.done).length);

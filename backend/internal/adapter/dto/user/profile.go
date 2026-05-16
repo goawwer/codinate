@@ -58,3 +58,8 @@ type ProjectFocusStat struct {
 	ProjectName  string `json:"projectName" db:"project_name"`
 	SpentMinutes int    `json:"spentMinutes" db:"spent_minutes"`
 }
+
+type UserHoursStat struct {
+	UserID       string `json:"userId" db:"user_id"`
+	TotalMinutes int    `json:"totalMinutes" db:"total_minutes"`
+}

@@ -47,3 +47,13 @@ type Suggestion struct {
 	Identifier int       `db:"identifier" json:"identifier"`
 	Title      string    `db:"title" json:"title"`
 }
+
+type DeadlineDayCount struct {
+	Date  string `db:"date" json:"date"`
+	Count int    `db:"count" json:"count"`
+}
+
+type DeadlinePressure struct {
+	Overdue  int                `json:"overdue"`
+	Upcoming []DeadlineDayCount `json:"upcoming"`
+}

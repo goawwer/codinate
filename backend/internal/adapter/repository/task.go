@@ -33,6 +33,7 @@ type TaskRepo interface {
 	ReopenTaskBy(ctx context.Context, id uuid.UUID) error
 	DeleteTaskBy(ctx context.Context, id uuid.UUID) error
 	RecordHistoryBatch(ctx context.Context, entries []model.TaskHistory) error
+	GetDeadlinePressure(ctx context.Context) (task.DeadlinePressure, error)
 
 	// Priorities
 	GetTaskPriorities(ctx context.Context) ([]shared.IdWithName, error)
@@ -256,6 +257,8 @@ func (r *taskRepoImpl) GetTaskProjectId(ctx context.Context, taskId uuid.UUID) (
 }
 
 func (r *taskRepoImpl) AddNewTask(ctx context.Context, input model.Task) (uuid.UUID, error) {
+	mentionIDs := util.ExtractMentionIDs(input.Description)
+
 	err := r.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
 		if _, err := tx.ExecContext(ctx, `
 			INSERT INTO tasks (
@@ -276,11 +279,20 @@ func (r *taskRepoImpl) AddNewTask(ctx context.Context, input model.Task) (uuid.U
 		}
 
 		for _, userID := range input.Participants {
-			_, err := tx.ExecContext(ctx, `
+			if _, err := tx.ExecContext(ctx, `
         		INSERT INTO task_participants (task_id, user_id, role_id)
           		VALUES ($1, $2, (SELECT u.role_id FROM users u WHERE u.id = $2))
-            `, input.Id, userID)
-			if err != nil {
+            `, input.Id, userID); err != nil {
+				return err
+			}
+		}
+
+		for _, mentionedID := range mentionIDs {
+			if _, err := tx.ExecContext(ctx, `
+				INSERT INTO mentions (entity_type, entity_id, mentioned_user_id)
+				VALUES ('task', $1, $2)
+				ON CONFLICT DO NOTHING
+			`, input.Id, mentionedID); err != nil {
 				return err
 			}
 		}
@@ -358,9 +370,29 @@ func (r *taskRepoImpl) UpdateTaskBy(ctx context.Context, newTask model.Task, id 
 		Eq("id::uuid", id).
 		Build()
 
-	_, err := r.ExecContext(ctx, "UPDATE tasks "+clause, qb.Args()...)
+	return r.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
+		if _, err := tx.ExecContext(ctx, "UPDATE tasks "+clause, qb.Args()...); err != nil {
+			return err
+		}
 
-	return err
+		if newTask.Description != "" {
+			mentionIDs := util.ExtractMentionIDs(newTask.Description)
+			if _, err := tx.ExecContext(ctx, "DELETE FROM mentions WHERE entity_type = 'task' AND entity_id = $1", id); err != nil {
+				return err
+			}
+			for _, mentionedID := range mentionIDs {
+				if _, err := tx.ExecContext(ctx, `
+					INSERT INTO mentions (entity_type, entity_id, mentioned_user_id)
+					VALUES ('task', $1, $2)
+					ON CONFLICT DO NOTHING
+				`, id, mentionedID); err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
 }
 
 func (r *taskRepoImpl) CloseTaskBy(ctx context.Context, id uuid.UUID) error {
@@ -508,4 +540,37 @@ func (r *taskRepoImpl) DeleteCategorty(ctx context.Context, id int) error {
 	`, id)
 
 	return err
+}
+
+func (r *taskRepoImpl) GetDeadlinePressure(ctx context.Context) (task.DeadlinePressure, error) {
+	var overdue int
+
+	if err := r.QueryRowContext(ctx, `
+		SELECT COUNT(*)
+		FROM tasks
+		WHERE due_at IS NOT NULL
+			AND due_at::date < CURRENT_DATE
+			AND (closed_at IS NULL OR closed_at < '0002-01-01'::timestamp)
+	`).Scan(&overdue); err != nil {
+		return task.DeadlinePressure{}, err
+	}
+
+	upcoming := make([]task.DeadlineDayCount, 0)
+
+	if err := r.SelectContext(ctx, &upcoming, `
+		SELECT
+			due_at::date::text AS date,
+			COUNT(*)::int AS count
+		FROM tasks
+		WHERE due_at IS NOT NULL
+			AND due_at::date >= CURRENT_DATE
+			AND due_at::date < CURRENT_DATE + INTERVAL '7 days'
+			AND (closed_at IS NULL OR closed_at < '0002-01-01'::timestamp)
+		GROUP BY due_at::date
+		ORDER BY due_at::date
+	`); err != nil {
+		return task.DeadlinePressure{}, err
+	}
+
+	return task.DeadlinePressure{Overdue: overdue, Upcoming: upcoming}, nil
 }

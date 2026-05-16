@@ -4,94 +4,131 @@
     <search tuiSearch class="feed-search-wrapper">
       <form [formGroup]="form">
         <fieldset tuiTextfieldSize="s">
+          <tui-segmented
+            size="s"
+            [activeItemIndex]="feedMode() === 'all' ? 0 : feedMode() === 'tasks' ? 1 : 2"
+            (activeItemIndexChange)="setFeedMode($event === 0 ? 'all' : $event === 1 ? 'tasks' : 'posts')"
+          >
+            <button type="button">{{ 'feed.modes.all' | translate }}</button>
+            <button type="button">{{ 'feed.modes.tasks' | translate }}</button>
+            <button type="button">{{ 'feed.modes.posts' | translate }}</button>
+          </tui-segmented>
+
           <tui-textfield iconStart="@tui.search">
             <input
               formControlName="search"
               tuiTextfield
-              [placeholder]="'generic.actions.search' | translate: { value: ('models.task.title.plural' | translate | lowercase) }"
+              [placeholder]="searchPlaceholder()"
             />
           </tui-textfield>
+
           <button
             size="s"
             tuiButton
             class="btn-primary"
             type="button"
-            (click)="fetchTasks()"
+            (click)="fetchCurrentMode()"
           >
             {{ 'generic.actions.find' | translate }}
           </button>
 
-          <button
-            iconStart="@tui.plus"
-            size="s"
-            tuiButton
-            class="btn-primary"
-            type="button"
-            tuiHintAppearance="primary-tooltip"
-            tuiHintDirection="bottom"
-            [tuiHint]="'generic.actions.create' | translate: { value: ('models.task.title.accusative' | translate | lowercase) }"
-            (click)="openCreateDialog()"
-          >
-          </button>
+          @if (feedMode() === 'all') {
+            <button
+              iconStart="@tui.plus"
+              size="s"
+              tuiButton
+              class="btn-primary"
+              type="button"
+              [tuiDropdown]="createDropdown"
+              [tuiDropdownOpen]="createMenuOpen()"
+              (tuiDropdownOpenChange)="createMenuOpen.set($event)"
+            ></button>
+          } @else {
+            <button
+              iconStart="@tui.plus"
+              size="s"
+              tuiButton
+              class="btn-primary"
+              type="button"
+              tuiHintAppearance="primary-tooltip"
+              tuiHintDirection="bottom"
+              [tuiHint]="createHint()"
+              (click)="openCreateDialog()"
+            ></button>
+          }
+
+          <ng-template #createDropdown>
+            <tui-data-list size="m" class="p-1">
+              <button tuiOption type="button" (click)="openCreateTaskDialog()" iconStart="@tui.check-square">
+                {{ 'models.task.title.default' | translate }}
+              </button>
+
+              <button tuiOption type="button" (click)="openCreatePostDialog()" iconStart="@tui.file-text">
+                {{ 'feed.posts.title' | translate }}
+              </button>
+            </tui-data-list>
+          </ng-template>
         </fieldset>
 
         <fieldset>
-          <button
-            appearance="secondary-grayscale"
-            iconStart="@tui.circle-dot"
-            size="s"
-            tuiButton
-            tuiButtonSelect
-            type="button"
-            [formControl]="form.controls.statusIds"
-          >
-            {{ statusLabel() }}
-            <tui-data-list *tuiTextfieldDropdown>
-              <tui-opt-group label="Status" tuiMultiSelectGroup>
-                @for (s of statuses(); track s.id) {
-                  <button new tuiOption type="button" [value]="s">{{ s.name }}</button>
-                }
-              </tui-opt-group>
-            </tui-data-list>
-          </button>
+          @if (feedMode() === 'tasks') {
+            <button
+              appearance="secondary-grayscale"
+              iconStart="@tui.circle-dot"
+              size="s"
+              tuiButton
+              tuiButtonSelect
+              type="button"
+              [formControl]="form.controls.statusIds"
+            >
+              {{ statusLabel() }}
+              <tui-data-list *tuiTextfieldDropdown>
+                <tui-opt-group [label]="'generic.titles.plural.status' | translate" tuiMultiSelectGroup>
+                  @for (s of statuses(); track s.id) {
+                    <button new tuiOption type="button" [value]="s">{{ s.name }}</button>
+                  }
+                </tui-opt-group>
+              </tui-data-list>
+            </button>
 
-          <button
-            appearance="secondary-grayscale"
-            iconStart="@tui.flame"
-            size="s"
-            tuiButton
-            tuiButtonSelect
-            type="button"
-            [formControl]="form.controls.priorityIds"
-          >
-            {{ priorityLabel() }}
-            <tui-data-list *tuiTextfieldDropdown>
-              <tui-opt-group label="Priority" tuiMultiSelectGroup>
-                @for (p of priorities(); track p.id) {
-                  <button new tuiOption type="button" [value]="p">{{ p.name }}</button>
-                }
-              </tui-opt-group>
-            </tui-data-list>
-          </button>
+            <button
+              appearance="secondary-grayscale"
+              iconStart="@tui.flame"
+              size="s"
+              tuiButton
+              tuiButtonSelect
+              type="button"
+              [formControl]="form.controls.priorityIds"
+            >
+              {{ priorityLabel() }}
+              <tui-data-list *tuiTextfieldDropdown>
+                <tui-opt-group [label]="'generic.titles.plural.priority' | translate" tuiMultiSelectGroup>
+                  @for (p of priorities(); track p.id) {
+                    <button new tuiOption type="button" [value]="p">{{ p.name }}</button>
+                  }
+                </tui-opt-group>
+              </tui-data-list>
+            </button>
 
-          <button
-            appearance="secondary-grayscale"
-            iconStart="@tui.folder-open"
-            size="s"
-            tuiButton
-            tuiButtonSelect
-            type="button"
-            [formControl]="form.controls.projectIds"
-          >
-            {{ projectLabel() }}
-            <tui-data-list *tuiTextfieldDropdown>
-              <tui-opt-group label="Project" tuiMultiSelectGroup>
-                @for (p of projects(); track p.id) {
-                  <button new tuiOption type="button" [value]="p">{{ p.projectName }}</button>
-                }
-              </tui-opt-group>
-            </tui-data-list>
-          </button>
+            <button
+              appearance="secondary-grayscale"
+              iconStart="@tui.folder-open"
+              size="s"
+              tuiButton
+              tuiButtonSelect
+              type="button"
+              [formControl]="form.controls.projectIds"
+            >
+              {{ projectLabel() }}
+              <tui-data-list *tuiTextfieldDropdown>
+                <tui-opt-group [label]="'generic.titles.plural.project' | translate" tuiMultiSelectGroup>
+                  @for (p of projects(); track p.id) {
+                    <button new tuiOption type="button" [value]="p">{{ p.projectName }}</button>
+                  }
+                </tui-opt-group>
+              </tui-data-list>
+            </button>
+          }
 
           <button
             appearance="secondary-grayscale"
@@ -119,7 +156,7 @@
 
           <ng-template #calendarDropdown>
             <tui-calendar-range
-              [value]="formValue()?.dateRange ?? null"
+              [value]="formValue().dateRange ?? null"
               (valueChange)="onDateRangeChange($event!)"
             />
           </ng-template>
@@ -133,7 +170,7 @@
             [disabled]="!filterCount()"
             (click)="resetFilters()"
           >
-            {{ 'generic.actions.clear' | translate}} {{ filterCount() ? '(' + filterCount() + ')' : '' }}
+            {{ 'generic.actions.clear' | translate }} {{ filterCount() ? '(' + filterCount() + ')' : '' }}
           </button>
         </fieldset>
       </form>
@@ -141,44 +178,60 @@
 
     <tui-scrollbar class="feed-scroll">
       <div class="feed-items">
-
         @if (isLoading()) {
           <tui-block-status>
             <h4>Loading...</h4>
           </tui-block-status>
         } @else {
-          @for (item of pagedFeed(); track item.id) {
-            <div class="feed-card" [routerLink]="['/tasks', item.id]">
-              <div class="feed-card-header">
-                <span class="feed-card-identifier">#{{ item.identifier }}</span>
-                <div class="feed-card-badges">
-                  <tui-badge size="s" appearance="neutral">{{ item.status }}</tui-badge>
-                  <tui-badge size="s" appearance="neutral">{{ item.priority }}</tui-badge>
-                  <tui-badge size="s" appearance="neutral">{{ item.category }}</tui-badge>
+          @for (item of pagedItems(); track trackFeedItem(item)) {
+            @if (item.kind === 'task') {
+              <div class="feed-card" [routerLink]="['/tasks', item.task.id]">
+                <div class="feed-card-header">
+                  <span class="feed-card-identifier">#{{ item.task.identifier }}</span>
+                  <div class="feed-card-badges">
+                    <tui-badge size="s" appearance="neutral">{{ item.task.status }}</tui-badge>
+                    <tui-badge size="s" appearance="neutral">{{ item.task.priority }}</tui-badge>
+                    <tui-badge size="s" appearance="neutral">{{ item.task.category }}</tui-badge>
+                  </div>
+                </div>
+                <p class="feed-card-title">{{ item.task.title }}</p>
+                <p class="feed-card-description">{{ item.task.description | stripHtml }}</p>
+                <div class="feed-card-footer">
+                  <span class="feed-card-meta">
+                    <tui-icon icon="@tui.user" class="feed-meta-icon" />
+                    {{ item.task.assigneeUsername }}
+                  </span>
+                  <span class="feed-card-meta">
+                    <tui-icon icon="@tui.clock" class="feed-meta-icon" />
+                    {{ item.task.dueAt | appDate: 'dd MMMM yyyy' }}
+                  </span>
                 </div>
               </div>
-              <p class="feed-card-title">{{ item.title }}</p>
-              <p class="feed-card-description">{{ item.description | stripHtml }}</p>
-              <div class="feed-card-footer">
-                <span class="feed-card-meta">
-                  <tui-icon icon="@tui.user" class="feed-meta-icon" />
-                  {{ item.assigneeUsername }}
-                </span>
-                <span class="feed-card-meta">
-                  <tui-icon icon="@tui.clock" class="feed-meta-icon" />
-                  {{ item.dueAt | appDate: 'dd MMMM yyyy' }}
-                </span>
+            } @else {
+              <div class="feed-card feed-card--post" (click)="openPostDialog(item.post)">
+                <p class="feed-card-title">{{ item.post.title }}</p>
+                <p class="feed-card-description">{{ item.post.body | stripHtml }}</p>
+                <div class="feed-card-footer">
+                  <span class="feed-card-meta">
+                    <tui-icon icon="@tui.user" class="feed-meta-icon" />
+                    {{ item.post.authorUsername }}
+                  </span>
+                  <span class="feed-card-meta">
+                    <tui-icon icon="@tui.clock" class="feed-meta-icon" />
+                    {{ item.post.createdAt | appDate: 'dd MMMM yyyy' }}
+                  </span>
+                </div>
               </div>
-            </div>
+            }
           }
 
-          @if (filteredFeed().length === 0) {
-          <div class="absolute top-1/3 left-0 right-0">
-            <tui-block-status>
-              <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
-              <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
-            </tui-block-status>
-          </div>
+          @if (currentItems().length === 0) {
+            <div class="absolute top-1/3 left-0 right-0">
+              <tui-block-status>
+                <h4>{{ 'generic.statuses.notFound' | translate }}</h4>
+                <p>{{ 'generic.statuses.notFoundDetails' | translate }}</p>
+              </tui-block-status>
+            </div>
           }
         }
       </div>
@@ -226,19 +279,19 @@
     <div class="widget">
       <div class="widget-header">
         <tui-icon icon="@tui.trophy" />
-        <span>{{ 'generic.widgets.leaderboard' | translate}}</span>
-        <div class="widget-header-season"
+        <span>{{ 'generic.widgets.leaderboard' | translate }}</span>
+        <div
+          class="widget-header-season"
           [tuiHint]="'generic.widgets.season.hint' | translate"
           tuiHintAppearance="primary-tooltip"
           tuiHintDirection="bottom-left"
         >
-          <tui-icon [style.font-size.rem]="0.875" icon="@tui.calendar-days" />
-          <span>{{ seasonHint }}</span>
+          <span>{{ seasonHint() }}</span>
         </div>
       </div>
       @if (leaderboard().length) {
         <div class="leaderboard-list">
-          @for (entry of leaderboard(); track entry.userId; let i = $index) {
+          @for (entry of leaderboard(); track entry.userId) {
             <div class="leaderboard-entry" [routerLink]="['/users', entry.userId]">
               <app-rank-badge [userId]="entry.userId" />
               <div class="leaderboard-avatar">
@@ -267,16 +320,78 @@
       }
     </div>
 
-    <div class="widget">
-      <div class="widget-header">
-        <tui-icon icon="@tui.history" />
-        <span>Recent Changes</span>
-      </div>
-      <div class="widget-placeholder">
-        <tui-icon icon="@tui.file-clock" class="widget-placeholder-icon" />
-        <p>Task change history</p>
-        <span>Available once task history is added</span>
-      </div>
+    <div class="widget metrics-widget">
+      <tui-carousel
+        class="metrics-carousel"
+        [duration]="6000"
+        [(index)]="metricsCarouselIndex"
+      >
+
+        <div *tuiItem class="metrics-slide">
+          <div class="widget-header">
+            <tui-icon icon="@tui.clock-alert" />
+            <span>Deadline Pressure</span>
+            @if (deadlinePressure()?.overdue) {
+              <tui-badge
+                appearance="negative"
+                class="metrics-overdue-badge"
+              >{{ deadlinePressure()!.overdue }} overdue</tui-badge>
+            }
+          </div>
+
+          @if (deadlinePressure()) {
+            <tui-axes
+              class="metrics-chart"
+              axisY="none"
+              [axisXLabels]="deadlineXLabels()"
+              [horizontalLines]="2"
+            >
+              <tui-line-days-chart
+                [value]="deadlineChartValue()"
+                [y]="0"
+                [height]="deadlineChartMax()"
+                [smoothingFactor]="0.4"
+                [dots]="true"
+              />
+            </tui-axes>
+          } @else {
+            <div class="widget-placeholder">
+              <tui-icon icon="@tui.loader" class="widget-placeholder-icon" />
+              <p>Loading...</p>
+            </div>
+          }
+        </div>
+
+        <div *tuiItem class="metrics-slide">
+          <div class="widget-header">
+            <tui-icon icon="@tui.chart-pie" />
+            <span>Task Health</span>
+          </div>
+          <div class="widget-placeholder">
+            <tui-icon icon="@tui.loader" class="widget-placeholder-icon" />
+            <p>Coming soon</p>
+          </div>
+        </div>
+
+        <div *tuiItem class="metrics-slide">
+          <div class="widget-header">
+            <tui-icon icon="@tui.zap" />
+            <span>Momentum Score</span>
+          </div>
+          <div class="widget-placeholder">
+            <tui-icon icon="@tui.loader" class="widget-placeholder-icon" />
+            <p>Coming soon</p>
+          </div>
+        </div>
+
+      </tui-carousel>
+
+      <tui-pagination
+        size="s"
+        class="metrics-pagination"
+        [length]="metricSlides.length"
+        [(index)]="metricsCarouselIndex"
+      />
     </div>
   </div>
 </div>

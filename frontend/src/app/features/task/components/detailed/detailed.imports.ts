@@ -31,7 +31,9 @@ import { EmployeeRolePipe } from '../../../../common/pipes/employee-role.pipe';
 import { AppEditorComponent } from '../../../../common/editor/app-editor.component';
 import { CommentList } from '../../../../common/comment/comment-list/comment-list';
 import { AppDatePipe } from '../../../../common/pipes/app-date.pipe';
+import { SafeHtmlPipe } from '../../../../common/pipes/safe-html.pipe';
 import { TaskCommentComposerComponent } from '../task-comment-composer/task-comment-composer';
+import { MentionLinksDirective } from '../../../../common/directives/mention-link.directive';
 
 export const DETAILED_IMPORTS = [
   AsyncPipe,
@@ -67,4 +69,6 @@ export const DETAILED_IMPORTS = [
   CommentList,
   AppDatePipe,
   TaskCommentComposerComponent,
+  SafeHtmlPipe,
+  MentionLinksDirective,
 ];

@@ -35,19 +35,43 @@
         </div>
       </div>
 
-      @if (userStore.isAtLeastAdmin()) {
+      <div class="flex items-center gap-2">
         <button
-          appearance="action"
-          iconStart="@tui.settings"
-          size="m"
-          tuiIconButton
-          tuiHintAppearance="primary-tooltip"
-          tuiHintDirection="bottom"
-          [tuiHint]="'admin.dashboard.teams.hints.edit' | translate"
+          iconStart="@tui.plus"
+          size="s"
+          tuiButton
+          class="btn-primary"
           type="button"
-          (click)="openEditDialog()"
+          [tuiDropdown]="createDropdown"
+          [tuiDropdownOpen]="createMenuOpen()"
+          (tuiDropdownOpenChange)="createMenuOpen.set($event)"
         ></button>
-      }
+
+        <ng-template #createDropdown>
+          <tui-data-list size="m" class="p-1">
+            <button tuiOption type="button" (click)="openCreateTaskDialog()" iconStart="@tui.check-square">
+              {{ 'models.task.title.default' | translate }}
+            </button>
+            <button tuiOption type="button" (click)="openCreatePostDialog()" iconStart="@tui.file-text">
+              {{ 'feed.posts.title' | translate }}
+            </button>
+          </tui-data-list>
+        </ng-template>
+
+        @if (userStore.isAtLeastAdmin()) {
+          <button
+            appearance="action"
+            iconStart="@tui.settings"
+            size="m"
+            tuiIconButton
+            tuiHintAppearance="primary-tooltip"
+            tuiHintDirection="bottom"
+            [tuiHint]="'admin.dashboard.teams.hints.edit' | translate"
+            type="button"
+            (click)="openEditDialog()"
+          ></button>
+        }
+      </div>
     </div>
 
     <div class="main-layout">
@@ -61,25 +85,97 @@
             (activeItemIndexChange)="activeTab.set($event)"
           >
             <button tuiTab>{{ 'generic.titles.feed' | translate }}</button>
+            <button tuiTab>{{ 'generic.titles.info' | translate }}</button>
           </tui-tabs>
 
+          <!-- Feed tab -->
           @if (activeTab() === 0) {
-            <tui-block-status>
-              <img
-                alt="{{ 'generic.statuses.empty' | translate }}"
-                src="assets/images/not-found.svg"
-                tuiSlot="top"
-                class="image"
-              />
-              <h4>{{ 'generic.statuses.empty' | translate }}</h4>
-            </tui-block-status>
+            @if (isPostsLoading()) {
+              <tui-loader />
+            } @else if (posts().length) {
+              <div class="post-list">
+                @for (post of posts(); track post.id) {
+                  <div class="post-card" (click)="openPostDialog(post)">
+                    <p class="post-card-title">{{ post.title }}</p>
+                    <p class="post-card-description">{{ post.body | stripHtml }}</p>
+                    <div class="post-card-footer">
+                      <span class="post-card-meta">
+                        <tui-icon icon="@tui.user" class="post-meta-icon" />
+                        {{ post.authorUsername }}
+                      </span>
+                      <span class="post-card-meta">
+                        <tui-icon icon="@tui.clock" class="post-meta-icon" />
+                        {{ post.createdAt | appDate: 'dd MMMM yyyy' }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <tui-block-status>
+                <img
+                  alt="{{ 'generic.statuses.empty' | translate }}"
+                  src="assets/images/not-found.svg"
+                  tuiSlot="top"
+                  class="image"
+                />
+                <h4>{{ 'generic.statuses.empty' | translate }}</h4>
+              </tui-block-status>
+            }
+          }
+
+          <!-- Info tab -->
+          @if (activeTab() === 1) {
+            <div class="content-card">
+              <div class="content-card-header">
+                <span class="content-card-title">
+                  <tui-icon icon="@tui.file-text" />
+                  {{ 'models.team.description' | translate }}
+                </span>
+                <div class="flex items-center gap-1">
+                  @if (isEditing()) {
+                    <button
+                      tuiIconButton
+                      appearance="action"
+                      size="xs"
+                      type="button"
+                      iconStart="@tui.save"
+                      [disabled]="isSaving()"
+                      (click)="save()"
+                    ></button>
+                  }
+                  <button
+                    tuiIconButton
+                    appearance="action"
+                    size="xs"
+                    type="button"
+                    [iconStart]="isEditing() ? '@tui.x' : '@tui.pencil'"
+                    (click)="toggleEditing()"
+                  ></button>
+                </div>
+              </div>
+
+              @if (isEditing()) {
+                <app-editor
+                  [formControl]="descriptionControl"
+                  entityType="teams"
+                  [entityId]="numericId()?.toString() ?? null"
+                />
+              } @else if (t.description) {
+                <div class="prose" [innerHTML]="t.description | safeHtml" appMentionLinks></div>
+              } @else {
+                <p class="empty-text">{{ 'generic.statuses.empty' | translate }}</p>
+              }
+            </div>
           }
 
         </div>
       </tui-scrollbar>
 
+      <!-- Side column -->
       <div class="side-col">
 
+        <!-- Members widget -->
         <div class="widget">
           <div class="widget-header">
             <tui-icon icon="@tui.users" />
@@ -89,7 +185,7 @@
             @for (member of t.members; track member.id) {
               <a class="participant-row" [routerLink]="['/users', member.id]">
                 <div class="participant-avatar">
-                  <app-picture [name]="member.name" size="s" entityType="users" pictureName="" />
+                  <app-picture [name]="member.name" [surname]="member.surname" size="s" entityType="users" pictureName="" />
                 </div>
                 <div class="participant-info">
                   <span class="participant-name">{{ member.name }} {{ member.surname }}</span>
@@ -100,6 +196,122 @@
               <span class="empty-text">{{ 'generic.statuses.empty' | translate }}</span>
             }
           </div>
+        </div>
+
+        <!-- Recent widget -->
+        <div class="widget">
+          <div class="widget-header widget-header--clickable" (click)="recentExpanded.set(!recentExpanded())">
+            <div class="flex items-center gap-2">
+              <tui-icon icon="@tui.list-checks" />
+              <span>{{ 'models.project.detailed.recent' | translate }}</span>
+            </div>
+            <tui-icon [icon]="recentExpanded() ? '@tui.chevron-up' : '@tui.chevron-down'" />
+          </div>
+          @if (recentExpanded()) {
+            <div class="widget-body">
+              @for (post of recentPosts(); track post.id) {
+                <button type="button" class="post-link-row" (click)="openPostDialog(post)">
+                  <tui-icon icon="@tui.file-text" class="post-link-icon" />
+                  <span class="task-link-title">{{ post.title }}</span>
+                </button>
+              }
+              @if (!posts().length) {
+                <span class="empty-text">{{ 'generic.statuses.empty' | translate }}</span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Links widget -->
+        <div class="widget">
+          <div class="widget-header widget-header--clickable" (click)="linksExpanded.set(!linksExpanded())">
+            <div class="flex items-center gap-2">
+              <tui-icon icon="@tui.link" />
+              <span>{{ 'models.project.links' | translate }}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              @if (userStore.isAtLeastAdmin()) {
+                <button
+                  tuiIconButton
+                  appearance="flat"
+                  size="xs"
+                  type="button"
+                  [iconStart]="linksEditing() ? '@tui.x' : '@tui.pencil'"
+                  (click)="toggleLinksEditing(); $event.stopPropagation()"
+                ></button>
+              }
+              <tui-icon [icon]="linksExpanded() ? '@tui.chevron-up' : '@tui.chevron-down'" />
+            </div>
+          </div>
+
+          @if (linksExpanded() || linksEditing()) {
+            @if (linksEditing()) {
+              <div class="widget-body links-edit">
+                @for (link of editableLinks(); track $index; let i = $index) {
+                  <div class="link-edit-row">
+                    <tui-textfield class="flex-1" [tuiTextfieldSize]="'s'">
+                      <input
+                        tuiTextfield
+                        placeholder="Title"
+                        [value]="link.title"
+                        (input)="updateLinkField(i, 'title', $any($event.target).value)"
+                      />
+                    </tui-textfield>
+                    <tui-textfield class="flex-1" [tuiTextfieldSize]="'s'">
+                      <input
+                        tuiTextfield
+                        placeholder="https://…"
+                        [value]="link.url"
+                        (input)="updateLinkField(i, 'url', $any($event.target).value)"
+                      />
+                    </tui-textfield>
+                    <button
+                      tuiIconButton
+                      appearance="flat"
+                      size="xs"
+                      type="button"
+                      iconStart="@tui.x"
+                      (click)="removeLink(i)"
+                    ></button>
+                  </div>
+                }
+                <div class="flex gap-2 pt-1">
+                  <button
+                    tuiButton
+                    appearance="flat"
+                    size="xs"
+                    type="button"
+                    iconStart="@tui.plus"
+                    (click)="addLink()"
+                  >Add</button>
+                  <button
+                    tuiButton
+                    appearance="primary"
+                    size="xs"
+                    type="button"
+                    (click)="saveLinks()"
+                  >Save</button>
+                </div>
+              </div>
+            } @else {
+              <div class="widget-body">
+                @for (link of t.links; track $index) {
+                  <a
+                    [href]="link.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="link-row"
+                  >
+                    <tui-icon icon="@tui.external-link" />
+                    <span>{{ link.title || link.url }}</span>
+                  </a>
+                }
+                @if (!t.links.length) {
+                  <span class="empty-text">{{ 'generic.statuses.empty' | translate }}</span>
+                }
+              </div>
+            }
+          }
         </div>
 
       </div>

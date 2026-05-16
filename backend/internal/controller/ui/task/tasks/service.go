@@ -194,6 +194,10 @@ func (s *service) suggestionsBy(ctx context.Context, b controller.BasicQueryPara
 	return repository.GetTaskRepo().GetTasksSuggestion(ctx, b)
 }
 
+func (s *service) getDeadlinePressure(ctx context.Context) (task.DeadlinePressure, error) {
+	return repository.GetTaskRepo().GetDeadlinePressure(ctx)
+}
+
 // detectTaskChanges builds history entries comparing snapshot (with resolved names) against
 // the incoming input. String names are stored directly so the frontend can display them
 // without needing to resolve IDs.

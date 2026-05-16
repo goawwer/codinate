@@ -6,7 +6,9 @@ import (
 	"github.com/goawwer/codinate/internal/adapter/database"
 	"github.com/goawwer/codinate/internal/adapter/dto/comment"
 	"github.com/goawwer/codinate/internal/adapter/model"
+	"github.com/goawwer/codinate/pkg/util"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 )
 
@@ -70,17 +72,33 @@ func (r *commentRepoImpl) GetAllBy(ctx context.Context, entityId uuid.UUID) ([]c
 }
 
 func (r *commentRepoImpl) Create(ctx context.Context, c model.Comment) (uuid.UUID, error) {
+	mentionIDs := util.ExtractMentionIDs(c.Body)
 	var id uuid.UUID
 
-	err := r.QueryRowContext(ctx, `
-		INSERT INTO comments (
-			id, entity_type, entity_id, user_id, body, attached_files_ids
-		)
-		VALUES (
-			$1, $2, $3, $4, $5, $6::uuid[]
-		)
-		RETURNING id
-	`, c.Id, c.EntityType, c.EntityId, c.UserId, c.Body, pq.Array(c.AttachedFilesIds)).Scan(&id)
+	err := r.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
+		if err := tx.QueryRowxContext(ctx, `
+			INSERT INTO comments (
+				id, entity_type, entity_id, user_id, body, attached_files_ids
+			)
+			VALUES (
+				$1, $2, $3, $4, $5, $6::uuid[]
+			)
+			RETURNING id
+		`, c.Id, c.EntityType, c.EntityId, c.UserId, c.Body, pq.Array(c.AttachedFilesIds)).Scan(&id); err != nil {
+			return err
+		}
+
+		for _, mentionedID := range mentionIDs {
+			if _, err := tx.ExecContext(ctx, `
+				INSERT INTO mentions (entity_type, entity_id, mentioned_user_id)
+				VALUES ('comment', $1, $2)
+				ON CONFLICT DO NOTHING
+			`, id, mentionedID); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 
 	return id, err
 }
@@ -97,18 +115,35 @@ func (r *commentRepoImpl) IsAuthor(ctx context.Context, userId, commentId uuid.U
 }
 
 func (r *commentRepoImpl) Update(ctx context.Context, newComment model.Comment) error {
+	mentionIDs := util.ExtractMentionIDs(newComment.Body)
 	strIds := make([]string, len(newComment.AttachedFilesIds))
 	for i, id := range newComment.AttachedFilesIds {
 		strIds[i] = id.String()
 	}
 
-	_, err := r.ExecContext(ctx, `
-		UPDATE comments
-		SET body = $1, attached_files_ids = $2::text[]::uuid[], updated_at = now()
-		WHERE id = $3
-	`, newComment.Body, pq.Array(strIds), newComment.Id)
+	return r.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
+		if _, err := tx.ExecContext(ctx, `
+			UPDATE comments
+			SET body = $1, attached_files_ids = $2::text[]::uuid[], updated_at = now()
+			WHERE id = $3
+		`, newComment.Body, pq.Array(strIds), newComment.Id); err != nil {
+			return err
+		}
 
-	return err
+		if _, err := tx.ExecContext(ctx, "DELETE FROM mentions WHERE entity_type = 'comment' AND entity_id = $1", newComment.Id); err != nil {
+			return err
+		}
+		for _, mentionedID := range mentionIDs {
+			if _, err := tx.ExecContext(ctx, `
+				INSERT INTO mentions (entity_type, entity_id, mentioned_user_id)
+				VALUES ('comment', $1, $2)
+				ON CONFLICT DO NOTHING
+			`, newComment.Id, mentionedID); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (r *commentRepoImpl) Delete(ctx context.Context, commentId uuid.UUID) error {

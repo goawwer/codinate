@@ -5,7 +5,6 @@ import (
 
 	"github.com/goawwer/codinate/internal/adapter/database"
 	"github.com/goawwer/codinate/internal/adapter/dto/team"
-	"github.com/goawwer/codinate/internal/adapter/dto/user"
 	"github.com/goawwer/codinate/internal/adapter/model"
 	"github.com/goawwer/codinate/pkg/util"
 	"github.com/google/uuid"
@@ -16,8 +15,9 @@ import (
 type TeamRepo interface {
 	Create(ctx context.Context, input team.CreateTeamInput) error
 	GetAllTeamsWithMembersShort(ctx context.Context) ([]team.Row, error)
-	GetTeamMembersBy(ctx context.Context, id uuid.UUID) ([]user.TeamMember, error)
+	GetTeamBy(ctx context.Context, id uuid.UUID) (team.Row, error)
 	Update(ctx context.Context, input team.UpdateTeamInput, id int) error
+	UpdateLinks(ctx context.Context, id int, links team.TeamLinks) error
 	RemoveMember(ctx context.Context, teamId int, userId uuid.UUID) error
 	AddMember(ctx context.Context, teamId int, userId uuid.UUID) error
 	DeleteBy(ctx context.Context, teamId int) error
@@ -38,7 +38,9 @@ func (r *teamRepoImpl) GetAllTeamsWithMembersShort(ctx context.Context) ([]team.
 
 	err := r.SelectContext(ctx, &res, `
 		SELECT
-			t.*,
+			t.id, t.author_id, t.name, t.description, t.picture_name,
+			COALESCE(t.links, '[]'::jsonb) AS links,
+			t.created_at, t.updated_at,
 			COALESCE(
 				json_agg(
 					json_build_object(
@@ -60,20 +62,48 @@ func (r *teamRepoImpl) GetAllTeamsWithMembersShort(ctx context.Context) ([]team.
 	return res, err
 }
 
-func (r *teamRepoImpl) GetTeamMembersBy(ctx context.Context, id uuid.UUID) ([]user.TeamMember, error) {
-	res := make([]user.TeamMember, 0)
+func (r *teamRepoImpl) GetTeamBy(ctx context.Context, id uuid.UUID) (team.Row, error) {
+	var res team.Row
 
 	err := r.SelectContext(ctx, &res, `
 		SELECT
-			u.name, u.surname, u.username, u.avatar,
+			t.id, t.author_id, t.name, t.description, t.picture_name,
+			COALESCE(t.links, '[]'::jsonb) AS links,
+			t.created_at, t.updated_at,
+			COALESCE(
+				json_agg(
+					json_build_object(
+						'id',      u.id,
+						'name',    u.name,
+						'surname', u.surname,
+						'role',    er.name
+					)
+				) FILTER (WHERE u.id IS NOT NULL),
+				'[]'::json
+			) AS members
 		FROM teams t
 		LEFT JOIN team_members m ON t.id = m.team_id
 		LEFT JOIN users u ON u.id = m.user_id
-		LEFT JOIN employee_roles er ON er.id = u.role_id
+		LEFT JOIN employee_roles er ON u.role_id = er.id
+
 		WHERE t.id = $1
+
+		GROUP BY t.id
 	`, id)
 
 	return res, err
+}
+
+func (r *teamRepoImpl) UpdateLinks(ctx context.Context, id int, links team.TeamLinks) error {
+	val, err := links.Value()
+	if err != nil {
+		return err
+	}
+	_, err = r.ExecContext(ctx,
+		`UPDATE teams SET links = $1, updated_at = current_timestamp WHERE id = $2`,
+		val, id,
+	)
+	return err
 }
 
 func (r *teamRepoImpl) Create(ctx context.Context, input team.CreateTeamInput) error {
@@ -109,7 +139,7 @@ func (r *teamRepoImpl) Update(ctx context.Context, input team.UpdateTeamInput, i
 		Eq("id", id).
 		Build()
 
-	_, err := r.ExecContext(ctx, "UPDATE projects "+clause, qb.Args()...)
+	_, err := r.ExecContext(ctx, "UPDATE teams "+clause, qb.Args()...)
 	return err
 }
 

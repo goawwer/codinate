@@ -7,6 +7,10 @@
   gap: 1rem;
 }
 
+::ng-deep search[tuiSearch] form tui-textfield {
+  max-inline-size: 25rem !important;
+}
+
 .feed-layout {
   display: flex;
   gap: 1.25rem;
@@ -21,6 +25,7 @@
 }
 
 .feed-search-wrapper {
+  padding-right: 0.5rem;
   flex-shrink: 0;
 }
 
@@ -125,6 +130,7 @@
   flex: 1;
   min-height: 0;
   max-height: 80vh;
+  max-width: 40vh;
 }
 
 .widget {
@@ -146,6 +152,17 @@
   font-weight: 600;
   color: var(--tui-text-primary);
   flex-shrink: 0;
+
+  > tui-icon {
+    flex-shrink: 0;
+  }
+
+  > span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
 }
 
 .widget-placeholder {
@@ -185,12 +202,94 @@
   font-size: 0.75rem;
   font-weight: 400;
   color: var(--tui-text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
   opacity: 0;
   transition: opacity 0.2s ease;
 }
 
 .widget:hover .widget-header-season {
   opacity: 1;
+}
+
+.metrics-widget {
+  position: relative;
+}
+
+.metrics-carousel {
+  display: block;
+  flex: 1;
+  min-block-size: 0;
+  inline-size: 100%;
+
+  ::ng-deep > * {
+    block-size: 100%;
+  }
+
+  ::ng-deep .t-wrapper,
+  ::ng-deep .t-items,
+  ::ng-deep .t-item {
+    block-size: 100%;
+    padding: 0;
+  }
+
+  ::ng-deep .t-items {
+    display: flex;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  ::ng-deep .t-item {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+}
+
+.metrics-slide {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  box-sizing: border-box;
+  block-size: 100%;
+  inline-size: 100%;
+  min-block-size: 0;
+}
+
+.widget-header {
+  flex-shrink: 0;
+}
+
+.widget-placeholder {
+  flex: 1;
+  min-block-size: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.metrics-pagination {
+  flex-shrink: 0;
+  justify-content: center;
+  padding: 0.625rem 0;
+}
+
+.metrics-overdue-badge {
+  margin-inline-start: auto;
+  flex-shrink: 0;
+}
+
+.metrics-chart {
+  flex: 1;
+  min-block-size: 0;
+  padding: 0.75rem 1rem 0.5rem;
+
+  tui-line-days-chart {
+    block-size: 100%;
+    inline-size: 100%;
+  }
 }
 
 .leaderboard-list {

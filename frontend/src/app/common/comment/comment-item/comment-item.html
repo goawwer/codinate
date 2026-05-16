@@ -119,7 +119,7 @@
         </div>
       }
       @if (comment.body) {
-        <div class="comment-body" [innerHTML]="comment.body"></div>
+        <div class="comment-body" [innerHTML]="comment.body | safeHtml" appMentionLinks></div>
       }
       @if (comment.attachedFiles.length) {
         <div class="comment-files">

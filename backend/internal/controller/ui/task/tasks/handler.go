@@ -11,6 +11,7 @@ import (
 
 func Register() {
 	ui.RegisterGet("/tasks/suggestions", enum.AnyUser, reflect.TypeOf(service{}), suggestions)
+	ui.RegisterGet("/tasks/metrics/deadline", enum.AnyUser, reflect.TypeOf(service{}), getDeadlinePressure)
 	ui.RegisterGet("/tasks/{id}", enum.AnyUser, reflect.TypeOf(service{}), getById)
 	ui.RegisterGet("/tasks", enum.AnyUser, reflect.TypeOf(service{}), getAll)
 	ui.RegisterPost("/tasks/add", enum.AnyUser, reflect.TypeOf(service{}), add)
@@ -208,6 +209,10 @@ func addParticipant(s ui.UIService) (any, error) {
 
 func suggestions(s ui.UIService) (any, error) {
 	return s.GetService().(*service).suggestionsBy(s.GetRequest().Context(), s.GetBasicSortingAndPagingParams())
+}
+
+func getDeadlinePressure(s ui.UIService) (any, error) {
+	return s.GetService().(*service).getDeadlinePressure(s.GetRequest().Context())
 }
 
 func parseFilterParams(s ui.UIService) (*task.Filters, error) {

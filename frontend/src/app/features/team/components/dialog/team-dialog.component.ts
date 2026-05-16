@@ -131,7 +131,7 @@ export class TeamDialogComponent {
       next: () => {
         this.members.update((list) => [
           ...list,
-          { id: member.id, name: member.name, surname: member.surname },
+          { id: member.id, name: member.name, surname: member.surname, picture: member.picture },
         ]);
         this.memberToAdd.reset();
         this.selectedMember.set(null);
@@ -165,7 +165,9 @@ export class TeamDialogComponent {
     this.dialogs
       .confirm({
         label: this.translate.instant('admin.dashboard.teams.dialogs.deleteTitle'),
-        content: this.translate.instant('admin.dashboard.teams.dialogs.deleteContent', { count: 1 }),
+        content: this.translate.instant('admin.dashboard.teams.dialogs.deleteContent', {
+          count: 1,
+        }),
         yes: this.translate.instant('generic.actions.delete'),
         no: this.translate.instant('generic.actions.cancel'),
       })

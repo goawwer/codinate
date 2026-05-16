@@ -81,3 +81,13 @@ export interface TaskSuggestion {
   identifier: number;
   title: string;
 }
+
+export interface DeadlineDayCount {
+  date: string;
+  count: number;
+}
+
+export interface DeadlinePressure {
+  overdue: number;
+  upcoming: DeadlineDayCount[];
+}

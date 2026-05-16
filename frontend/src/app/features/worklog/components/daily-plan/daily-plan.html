@@ -34,7 +34,7 @@
 
   <section class="day-plan__toolbar">
     @if (items().length && !isFormVisible()) {
-      <button tuiButton size="m" appearance="ghost" type="button" (click)="clearPlan()">
+      <button tuiButton size="m" appearance="secondary-grayscale" type="button" (click)="clearPlan()">
         {{ 'models.worklog.dailyPlan.clearPlan' | translate }}
       </button>
     }
@@ -47,67 +47,66 @@
         <p class="day-plan__form-caption">{{ 'models.worklog.dailyPlan.editItem' | translate }}</p>
       }
 
-      <div class="flex gap-1">
-        <div class="dp-task-search day-plan__add-form-field--wide">
+      <div class="flex flex-col items-start gap-2">
+        <div class="flex gap-1">
+          <div class="dp-task-search day-plan__add-form-field--wide">
+            <tui-textfield [tuiTextfieldSize]="'m'">
+              <label tuiLabel>{{ 'models.worklog.dailyPlan.addForm.identifier' | translate }}</label>
+              <input
+                tuiTextfield
+                [ngModel]="searchText()"
+                (ngModelChange)="onSearchTextChange($event)"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="#1..."
+                autocomplete="off"
+                [attr.disabled]="resolvedTask() ? true : null"
+                (keyup.enter)="saveItem()"
+              />
+              @if (isLoadingSuggestions()) {
+                <tui-loader size="xs" class="dp-input-loader" />
+              }
+            </tui-textfield>
+
+            @if (shouldShowSuggestions()) {
+              <div class="dp-suggestions">
+                <app-task-suggestions
+                  [suggestions]="taskSuggestions()"
+                  (selected)="selectSuggestion($event)"
+                  (dismissed)="taskSuggestions.set([])"
+                />
+              </div>
+            }
+          </div>
+
           <tui-textfield [tuiTextfieldSize]="'m'">
-            <label tuiLabel>{{ 'models.worklog.dailyPlan.addForm.identifier' | translate }}</label>
+            <label tuiLabel>{{ 'models.worklog.dailyPlan.addForm.plannedMinutes' | translate }}</label>
             <input
               tuiTextfield
-              [ngModel]="searchText()"
-              (ngModelChange)="onSearchTextChange($event)"
-              [ngModelOptions]="{ standalone: true }"
-              placeholder="#1..."
-              autocomplete="off"
-              [attr.disabled]="resolvedTask() ? true : null"
-              (keyup.enter)="saveItem()"
+              tuiInputNumber
+              min="1"
+              [ngModel]="form().plannedMinutes"
+              (ngModelChange)="updatePlannedMinutes($event)"
             />
-            @if (isLoadingSuggestions()) {
-              <tui-loader size="xs" class="dp-input-loader" />
-            }
           </tui-textfield>
-
-          @if (resolvedTask(); as t) {
-            <div class="dp-selected-task">
-              <button type="button" class="dp-selected-task-main" (click)="navigateToTask(t.id)">
-                <span class="dp-selected-task-id">#{{ t.identifier }}</span>
-                <span class="dp-selected-task-title">{{ t.title }}</span>
-                <tui-icon icon="@tui.external-link" class="dp-selected-task-icon" />
-              </button>
-              <button
-                type="button"
-                tuiButton
-                appearance="flat"
-                size="xs"
-                iconStart="@tui.x"
-                (click)="clearTask()"
-              ></button>
-            </div>
-          }
-
-          @if (shouldShowSuggestions()) {
-            <div class="dp-suggestions">
-              <app-task-suggestions
-                [suggestions]="taskSuggestions()"
-                (selected)="selectSuggestion($event)"
-                (dismissed)="taskSuggestions.set([])"
-              />
-            </div>
-          }
         </div>
-
-        <tui-textfield [tuiTextfieldSize]="'m'">
-          <label tuiLabel>{{ 'models.worklog.dailyPlan.addForm.plannedMinutes' | translate }}</label>
-          <input
-            tuiTextfield
-            tuiInputNumber
-            min="1"
-            [ngModel]="form().plannedMinutes"
-            (ngModelChange)="updatePlannedMinutes($event)"
-          />
-        </tui-textfield>
+        @if (resolvedTask(); as t) {
+          <div class="dp-selected-task">
+            <button type="button" class="dp-selected-task-main" (click)="navigateToTask(t.id)">
+              <span class="dp-selected-task-id">#{{ t.identifier }}</span>
+              <span class="dp-selected-task-title">{{ t.title }}</span>
+              <tui-icon icon="@tui.external-link" class="dp-selected-task-icon" />
+            </button>
+            <button
+              type="button"
+              tuiButton
+              appearance="flat"
+              size="xs"
+              iconStart="@tui.x"
+              (click)="clearTask()"
+            ></button>
+          </div>
+        }
       </div>
-
-
 
       <div class="dp-description day-plan__add-form-field--wide">
         <label class="dp-description-label">{{ 'models.worklog.fields.description' | translate }}</label>

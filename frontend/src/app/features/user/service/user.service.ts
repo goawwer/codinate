@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from '../types/model/user.model';
 import { CreateUserInput, UpdateUserInput, UserFilters } from '../types/model/dashboard.model';
-import { UpdateProfileInput, UserProfile, UserProfileStats } from '../types/model/profile.model';
+import { UpdateProfileInput, UserHoursStat, UserProfile, UserProfileStats } from '../types/model/profile.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserApiService {
@@ -27,6 +27,10 @@ export class UserApiService {
     return this.httpClient.get<UserProfileStats>(`${this.baseURL}/profile/${userId}/stats`, {
       params: { from, to },
     });
+  }
+
+  getAllUsersHours(from: string, to: string): Observable<UserHoursStat[]> {
+    return this.httpClient.get<UserHoursStat[]>(`${this.baseURL}/hours`, { params: { from, to } });
   }
 
   create(body: CreateUserInput): Observable<void> {

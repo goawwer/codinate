@@ -45,6 +45,23 @@
   </div>
 </div>
 
+<div class="period-selector">
+  <span class="period-label">{{ 'admin.dashboard.users.periods.label' | translate }}</span>
+  <div class="period-buttons">
+    @for (period of periods; track period) {
+      <button
+        tuiButton
+        size="s"
+        type="button"
+        [appearance]="activePeriod() === period ? 'primary' : 'outline'"
+        (click)="activePeriod.set(period)"
+      >
+        {{ periodLabel(period) }}
+      </button>
+    }
+  </div>
+</div>
+
 <table
   tuiTable
   class="w-full"
@@ -58,6 +75,8 @@
         <th tuiTh [style.width]="col.width">
           @if (col.key === 'disabled') {
             {{ 'admin.dashboard.users.status.default' | translate }}
+          } @else if (col.isHours) {
+            {{ 'admin.dashboard.users.columns.hours' | translate }}
           } @else {
             {{ 'models.user.' + col.key | translate }}
           }
@@ -112,19 +131,21 @@
             </td>
             @for (col of columns; track col.key) {
               <td tuiTd>
-                @if (col.isDate) {
-                  {{ user[col.key].toString() | appDate }}
+                @if (col.isHours) {
+                  <span class="hours-value">{{ getUserHours(user.id) }}</span>
+                } @else if (col.isDate) {
+                  {{ getUserValue(user, col.key)?.toString() | appDate }}
                 } @else if (col.isRole) {
                   <tui-badge
                     size="m"
-                    [style.background]="'var(--tui-chart-categorical-01)'"
+                    [style.background]="'var(--app-badge-color)'"
                   >
                     {{ group.role.name | employeeRole }}
                   </tui-badge>
                 } @else if (col.isStatus) {
-                  <app-user-status [disabled]="!!user[col.key]" />
+                  <app-user-status [disabled]="!!getUserValue(user, col.key)" />
                 } @else {
-                  {{ user[col.key] }}
+                {{ getUserValue(user, col.key) }}
                 }
               </td>
             }

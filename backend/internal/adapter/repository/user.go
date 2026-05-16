@@ -22,6 +22,7 @@ type UserRepo interface {
 	UpdateById(ctx context.Context, newFields user.UpdateInput, id uuid.UUID) error
 	GetUserProfile(ctx context.Context, userId uuid.UUID) (user.Profile, error)
 	GetUserProfileStats(ctx context.Context, userId uuid.UUID, d *filters.DateRange) (user.ProfileStats, error)
+	GetAllUsersHours(ctx context.Context, d *filters.DateRange) ([]user.UserHoursStat, error)
 	UpdateProfileBy(ctx context.Context, input user.UpdateProfileInput, id uuid.UUID) error
 }
 
@@ -162,11 +163,17 @@ func (r *userRepoImpl) GetUserProfile(ctx context.Context, userId uuid.UUID) (us
 
 		tasks := make([]user.TaskRef, 0)
 		err = r.SelectContext(ctx, &tasks, `
-			SELECT id::text, identifier, title
-			FROM tasks
-			WHERE project_id = $1 AND assignee_id = $2
-			ORDER BY created_at DESC
-			LIMIT 3
+			SELECT t.id::text, t.identifier, t.title
+			FROM tasks t
+			INNER JOIN (
+				SELECT task_id, MAX(created_at) AS last_activity
+				FROM task_history
+				WHERE user_id = $2
+				GROUP BY task_id
+			) th ON th.task_id = t.id
+			WHERE t.project_id = $1
+			ORDER BY th.last_activity DESC
+			LIMIT 5
 		`, p.ID, userId)
 		if err != nil {
 			return res, err
@@ -225,6 +232,22 @@ func (r *userRepoImpl) GetUserProfileStats(ctx context.Context, userId uuid.UUID
 	}
 
 	return res, nil
+}
+
+func (r *userRepoImpl) GetAllUsersHours(ctx context.Context, d *filters.DateRange) ([]user.UserHoursStat, error) {
+	res := make([]user.UserHoursStat, 0)
+	err := r.SelectContext(ctx, &res, `
+		SELECT
+			u.id::text AS user_id,
+			COALESCE(SUM(t.total_minutes), 0)::int AS total_minutes
+		FROM users u
+		LEFT JOIN time_logs t
+			ON t.user_id = u.id
+			AND t.created_at >= $1::date
+			AND t.created_at < ($2::date + interval '1 day')
+		GROUP BY u.id
+	`, d.From, d.To)
+	return res, err
 }
 
 func (r *userRepoImpl) UpdateProfileBy(ctx context.Context, input user.UpdateProfileInput, id uuid.UUID) error {

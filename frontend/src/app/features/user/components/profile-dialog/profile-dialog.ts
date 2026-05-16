@@ -51,6 +51,7 @@ export class ProfileDialogComponent {
   protected readonly currentLang = signal(this.translate.currentLang ?? 'ru');
   protected open = false;
   protected readonly language = new FormControl(this.translate.currentLang ?? 'ru');
+  private readonly initialLang = this.translate.currentLang ?? 'ru';
 
   protected readonly form = new FormGroup({
     username: new FormControl(this.profile.username, {
@@ -114,8 +115,12 @@ export class ProfileDialogComponent {
       )
       .subscribe({
         next: () => {
-          this.alert.success(this.translate.instant('cmd.user.profile.success.updated'));
           this.context.completeWith(true);
+          if (this.language.value !== this.initialLang) {
+            window.location.reload();
+          } else {
+            this.alert.success(this.translate.instant('cmd.user.profile.success.updated'));
+          }
         },
         error: () => {
           this.loading.set(false);

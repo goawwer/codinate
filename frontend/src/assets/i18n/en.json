@@ -67,26 +67,18 @@
       "progress": "Progress",
       "feed": "Feed",
       "period": "Period",
-      "others": "Others"
+      "others": "Others",
+      "plural": {
+        "status": "Statuses",
+        "priority": "Priorities",
+        "project": "Projects"
+      }
     },
     "tabs": {
       "general": "General",
       "details": "Details"
     },
-    "months": [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
-    ],
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     "timePeriods": {
       "today": "Today",
       "yesterday": "Yesterday",
@@ -99,7 +91,8 @@
       "season": {
         "dayOne": "Day 1",
         "days": "Day {{ days }}",
-        "hint": "Current monthly ranking season. The leaderboard resets at the beginning of each month."
+        "hint": "Current monthly ranking season. The leaderboard resets at the beginning of each month.",
+        "progress": "Day {{ current }} · {{ left }} days left"
       }
     },
     "time": {
@@ -251,7 +244,8 @@
           "description": "About me",
           "changeBg": "Change background",
           "language": "Language"
-        }
+        },
+        "recentTasks": "Recently touched tasks"
       }
     },
     "task": {
@@ -387,6 +381,46 @@
           "add": "Add to plan"
         }
       }
+    },
+    "feed": {
+      "feed": {
+        "items": "items",
+        "tabs": {
+          "all": "All",
+          "tasks": "Tasks",
+          "posts": "Posts"
+        },
+        "segments": {
+          "all": "All tasks",
+          "open": "Open",
+          "closed": "Closed"
+        },
+        "posts": {
+          "title": "Post",
+          "titlePlural": "Posts",
+          "accusative": "post",
+          "create": "Create post",
+          "pinned": "Pinned",
+          "types": {
+            "note": "Note",
+            "announcement": "Announcement",
+            "poll": "Poll"
+          },
+          "priorities": {
+            "low": "Low",
+            "normal": "Normal",
+            "high": "High",
+            "critical": "Critical"
+          },
+          "form": {
+            "title": "Title",
+            "titlePlaceholder": "Post title...",
+            "body": "Content",
+            "bodyPlaceholder": "What would you like to share?",
+            "postTo": "Post to"
+          }
+        }
+      }
     }
   },
   "admin": {
@@ -466,6 +500,15 @@
           "deleteContent": "Are you sure you want to delete {{ count }} user(s)? This action cannot be undone.",
           "createTitle": "Create user",
           "editTitle": "Update user"
+        },
+        "periods": {
+          "label": "Period",
+          "last_month": "Last month",
+          "current_month": "Current month",
+          "first_20_days": "First 20 days"
+        },
+        "columns": {
+          "hours": "Hours worked"
         }
       }
     }
@@ -563,6 +606,37 @@
         "errors": {
           "updateFailed": "Failed to update profile"
         }
+      }
+    }
+  },
+  "feed": {
+    "items": "items",
+    "modes": {
+      "all": "All",
+      "tasks": "Tasks",
+      "posts": "Posts"
+    },
+    "segments": {
+      "all": "All tasks",
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "posts": {
+      "title": "Post",
+      "titlePlural": "Posts",
+      "accusative": "post",
+      "create": "Create post",
+      "pinned": "Pinned",
+      "types": {
+        "note": "Note",
+        "announcement": "Announcement",
+        "poll": "Poll"
+      },
+      "priorities": {
+        "low": "Low",
+        "normal": "Normal",
+        "high": "High",
+        "critical": "Critical"
       }
     }
   }

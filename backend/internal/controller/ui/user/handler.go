@@ -17,6 +17,8 @@ func Register() {
 	ui.RegisterGet("/users/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUser)
 	ui.RegisterGet("/users/all", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUsers)
 
+	ui.RegisterGet("/users/hours", enum.AtLeastAdmin, reflect.TypeOf(service{}), usersHours)
+
 	// profile
 	ui.RegisterGet("/users/profile/{user_id}", enum.AnyUser, reflect.TypeOf(service{}), profile)
 	ui.RegisterGet("/users/profile/{user_id}/stats", enum.AnyUser, reflect.TypeOf(service{}), profileStats)
@@ -154,6 +156,11 @@ func deleteMany(s ui.UIService) (any, error) {
 	}
 
 	return nil, s.GetService().(*service).deleteUsersByIds(s.GetRequest().Context(), input.IDs)
+}
+
+func usersHours(s ui.UIService) (any, error) {
+	from, to := s.GetDateRange()
+	return s.GetService().(*service).getAllUsersHours(s.GetRequest().Context(), from, to)
 }
 
 func profile(s ui.UIService) (any, error) {
