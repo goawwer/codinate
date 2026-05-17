@@ -11,7 +11,7 @@ import {
   TuiOption,
   TuiDataList,
 } from '@taiga-ui/core';
-import { TuiBadge, TuiProgress, TuiTabs } from '@taiga-ui/kit';
+import { TuiBadge, TuiProgress, TuiTabs, TuiLineClamp } from '@taiga-ui/kit';
 import { AppPicture } from '../../../../common/picture/app-picture';
 import { AppDatePipe } from '../../../../common/pipes/app-date.pipe';
 import { AppEditorComponent } from '../../../../common/editor/app-editor.component';
@@ -52,4 +52,5 @@ export const PROJECTDETAILSIMPORTS = [
   TuiOption,
   TuiDataList,
   MentionLinksDirective,
+  TuiLineClamp,
 ] as const;

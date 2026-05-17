@@ -96,7 +96,7 @@
       </div>
     </form>
   } @else {
-    <div class="post-body" [innerHTML]="post.body | safeHtml" appMentionLinks></div>
+    <div class="post-body" [innerHTML]="post.body | safeHtml" appMentionLinks (appMentionClick)="openMentionProfile($event)"></div>
   }
 
   <div class="comments-section">
@@ -110,6 +110,7 @@
         <app-comment-list
           [entityId]="post.id"
           entityType="post"
+          (mentionClicked)="closeDialogOnMention()"
         ></app-comment-list>
       </div>
     }

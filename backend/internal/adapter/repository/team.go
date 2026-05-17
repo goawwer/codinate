@@ -15,7 +15,7 @@ import (
 type TeamRepo interface {
 	Create(ctx context.Context, input team.CreateTeamInput) error
 	GetAllTeamsWithMembersShort(ctx context.Context) ([]team.Row, error)
-	GetTeamBy(ctx context.Context, id uuid.UUID) (team.Row, error)
+	GetTeamById(ctx context.Context, id int) (team.Row, error)
 	Update(ctx context.Context, input team.UpdateTeamInput, id int) error
 	UpdateLinks(ctx context.Context, id int, links team.TeamLinks) error
 	RemoveMember(ctx context.Context, teamId int, userId uuid.UUID) error
@@ -62,10 +62,10 @@ func (r *teamRepoImpl) GetAllTeamsWithMembersShort(ctx context.Context) ([]team.
 	return res, err
 }
 
-func (r *teamRepoImpl) GetTeamBy(ctx context.Context, id uuid.UUID) (team.Row, error) {
+func (r *teamRepoImpl) GetTeamById(ctx context.Context, id int) (team.Row, error) {
 	var res team.Row
 
-	err := r.SelectContext(ctx, &res, `
+	err := r.GetContext(ctx, &res, `
 		SELECT
 			t.id, t.author_id, t.name, t.description, t.picture_name,
 			COALESCE(t.links, '[]'::jsonb) AS links,
@@ -76,7 +76,8 @@ func (r *teamRepoImpl) GetTeamBy(ctx context.Context, id uuid.UUID) (team.Row, e
 						'id',      u.id,
 						'name',    u.name,
 						'surname', u.surname,
-						'role',    er.name
+						'role',    er.name,
+						'picture', u.avatar
 					)
 				) FILTER (WHERE u.id IS NOT NULL),
 				'[]'::json

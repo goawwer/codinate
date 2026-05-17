@@ -48,12 +48,36 @@ type Suggestion struct {
 	Title      string    `db:"title" json:"title"`
 }
 
-type DeadlineDayCount struct {
-	Date  string `db:"date" json:"date"`
-	Count int    `db:"count" json:"count"`
+type DeadlineTask struct {
+	ID    uuid.UUID `db:"id" json:"id"`
+	Title string    `db:"title" json:"title"`
+	DueAt time.Time `db:"due_at" json:"dueAt"`
 }
 
 type DeadlinePressure struct {
-	Overdue  int                `json:"overdue"`
-	Upcoming []DeadlineDayCount `json:"upcoming"`
+	Overdue  []DeadlineTask `json:"overdue"`
+	Upcoming []DeadlineTask `json:"upcoming"`
+}
+
+type StatusDistributionItem struct {
+	Status string `db:"status" json:"status"`
+	Count  int    `db:"count"  json:"count"`
+}
+
+type StatusTasksPage struct {
+	Items []Row `json:"items"`
+	Total int   `json:"total"`
+}
+
+type VelocityDay struct {
+	Day   string `json:"day"`
+	Count int    `json:"count"`
+}
+
+type VelocityData struct {
+	ThisWeek      []VelocityDay `json:"thisWeek"`
+	LastWeek      []VelocityDay `json:"lastWeek"`
+	ThisWeekTotal int           `json:"thisWeekTotal"`
+	LastWeekTotal int           `json:"lastWeekTotal"`
+	ChangePercent int           `json:"changePercent"`
 }

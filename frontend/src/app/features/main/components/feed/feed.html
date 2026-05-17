@@ -304,8 +304,16 @@
                 />
               </div>
               <div class="leaderboard-info">
-                <span class="leaderboard-name">{{ entry.name }} {{ entry.surname }}</span>
-                <span class="leaderboard-sub">&#64;{{ entry.username }}</span>
+                <tui-line-clamp
+                  class="leaderboard-name"
+                  [content]="entry.name + ' ' + entry.surname"
+                  [lineHeight]="20"
+                />
+                <tui-line-clamp
+                  class="leaderboard-sub"
+                  [content]="entry.username"
+                  [lineHeight]="20"
+                />
               </div>
               <span class="leaderboard-hours">{{ entry.totalMinutes / 60 | number: '1.1-1' }}h</span>
             </div>
@@ -323,41 +331,54 @@
     <div class="widget metrics-widget">
       <tui-carousel
         class="metrics-carousel"
-        [duration]="6000"
+        [duration]="8000"
         [(index)]="metricsCarouselIndex"
       >
 
         <div *tuiItem class="metrics-slide">
           <div class="widget-header">
             <tui-icon icon="@tui.clock-alert" />
-            <span>Deadline Pressure</span>
-            @if (deadlinePressure()?.overdue) {
-              <tui-badge
-                appearance="negative"
-                class="metrics-overdue-badge"
-              >{{ deadlinePressure()!.overdue }} overdue</tui-badge>
+            <span
+              tuiHintAppearance="primary-tooltip"
+              tuiHintDirection="bottom"
+              [tuiHint]="'generic.widgets.deadlinePressure.subtitle' | translate"
+            >{{ 'generic.widgets.deadlinePressure.title' | translate }}</span>
+            @if (deadlinePressure()?.overdue?.length) {
+              <tui-badge appearance="negative" class="metrics-overdue-badge" size="m">
+                {{ 'generic.widgets.deadlinePressure.overdue' | translate: { count: deadlinePressure()!.overdue.length } }}
+              </tui-badge>
             }
           </div>
 
-          @if (deadlinePressure()) {
-            <tui-axes
-              class="metrics-chart"
-              axisY="none"
-              [axisXLabels]="deadlineXLabels()"
-              [horizontalLines]="2"
-            >
-              <tui-line-days-chart
-                [value]="deadlineChartValue()"
-                [y]="0"
-                [height]="deadlineChartMax()"
-                [smoothingFactor]="0.4"
-                [dots]="true"
-              />
-            </tui-axes>
+          @if (deadlinePressure(); as pressure) {
+            @if (pressure.overdue.length === 0 && pressure.upcoming.length === 0) {
+              <div class="widget-placeholder">
+                <tui-icon icon="@tui.circle-check" class="widget-placeholder-icon" />
+                <p>{{ 'generic.widgets.deadlinePressure.allClear' | translate }}</p>
+                <span>{{ 'generic.widgets.deadlinePressure.allClearDetails' | translate }}</span>
+              </div>
+            } @else {
+              <tui-scrollbar class="deadline-scroll">
+                <div class="deadline-list">
+                  @for (task of pressure.overdue; track task.id) {
+                    <a class="deadline-item deadline-item--overdue" [routerLink]="['/tasks', task.id]">
+                      <span class="deadline-item-title">{{ task.title }}</span>
+                      <tui-badge size="s" appearance="negative">{{ deadlineRelativeDate(task) }}</tui-badge>
+                    </a>
+                  }
+                  @for (task of pressure.upcoming; track task.id) {
+                    <a class="deadline-item" [routerLink]="['/tasks', task.id]">
+                      <span class="deadline-item-title">{{ task.title }}</span>
+                      <span class="deadline-item-date">{{ deadlineRelativeDate(task) }}</span>
+                    </a>
+                  }
+                </div>
+              </tui-scrollbar>
+            }
           } @else {
             <div class="widget-placeholder">
               <tui-icon icon="@tui.loader" class="widget-placeholder-icon" />
-              <p>Loading...</p>
+              <p>{{ 'generic.widgets.deadlinePressure.loading' | translate }}</p>
             </div>
           }
         </div>
@@ -365,23 +386,161 @@
         <div *tuiItem class="metrics-slide">
           <div class="widget-header">
             <tui-icon icon="@tui.chart-pie" />
-            <span>Task Health</span>
+            <span
+              tuiHintAppearance="primary-tooltip"
+              tuiHintDirection="bottom"
+              [tuiHint]="'generic.widgets.taskHealth.subtitle' | translate"
+            >{{ 'generic.widgets.taskHealth.title' | translate }}</span>
           </div>
-          <div class="widget-placeholder">
-            <tui-icon icon="@tui.loader" class="widget-placeholder-icon" />
-            <p>Coming soon</p>
-          </div>
+          @if (statusChartValues().length) {
+            <div class="status-chart-body">
+              <tui-ring-chart
+                class="status-ring"
+                [value]="statusChartValues()"
+                [activeItemIndex]="statusChartActiveIndex()"
+                size="m"
+                (activeItemIndexChange)="statusChartActiveIndex.set($event)"
+              >
+                <b>{{ statusChartActiveCount() }}</b>
+                <div>{{ statusChartActiveLabel() }}</div>
+              </tui-ring-chart>
+              <div class="status-legend">
+                @for (item of statusDistribution(); track item.status; let i = $index) {
+                  <div
+                    class="status-legend-item"
+                    [class.status-legend-item--active]="selectedStatusForDropdown() === i"
+                    [tuiDropdown]="statusTaskDropdown"
+                    [tuiDropdownOpen]="selectedStatusForDropdown() === i"
+                    (tuiDropdownOpenChange)="onStatusDropdownChange($event, i)"
+                  >
+                    <span class="status-legend-dot" [style.background]="'var(--tui-chart-' + i + ')'"></span>
+                    <span class="status-legend-name">{{ item.status }}</span>
+                    <span class="status-legend-count">{{ item.count }}</span>
+                  </div>
+                }
+              </div>
+
+              <ng-template #statusTaskDropdown>
+                <div class="status-task-dropdown">
+                  @if (statusDropdownData(); as data) {
+                    @if (data.items.length) {
+                      <div class="status-task-list">
+                        @for (task of data.items; track task.id) {
+                          <a class="status-task-item" [routerLink]="['/tasks', task.id]">
+                            <span class="status-task-id">#{{ task.identifier }}</span>
+                            <span class="status-task-title">{{ task.title }}</span>
+                            <span class="status-task-meta">{{ task.assigneeUsername }}</span>
+                          </a>
+                        }
+                      </div>
+                      @if (statusDropdownTotalPages() > 1) {
+                        <div class="status-task-pagination">
+                          <button
+                            tuiIconButton
+                            appearance="ghost"
+                            iconStart="@tui.chevron-left"
+                            size="xs"
+                            type="button"
+                            [disabled]="statusDropdownPage() === 0"
+                            (click)="onStatusDropdownPageChange(statusDropdownPage() - 1); $event.stopPropagation()"
+                          ></button>
+                          <span class="status-task-page-label">{{ statusDropdownPage() + 1 }} / {{ statusDropdownTotalPages() }}</span>
+                          <button
+                            tuiIconButton
+                            appearance="ghost"
+                            iconStart="@tui.chevron-right"
+                            size="xs"
+                            type="button"
+                            [disabled]="statusDropdownPage() === statusDropdownTotalPages() - 1"
+                            (click)="onStatusDropdownPageChange(statusDropdownPage() + 1); $event.stopPropagation()"
+                          ></button>
+                        </div>
+                      }
+                    } @else {
+                      <p class="status-task-empty">{{ 'generic.statuses.empty' | translate }}</p>
+                    }
+                  } @else {
+                    <p class="status-task-empty">{{ 'generic.widgets.deadlinePressure.loading' | translate }}</p>
+                  }
+                </div>
+              </ng-template>
+            </div>
+          } @else {
+            <div class="widget-placeholder">
+              <tui-icon icon="@tui.chart-pie" class="widget-placeholder-icon" />
+              <p>{{ 'generic.widgets.taskHealth.empty' | translate }}</p>
+              <span>{{ 'generic.widgets.taskHealth.emptyDetails' | translate }}</span>
+            </div>
+          }
         </div>
 
         <div *tuiItem class="metrics-slide">
           <div class="widget-header">
-            <tui-icon icon="@tui.zap" />
-            <span>Momentum Score</span>
+            <tui-icon icon="@tui.activity" />
+            <span
+              tuiHintAppearance="primary-tooltip"
+              tuiHintDirection="bottom"
+              [tuiHint]="'generic.widgets.momentumScore.subtitle' | translate"
+            >{{ 'generic.widgets.momentumScore.title' | translate }}</span>
+            @if (velocity(); as v) {
+              <div
+                class="velocity-change"
+                [class.velocity-change--positive]="v.changePercent > 0"
+                [class.velocity-change--negative]="v.changePercent < 0"
+                [class.velocity-change--neutral]="v.changePercent === 0"
+                tuiHintAppearance="primary-tooltip"
+                tuiHintDirection="bottom-left"
+                [tuiHint]="'generic.widgets.momentumScore.changeHint' | translate"
+              >
+                <tui-icon
+                  class="velocity-change-arrow"
+                  [icon]="v.changePercent >= 0 ? '@tui.trending-up' : '@tui.trending-down'"
+                />
+                {{ v.changePercent > 0 ? '+' : '' }}{{ v.changePercent }}%
+              </div>
+            }
           </div>
-          <div class="widget-placeholder">
-            <tui-icon icon="@tui.loader" class="widget-placeholder-icon" />
-            <p>Coming soon</p>
-          </div>
+          @if (velocity(); as v) {
+            <div class="activity-body">
+              <tui-axes
+                axisY="none"
+                class="activity-axes"
+                [axisXLabels]="activityLabelsX()"
+                [horizontalLines]="3"
+              >
+                <tui-bar-chart
+                  class="activity-chart"
+                  [collapsed]="true"
+                  [max]="activityChartMax()"
+                  tuiHintAppearance="primary-tooltip"
+                  [tuiHintContent]="activityHint"
+                  [value]="activityChartValue()"
+                />
+              </tui-axes>
+              <p class="velocity-footer">
+                {{ 'generic.widgets.momentumScore.summary' | translate: { count: v.thisWeekTotal } }}
+              </p>
+            </div>
+          } @else {
+            <div class="widget-placeholder">
+              <tui-icon icon="@tui.activity" class="widget-placeholder-icon" />
+              <p>{{ 'generic.widgets.momentumScore.loading' | translate }}</p>
+            </div>
+          }
+          <ng-template #activityHint let-index>
+            <div class="activity-hint">
+              <div class="activity-hint-row">
+                <span class="activity-hint-dot activity-hint-dot--last"></span>
+                <span class="activity-hint-label">{{ 'generic.widgets.momentumScore.lastWeek' | translate }}</span>
+                <b>{{ velocity()!.lastWeek[index]?.count ?? 0 }}</b>
+              </div>
+              <div class="activity-hint-row">
+                <span class="activity-hint-dot activity-hint-dot--current"></span>
+                <span class="activity-hint-label">{{ 'generic.widgets.momentumScore.thisWeek' | translate }}</span>
+                <b>{{ velocity()!.thisWeek[index]?.count ?? 0 }}</b>
+              </div>
+            </div>
+          </ng-template>
         </div>
 
       </tui-carousel>

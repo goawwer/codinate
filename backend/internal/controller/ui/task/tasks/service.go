@@ -198,6 +198,18 @@ func (s *service) getDeadlinePressure(ctx context.Context) (task.DeadlinePressur
 	return repository.GetTaskRepo().GetDeadlinePressure(ctx)
 }
 
+func (s *service) getStatusDistribution(ctx context.Context) ([]task.StatusDistributionItem, error) {
+	return repository.GetTaskRepo().GetStatusDistribution(ctx)
+}
+
+func (s *service) getTasksByStatus(ctx context.Context, statusId, page int) (task.StatusTasksPage, error) {
+	return repository.GetTaskRepo().GetTasksByStatus(ctx, statusId, page)
+}
+
+func (s *service) getVelocity(ctx context.Context) (task.VelocityData, error) {
+	return repository.GetTaskRepo().GetVelocity(ctx)
+}
+
 // detectTaskChanges builds history entries comparing snapshot (with resolved names) against
 // the incoming input. String names are stored directly so the frontend can display them
 // without needing to resolve IDs.

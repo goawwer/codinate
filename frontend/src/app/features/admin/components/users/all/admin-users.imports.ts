@@ -25,9 +25,11 @@ import {
   TuiStatus,
   TuiDataListWrapper,
   TuiChevron,
+  TuiLineClamp,
 } from '@taiga-ui/kit';
 import { TuiCell, TuiBlockStatus } from '@taiga-ui/layout';
 import { AppDatePipe } from '../../../../../common/pipes/app-date.pipe';
+import { FormatMinutesPipe } from '../../../../../common/pipes/format-minutes.pipe';
 import { UserStatus } from '../../../../../common/user-status/user-status';
 import { TranslatePipe } from '@ngx-translate/core';
 import { EmployeeRolePipe } from '../../../../../common/pipes/employee-role.pipe';
@@ -35,6 +37,7 @@ import { TuiHintDirective } from '@taiga-ui/core';
 
 export const USERSDASHBOARDIMPORTS = [
   AppDatePipe,
+  FormatMinutesPipe,
   TitleCasePipe,
   TuiAutoColorPipe,
   TuiDataList,
@@ -67,4 +70,5 @@ export const USERSDASHBOARDIMPORTS = [
   EmployeeRolePipe,
   TuiDataListWrapper,
   TuiChevron,
+  TuiLineClamp,
 ];

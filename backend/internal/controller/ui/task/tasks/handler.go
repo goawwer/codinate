@@ -12,6 +12,9 @@ import (
 func Register() {
 	ui.RegisterGet("/tasks/suggestions", enum.AnyUser, reflect.TypeOf(service{}), suggestions)
 	ui.RegisterGet("/tasks/metrics/deadline", enum.AnyUser, reflect.TypeOf(service{}), getDeadlinePressure)
+	ui.RegisterGet("/tasks/metrics/status-distribution", enum.AnyUser, reflect.TypeOf(service{}), getStatusDistribution)
+	ui.RegisterGet("/tasks/metrics/status-tasks", enum.AnyUser, reflect.TypeOf(service{}), getTasksByStatus)
+	ui.RegisterGet("/tasks/metrics/velocity", enum.AnyUser, reflect.TypeOf(service{}), getVelocity)
 	ui.RegisterGet("/tasks/{id}", enum.AnyUser, reflect.TypeOf(service{}), getById)
 	ui.RegisterGet("/tasks", enum.AnyUser, reflect.TypeOf(service{}), getAll)
 	ui.RegisterPost("/tasks/add", enum.AnyUser, reflect.TypeOf(service{}), add)
@@ -213,6 +216,25 @@ func suggestions(s ui.UIService) (any, error) {
 
 func getDeadlinePressure(s ui.UIService) (any, error) {
 	return s.GetService().(*service).getDeadlinePressure(s.GetRequest().Context())
+}
+
+func getStatusDistribution(s ui.UIService) (any, error) {
+	return s.GetService().(*service).getStatusDistribution(s.GetRequest().Context())
+}
+
+func getVelocity(s ui.UIService) (any, error) {
+	return s.GetService().(*service).getVelocity(s.GetRequest().Context())
+}
+
+func getTasksByStatus(s ui.UIService) (any, error) {
+	statusId, err := s.GetUrlParamAsInt("statusId")
+	if err != nil {
+		return nil, err
+	}
+
+	page, _ := s.GetUrlParamAsInt("pageNumber")
+
+	return s.GetService().(*service).getTasksByStatus(s.GetRequest().Context(), statusId, page)
 }
 
 func parseFilterParams(s ui.UIService) (*task.Filters, error) {

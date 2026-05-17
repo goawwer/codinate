@@ -116,9 +116,18 @@ func (r *worklogRepoImpl) GetByTask(ctx context.Context, taskId uuid.UUID) ([]wo
 func (r *worklogRepoImpl) GetLeaderboard(ctx context.Context, limit int) ([]worklog.LeaderboardEntry, error) {
 	result := make([]worklog.LeaderboardEntry, 0)
 	err := r.SelectContext(ctx, &result, `
-		SELECT user_id, username, name, surname, avatar, total_minutes, log_count, rank
-		FROM leaderboard_snapshots
-		ORDER BY rank ASC
+		SELECT
+			ls.user_id,
+			u.username,
+			COALESCE(u.name, '')    AS name,
+			COALESCE(u.surname, '') AS surname,
+			COALESCE(u.avatar, '')  AS avatar,
+			ls.total_minutes,
+			ls.log_count,
+			ls.rank
+		FROM leaderboard_snapshots ls
+		JOIN users u ON u.id = ls.user_id
+		ORDER BY ls.rank ASC
 		LIMIT $1
 	`, limit)
 	if err != nil {

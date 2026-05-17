@@ -1,4 +1,4 @@
-import { Directive, HostListener, inject } from '@angular/core';
+import { Directive, EventEmitter, HostListener, inject, Output } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Directive({
@@ -6,19 +6,23 @@ import { Router } from '@angular/router';
   standalone: true,
 })
 export class MentionLinksDirective {
-  private readonly router = inject(Router);
+  @Output()
+  readonly appMentionClick = new EventEmitter<string>();
 
   @HostListener('click', ['$event'])
   onClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
     const mention = target.closest('.my-mention[data-user]') as HTMLElement | null;
     if (!mention) return;
 
-    const userId = mention.dataset['user'];
+    const userId = mention.getAttribute('data-user');
     if (!userId) return;
 
     event.preventDefault();
     event.stopPropagation();
-    this.router.navigate(['/users', userId]);
+
+    this.appMentionClick.emit(userId);
   }
 }

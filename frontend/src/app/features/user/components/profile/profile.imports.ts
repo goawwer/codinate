@@ -1,4 +1,4 @@
-import { TuiBadge, TuiTabs } from '@taiga-ui/kit';
+import { TuiBadge, TuiTabs, TuiCarousel, TuiPagination } from '@taiga-ui/kit';
 import { TuiButton, TuiIcon, TuiHint, TuiTitle, TuiScrollbar } from '@taiga-ui/core';
 import { RouterLink } from '@angular/router';
 import { EmployeeRolePipe } from '../../../../common/pipes/employee-role.pipe';
@@ -8,6 +8,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { TuiBlockStatus } from '@taiga-ui/layout';
 import { TuiAxes, TuiBarChart, TuiRingChart } from '@taiga-ui/addon-charts';
 import { AppDatePipe } from '../../../../common/pipes/app-date.pipe';
+import { FormatMinutesPipe } from '../../../../common/pipes/format-minutes.pipe';
 
 export const PROFILEIMPORTS = [
   AppRankBadge,
@@ -25,6 +26,9 @@ export const PROFILEIMPORTS = [
   TuiRingChart,
   TuiHint,
   AppDatePipe,
+  FormatMinutesPipe,
   TuiTitle,
   TuiScrollbar,
+  TuiCarousel,
+  TuiPagination,
 ];

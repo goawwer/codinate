@@ -123,10 +123,6 @@ export class AdminUsers implements OnInit {
     });
   }
 
-  protected getUserHours(userId: string): string {
-    return this.formatMinutes(this.hoursMap().get(userId) ?? 0);
-  }
-
   protected periodLabel(period: Period): string {
     const key = period.replace(/-/g, '_');
     return this.translate.instant(`admin.dashboard.users.periods.${key}`);
@@ -196,12 +192,4 @@ export class AdminUsers implements OnInit {
     }
   }
 
-  private formatMinutes(minutes: number): string {
-    if (minutes <= 0) return '0h';
-    const hours = Math.floor(minutes / 60);
-    const rest = minutes % 60;
-    if (!hours) return `${rest}m`;
-    if (!rest) return `${hours}h`;
-    return `${hours}h ${rest}m`;
-  }
 }

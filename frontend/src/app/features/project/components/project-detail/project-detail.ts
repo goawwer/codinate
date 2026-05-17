@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { HttpParams } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, forkJoin, map } from 'rxjs';
 import { provideTuiEditor } from '@taiga-ui/editor';
@@ -51,6 +51,7 @@ import { TaskDialogComponent } from '../../../task/components/dialog/task-dialog
 })
 export class ProjectDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly projectService = inject(ProjectApiService);
   private readonly releaseService = inject(ReleaseService);
   private readonly taskService = inject(TaskCoreService);
@@ -291,5 +292,9 @@ export class ProjectDetailComponent implements OnInit {
 
   protected validDate(dateStr: string | null | undefined): boolean {
     return !!dateStr && !String(dateStr).startsWith('0001');
+  }
+
+  protected openMentionProfile(userId: string): void {
+    void this.router.navigate(['/users', userId]);
   }
 }

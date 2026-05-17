@@ -370,6 +370,7 @@
   flex: 1;
   min-height: 0;
   padding-bottom: 11rem;
+  max-height: 98%;
 }
 
 .activity-tab {
@@ -427,6 +428,11 @@
       color: var(--tui-text-tertiary);
     }
   }
+
+  &--chart {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .work-dynamics-axes {
@@ -458,6 +464,19 @@
   span {
     font-size: 0.8rem;
     color: var(--tui-text-secondary);
+  }
+}
+
+.metrics-pagination {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0 0;
+}
+
+.results-card--chart {
+  ::ng-deep .t-svg,
+  ::ng-deep .t-content {
+    top: -10px;
   }
 }
 

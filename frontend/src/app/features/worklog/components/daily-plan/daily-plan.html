@@ -14,7 +14,7 @@
         (click)="toggleForm()"
         tuiHintAppearance="primary-tooltip"
         tuiHintDirection="bottom"
-        [tuiHint]="'models.worklog.dailyPlan.create' | translate"
+        [tuiHint]="isFormVisible() ? null : ('models.worklog.dailyPlan.create' | translate)"
       >
         <tui-icon [icon]="isFormVisible() ? '@tui.x' : '@tui.plus'" />
         {{ isFormVisible() ? ('generic.actions.cancel' | translate) : ""}}

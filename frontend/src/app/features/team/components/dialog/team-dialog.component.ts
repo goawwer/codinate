@@ -131,7 +131,13 @@ export class TeamDialogComponent {
       next: () => {
         this.members.update((list) => [
           ...list,
-          { id: member.id, name: member.name, surname: member.surname, picture: member.picture },
+          {
+            id: member.id,
+            name: member.name,
+            surname: member.surname,
+            picture: member.picture,
+            role: member.role,
+          },
         ]);
         this.memberToAdd.reset();
         this.selectedMember.set(null);

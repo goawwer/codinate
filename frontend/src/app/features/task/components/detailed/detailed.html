@@ -43,16 +43,6 @@
                     <div class="flex items-center gap-1">
                       @if (isEditing()) {
                       <div class="action-bar">
-                        <button
-                          tuiIconButton
-                          appearance="ghost"
-                          type="button"
-                          size="xs"
-                          iconStart="@tui.save"
-                          [disabled]="isSaving()"
-                          (click)="save()"
-                        >
-                        </button>
                         @if (isClosed()) {
                           <button
                             tuiIconButton
@@ -61,6 +51,9 @@
                             size="xs"
                             iconStart="@tui.rotate-ccw"
                             (click)="reopenTask()"
+                            tuiHintAppearance="primary-tooltip"
+                            tuiHintDirection="bottom"
+                            [tuiHint]="'models.task.actions.close' | translate"
                           >
                           </button>
                         } @else {
@@ -72,9 +65,25 @@
                             iconStart="@tui.circle-check"
                             [disabled]="!canClose()"
                             (click)="closeTask()"
+                            tuiHintAppearance="primary-tooltip"
+                            tuiHintDirection="bottom"
+                            [tuiHint]="'models.task.actions.close' | translate"
                           >
                           </button>
                         }
+                        <button
+                          tuiIconButton
+                          appearance="ghost"
+                          type="button"
+                          size="xs"
+                          iconStart="@tui.save"
+                          [disabled]="isSaving()"
+                          (click)="save()"
+                          tuiHintAppearance="primary-tooltip"
+                          tuiHintDirection="bottom"
+                          [tuiHint]="'models.task.actions.saveChanges' | translate"
+                        >
+                        </button>
                         <button
                           tuiIconButton
                           appearance="ghost"
@@ -83,6 +92,9 @@
                           type="button"
                           [disabled]="!canDelete()"
                           (click)="confirmDelete()"
+                          tuiHintAppearance="primary-tooltip"
+                          tuiHintDirection="bottom"
+                          [tuiHint]="'models.task.actions.deleteTask' | translate"
                         >
                         </button>
                       </div>
@@ -95,18 +107,23 @@
                           [iconStart]="isEditing() ? '@tui.x' : '@tui.pencil'"
                           size="s"
                           (click)="toggleEditing()"
+                          tuiHintAppearance="primary-tooltip"
+                          tuiHintDirection="bottom"
+                          [tuiHint]="'models.task.actions.change' | translate"
                         ></button>
-                        <div class="log-time-wrap">
-                          <button
-                            tuiIconButton
-                            appearance="action"
-                            type="button"
-                            iconStart="@tui.plus"
-                            size="xs"
-                            [title]="'models.worklog.logTime' | translate"
-                            (click)="openLogTimeDialog()"
-                          ></button>
-                        </div>
+                        @if (!isEditing()) {
+                          <div class="log-time-wrap">
+                            <button
+                              tuiIconButton
+                              appearance="action"
+                              type="button"
+                              iconStart="@tui.plus"
+                              size="xs"
+                              [title]="'models.worklog.logTime' | translate"
+                              (click)="openLogTimeDialog()"
+                            ></button>
+                          </div>
+                        }
                       </div>
                       @if (totalMinutes() > 0) {
                         <span class="log-time-total">{{ formatMinutes(totalMinutes()) }}</span>
@@ -190,7 +207,10 @@
                       <tui-icon icon="@tui.user" />
                       {{ 'models.task.fields.assignee' | translate }}
                     </span>
-                    <span class="prop-value">{{ t.assigneeName }} {{ t.assigneeSurname }}</span>
+                    <tui-line-clamp
+                      [content]="t.assigneeName + ' ' + t.assigneeSurname"
+                      [lineHeight]="20"
+                    />
                   </div>
                   <div class="task-prop">
                     <span class="prop-label">
@@ -337,7 +357,10 @@
                       {{ 'models.task.detailed.assignee' | translate }}
                     }
                   </span>
-                  <span class="participant-name">{{ member.name }} {{ member.surname }}</span>
+                  <tui-line-clamp
+                    [content]="member.name + ' ' + member.surname"
+                    [lineHeight]="20"
+                  />
                 </div>
               </div>
             }

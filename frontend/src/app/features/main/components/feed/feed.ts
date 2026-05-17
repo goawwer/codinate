@@ -13,7 +13,7 @@ import { TuiDay, TuiDayRange } from '@taiga-ui/cdk';
 import { tuiScrollbarOptionsProvider } from '@taiga-ui/core';
 import { debounceTime, distinctUntilChanged, filter, forkJoin, startWith } from 'rxjs';
 import { FEEDIMPORTS } from './feed.imports';
-import { DeadlinePressure, Task } from '../../../task/types/task.model';
+import { DeadlinePressure, DeadlineTask, StatusDistributionItem, StatusTasksPage, Task, VelocityData } from '../../../task/types/task.model';
 import { TaskCoreService } from '../../../task/service/task-core.service';
 import { TaskStatus, TaskStatusesService } from '../../../task/service/task-statuses.service';
 import { TaskPriority, TaskPrioritiesService } from '../../../task/service/task-priorities.service';
@@ -71,9 +71,15 @@ export class MainFeedComponent implements OnInit {
   private readonly postService = inject(PostService);
   private readonly userStore = inject(UserStore);
 
+  protected readonly NaN = NaN;
   protected readonly feedMode = signal<FeedMode>('all');
   protected readonly metricsCarouselIndex = signal(0);
   protected readonly deadlinePressure = signal<DeadlinePressure | null>(null);
+  protected readonly statusDistribution = signal<StatusDistributionItem[]>([]);
+  protected readonly statusChartActiveIndex = signal(NaN);
+  protected readonly selectedStatusForDropdown = signal(NaN);
+  protected readonly statusDropdownPage = signal(0);
+  protected readonly statusDropdownData = signal<StatusTasksPage | null>(null);
   protected readonly currentPage = signal(0);
 
   protected readonly metricSlides = [
@@ -82,40 +88,6 @@ export class MainFeedComponent implements OnInit {
     { title: 'Momentum Score', icon: '@tui.zap' },
   ] as const;
 
-  protected readonly deadlineChartValue = computed((): ReadonlyArray<[TuiDay, number]> => {
-    const pressure = this.deadlinePressure();
-    const today = new Date();
-    const countMap = new Map<string, number>();
-
-    if (pressure) {
-      for (const item of pressure.upcoming) {
-        countMap.set(item.date, item.count);
-      }
-    }
-
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() + i);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      return [new TuiDay(d.getFullYear(), d.getMonth(), d.getDate()), countMap.get(key) ?? 0] as [
-        TuiDay,
-        number,
-      ];
-    });
-  });
-
-  protected readonly deadlineChartMax = computed(() => {
-    const vals = this.deadlineChartValue().map(([, n]) => n);
-    return Math.max(...vals, 1);
-  });
-
-  protected readonly deadlineXLabels = computed(() => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return this.deadlineChartValue().map(([day]) => {
-      const d = day.toLocalNativeDate();
-      return days[d.getDay()] ?? '';
-    });
-  });
   protected readonly isLoading = signal(false);
   protected readonly calendarOpen = signal(false);
   protected readonly createMenuOpen = signal(false);
@@ -317,6 +289,57 @@ export class MainFeedComponent implements OnInit {
     });
   });
 
+  protected readonly statusChartValues = computed((): ReadonlyArray<number> =>
+    this.statusDistribution().map((i) => i.count),
+  );
+
+  protected readonly statusChartActiveLabel = computed((): string => {
+    const i = this.statusChartActiveIndex();
+    if (isNaN(i)) return this.translate.instant('generic.widgets.taskHealth.totalLabel');
+    return this.statusDistribution()[i]?.status ?? '';
+  });
+
+  protected readonly statusChartActiveCount = computed((): number => {
+    const i = this.statusChartActiveIndex();
+    const items = this.statusDistribution();
+    if (isNaN(i)) return items.reduce((sum, x) => sum + x.count, 0);
+    return items[i]?.count ?? 0;
+  });
+
+  protected readonly statusDropdownTotalPages = computed(() => {
+    const data = this.statusDropdownData();
+    return data ? Math.ceil(data.total / 5) : 0;
+  });
+
+  protected readonly velocity = signal<VelocityData | null>(null);
+
+  protected readonly activityChartValue = computed((): ReadonlyArray<readonly number[]> => {
+    const v = this.velocity();
+    if (!v) return [];
+    return [
+      v.lastWeek.map((d) => d.count),
+      v.thisWeek.map((d) => d.count),
+    ];
+  });
+
+  protected readonly activityChartMax = computed((): number => {
+    const v = this.velocity();
+    if (!v) return 1;
+    const maxColumnSum = Math.max(...v.lastWeek.map((d, i) => d.count + v.thisWeek[i].count));
+    return Math.max(1, maxColumnSum);
+  });
+
+  protected readonly activityLabelsX = computed((): string[] => {
+    const v = this.velocity();
+    if (!v) return [];
+    return v.thisWeek.map((d) => this.velocityDayLabel(d.day));
+  });
+
+  protected readonly velocityTrendPositive = computed(() => {
+    const v = this.velocity();
+    return v ? v.changePercent >= 0 : true;
+  });
+
   ngOnInit(): void {
     forkJoin([
       this.statusesService.getAll(),
@@ -332,6 +355,14 @@ export class MainFeedComponent implements OnInit {
 
     this.taskService.getDeadlinePressure().subscribe((data) => {
       this.deadlinePressure.set(data);
+    });
+
+    this.taskService.getStatusDistribution().subscribe((data) => {
+      this.statusDistribution.set(data);
+    });
+
+    this.taskService.getVelocity().subscribe((data) => {
+      this.velocity.set(data);
     });
 
     this.form.valueChanges
@@ -557,6 +588,50 @@ export class MainFeedComponent implements OnInit {
     }
   }
 
+  protected deadlineRelativeDate(task: DeadlineTask): string {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(task.dueAt);
+    due.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+    const t = (key: string, params?: object) =>
+      this.translate.instant(`generic.widgets.deadlinePressure.${key}`, params);
+
+    if (diffDays === 0) return t('today');
+    if (diffDays === 1) return t('tomorrow');
+    if (diffDays === -1) return t('yesterday');
+    if (diffDays < 0) return t('daysOverdue', { count: Math.abs(diffDays) });
+    return t('inDays', { count: diffDays });
+  }
+
+  protected onStatusDropdownChange(open: boolean, index: number): void {
+    if (open) {
+      this.selectedStatusForDropdown.set(index);
+      this.statusChartActiveIndex.set(index);
+      this.statusDropdownPage.set(0);
+      this.statusDropdownData.set(null);
+      this.fetchStatusTasks(index, 0);
+    } else if (this.selectedStatusForDropdown() === index) {
+      this.selectedStatusForDropdown.set(NaN);
+      this.statusChartActiveIndex.set(NaN);
+    }
+  }
+
+  protected onStatusDropdownPageChange(page: number): void {
+    this.statusDropdownPage.set(page);
+    this.fetchStatusTasks(this.selectedStatusForDropdown(), page);
+  }
+
+  private fetchStatusTasks(legendIndex: number, page: number): void {
+    const item = this.statusDistribution()[legendIndex];
+    if (!item) return;
+    const status = this.statuses().find((s) => s.name === item.status);
+    if (!status) return;
+    this.taskService.getStatusTasks(status.id, page).subscribe((data) => {
+      this.statusDropdownData.set(data);
+    });
+  }
+
   private buildTaskParams(includeTaskFilters = true): HttpParams {
     const value = this.form.getRawValue();
 
@@ -640,6 +715,12 @@ export class MainFeedComponent implements OnInit {
       const result = a.createdAt.localeCompare(b.createdAt);
       return sortOrder === 'asc' ? result : -result;
     });
+  }
+
+  protected velocityDayLabel(dateStr: string): string {
+    const days = this.translate.instant('generic.daysShort') as string[];
+    const date = new Date(dateStr + 'T00:00:00');
+    return days[date.getDay()];
   }
 
   private fmtDay(day: TuiDay): string {

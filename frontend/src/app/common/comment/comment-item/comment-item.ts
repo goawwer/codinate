@@ -54,6 +54,7 @@ export class CommentItem {
 
   @Output() deleted = new EventEmitter<string>();
   @Output() updated = new EventEmitter<{ id: string } & UpdateCommentInput>();
+  @Output() mentionClicked = new EventEmitter<string>();
 
   private readonly pendingUploads = inject(PendingEditorUploads);
   private readonly appDate = inject(AppDatePipe);
@@ -187,5 +188,9 @@ export class CommentItem {
       .subscribe(() => {
         this.deleted.emit(commentId);
       });
+  }
+
+  protected openMentionProfile(userId: string): void {
+    this.mentionClicked.emit(userId);
   }
 }

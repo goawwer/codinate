@@ -82,12 +82,36 @@ export interface TaskSuggestion {
   title: string;
 }
 
-export interface DeadlineDayCount {
-  date: string;
-  count: number;
+export interface DeadlineTask {
+  id: string;
+  title: string;
+  dueAt: string;
 }
 
 export interface DeadlinePressure {
-  overdue: number;
-  upcoming: DeadlineDayCount[];
+  overdue: DeadlineTask[];
+  upcoming: DeadlineTask[];
+}
+
+export interface StatusDistributionItem {
+  status: string;
+  count: number;
+}
+
+export interface StatusTasksPage {
+  items: Task[];
+  total: number;
+}
+
+export interface VelocityDay {
+  day: string;
+  count: number;
+}
+
+export interface VelocityData {
+  thisWeek: VelocityDay[];
+  lastWeek: VelocityDay[];
+  thisWeekTotal: number;
+  lastWeekTotal: number;
+  changePercent: number;
 }

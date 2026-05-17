@@ -8,16 +8,15 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { HttpParams } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map } from 'rxjs';
+import { filter, forkJoin, map } from 'rxjs';
 import { provideTuiEditor } from '@taiga-ui/editor';
 import { tuiScrollbarOptionsProvider } from '@taiga-ui/core';
 import { TEAMDETAILIMPORTS } from './team-detail.imports';
 import { EDITOR_RU_PROVIDER } from '../../../../common/editor/editor-i18n';
-import { TeamStore } from '../../store/team.store';
 import { TeamApiService } from '../../service/team.service';
-import { TeamLink } from '../../types/model/team.model';
+import { Team, TeamLink } from '../../types/model/team.model';
 import { UserStore } from '../../../user/store/user.store';
 import { AppDialogService } from '../../../../common/dialogs/dialog.service';
 import { TranslateService } from '@ngx-translate/core';
@@ -51,7 +50,7 @@ import { Task } from '../../../task/types/task.model';
 })
 export class TeamDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly teamStore = inject(TeamStore);
+  private readonly router = inject(Router);
   private readonly teamApiService = inject(TeamApiService);
   private readonly taskService = inject(TaskCoreService);
   private readonly alert = inject(AlertService);
@@ -66,7 +65,7 @@ export class TeamDetailComponent implements OnInit {
     return id ? +id : null;
   });
 
-  protected readonly isLoading = this.teamStore.isLoading;
+  protected readonly isLoading = signal(true);
   protected readonly activeTab = signal(0);
   protected readonly posts = signal<Post[]>([]);
   protected readonly isPostsLoading = signal(false);
@@ -78,22 +77,32 @@ export class TeamDetailComponent implements OnInit {
   protected readonly isEditing = signal(false);
   protected readonly isSaving = signal(false);
 
+  protected readonly team = signal<Team | null>(null);
   protected readonly editableLinks = signal<TeamLink[]>([]);
   protected readonly descriptionControl = new FormControl('', { nonNullable: true });
-
-  protected readonly team = computed(() => {
-    const id = this.numericId();
-    if (!id) return null;
-    return this.teamStore.teams().find((t) => t.id === id) ?? null;
-  });
 
   protected readonly recentTasks = computed(() => this.tasks().slice(0, 5));
   protected readonly recentPosts = computed(() => this.posts().slice(0, 5));
 
   ngOnInit(): void {
-    this.teamStore.loadTeams();
     const id = this.numericId();
     if (!id) return;
+
+    forkJoin([
+      this.teamApiService.getById(id),
+      this.taskService.getAll(new HttpParams().set('teamId', id)),
+    ]).subscribe({
+      next: ([team, tasks]) => {
+        this.team.set(team);
+        this.tasks.set(tasks ?? []);
+        this.descriptionControl.setValue(team.description ?? '');
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.alert.error('Failed to load team');
+        this.isLoading.set(false);
+      },
+    });
 
     this.isPostsLoading.set(true);
     this.postService.getByTeam(id).subscribe({
@@ -103,12 +112,6 @@ export class TeamDetailComponent implements OnInit {
       },
       error: () => this.isPostsLoading.set(false),
     });
-
-    (this.teamApiService.getById(id),
-      this.taskService.getAll(new HttpParams().set('teamId', id)).subscribe({
-        next: (tasks) => this.tasks.set(tasks ?? []),
-        error: () => {},
-      }));
   }
 
   protected toggleEditing(): void {
@@ -124,7 +127,7 @@ export class TeamDetailComponent implements OnInit {
     this.isSaving.set(true);
     this.teamApiService.update(id, { description: this.descriptionControl.value }).subscribe({
       next: () => {
-        this.teamStore.loadTeams();
+        this.team.update((t) => (t ? { ...t, description: this.descriptionControl.value } : t));
         this.isEditing.set(false);
         this.isSaving.set(false);
       },
@@ -163,7 +166,7 @@ export class TeamDetailComponent implements OnInit {
     const links = this.editableLinks();
     this.teamApiService.updateLinks(id, links).subscribe({
       next: () => {
-        this.teamStore.loadTeams();
+        this.team.update((t) => (t ? { ...t, links } : t));
         this.linksEditing.set(false);
       },
       error: () => this.alert.error('Failed to save links'),
@@ -232,5 +235,9 @@ export class TeamDetailComponent implements OnInit {
         data: { team: t },
       })
       .subscribe();
+  }
+
+  protected openMentionProfile(userId: string): void {
+    void this.router.navigate(['/users', userId]);
   }
 }

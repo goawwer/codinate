@@ -15,7 +15,7 @@ func Register() {
 	ui.RegisterDelete("/users/delete/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), delete)
 	ui.RegisterDelete("/users/delete", enum.AtLeastAdmin, reflect.TypeOf(service{}), deleteMany)
 	ui.RegisterGet("/users/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUser)
-	ui.RegisterGet("/users/all", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUsers)
+	ui.RegisterGet("/users/all", enum.AnyUser, reflect.TypeOf(service{}), getUsers)
 
 	ui.RegisterGet("/users/hours", enum.AtLeastAdmin, reflect.TypeOf(service{}), usersHours)
 

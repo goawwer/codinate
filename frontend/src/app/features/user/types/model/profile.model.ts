@@ -36,6 +36,11 @@ export interface UpdateProfileInput {
 export interface UserProfileStats {
   workDynamics: DailyWorkStat[];
   projectFocus: ProjectFocusStat[];
+  assignedTasksCount: number;
+  authoredTasksCount: number;
+  participatedTasksCount: number;
+  commentsCount: number;
+  postsCount: number;
 }
 
 export interface DailyWorkStat {

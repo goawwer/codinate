@@ -132,9 +132,13 @@
             @for (col of columns; track col.key) {
               <td tuiTd>
                 @if (col.isHours) {
-                  <span class="hours-value">{{ getUserHours(user.id) }}</span>
+                  <span class="hours-value">{{ hoursMap().get(user.id) ?? 0 | formatMinutes }}</span>
                 } @else if (col.isDate) {
-                  {{ getUserValue(user, col.key)?.toString() | appDate }}
+                  <tui-line-clamp
+                    [content]="getUserValue(user, col.key)?.toString() | appDate"
+                    [lineHeight]="20"
+                    [linesLimit]="1"
+                  />
                 } @else if (col.isRole) {
                   <tui-badge
                     size="m"
@@ -145,7 +149,10 @@
                 } @else if (col.isStatus) {
                   <app-user-status [disabled]="!!getUserValue(user, col.key)" />
                 } @else {
-                {{ getUserValue(user, col.key) }}
+                  <tui-line-clamp
+                    [content]="getUserValue(user, col.key)?.toString() ?? ''"
+                    [linesLimit]="1"
+                  />
                 }
               </td>
             }

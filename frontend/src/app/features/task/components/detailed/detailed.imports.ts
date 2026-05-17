@@ -13,6 +13,7 @@ import {
   TuiScrollbar,
   TuiTextfield,
   TuiTitle,
+  TuiHint,
 } from '@taiga-ui/core';
 import {
   TuiBadge,
@@ -23,6 +24,7 @@ import {
   TuiSelect,
   TuiBadgedContent,
   TuiTabs,
+  TuiLineClamp,
 } from '@taiga-ui/kit';
 import { TuiBlockStatus, TuiCard, TuiHeader } from '@taiga-ui/layout';
 import { TuiEditor } from '@taiga-ui/editor';
@@ -71,4 +73,6 @@ export const DETAILED_IMPORTS = [
   TaskCommentComposerComponent,
   SafeHtmlPipe,
   MentionLinksDirective,
+  TuiLineClamp,
+  TuiHint,
 ];

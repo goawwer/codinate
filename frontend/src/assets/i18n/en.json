@@ -79,6 +79,7 @@
       "details": "Details"
     },
     "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "daysShort": ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
     "timePeriods": {
       "today": "Today",
       "yesterday": "Yesterday",
@@ -93,6 +94,35 @@
         "days": "Day {{ days }}",
         "hint": "Current monthly ranking season. The leaderboard resets at the beginning of each month.",
         "progress": "Day {{ current }} · {{ left }} days left"
+      },
+      "deadlinePressure": {
+        "title": "Deadline Pressure",
+        "subtitle": "Tasks due within the next 2 weeks",
+        "overdue": "{{ count }} overdue",
+        "allClear": "All clear",
+        "allClearDetails": "No upcoming or overdue tasks",
+        "loading": "Loading...",
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "yesterday": "Yesterday",
+        "daysOverdue": "{{ count }}d overdue",
+        "inDays": "In {{ count }}d"
+      },
+      "taskHealth": {
+        "title": "Task Health",
+        "subtitle": "Distribution of active tasks by current status",
+        "totalLabel": "Total open",
+        "empty": "No open tasks",
+        "emptyDetails": "All tasks are closed or none exist yet"
+      },
+      "momentumScore": {
+        "title": "Team Activity",
+        "subtitle": "Team activity trends compared to last week",
+        "changeHint": "Change in total actions compared to the previous week",
+        "loading": "Loading...",
+        "summary": "{{ count }} actions this week",
+        "lastWeek": "Last week",
+        "thisWeek": "This week"
       }
     },
     "time": {
@@ -234,6 +264,15 @@
           "focus": {
             "title": "Focus",
             "subtitle": "Time distribution between projects"
+          },
+          "activity": {
+            "title": "Activity",
+            "subtitle": "Your personal metrics",
+            "assigned": "Assigned",
+            "authored": "Authored",
+            "participated": "Participated",
+            "comments": "Comments",
+            "posts": "Posts"
           }
         },
         "tooltips": {
@@ -311,6 +350,13 @@
           "dueAt": "Due date",
           "closed": "Task"
         }
+      },
+      "actions": {
+        "close": "Close task",
+        "reopen": "Reopen task",
+        "saveChanges": "Save changes",
+        "deleteTask": "Delete task",
+        "change": "Change task conditions"
       }
     },
     "release": {

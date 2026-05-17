@@ -9,10 +9,12 @@ import { ProfileDialogComponent } from '../profile-dialog/profile-dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { PROFILEIMPORTS } from './profile.imports';
 import { API_CONFIG } from '../../../../core/declarations/tokens/api-config.token';
+import { FormatMinutesPipe } from '../../../../common/pipes/format-minutes.pipe';
 
 @Component({
   selector: 'app-profile',
   imports: [PROFILEIMPORTS],
+  providers: [FormatMinutesPipe],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
@@ -25,6 +27,9 @@ export class UserProfileComponent {
   private readonly translate = inject(TranslateService);
   private readonly apiService = inject(UserApiService);
   private readonly apiConfig = inject(API_CONFIG);
+  private readonly formatMinutes = inject(FormatMinutesPipe);
+
+  protected readonly metricsCarouselIndex = signal(0);
 
   protected readonly isOwnProfile = computed(
     () => this.profile()?.id === this.userStore.user()?.id,
@@ -47,7 +52,7 @@ export class UserProfileComponent {
 
   protected readonly recentLabel = computed(() => {
     const minutes = this.profile()?.recentMinutes ?? 0;
-    return minutes > 0 ? this.spentLabel(minutes) : '—';
+    return minutes > 0 ? this.formatMinutes.transform(minutes) : '—';
   });
 
   protected readonly backgroundSrc = computed(() => {
@@ -57,8 +62,8 @@ export class UserProfileComponent {
       : null;
   });
 
-  protected readonly totalSpentMinutes = computed(
-    () => this.profile()?.projects.reduce((total, p) => total + p.spentMinutes, 0) ?? 0,
+  protected readonly totalSpentMinutes = computed(() =>
+    (this.profile()?.projects ?? []).reduce((total, p) => total + p.spentMinutes, 0),
   );
 
   protected readonly projects = computed(() =>
@@ -101,6 +106,7 @@ export class UserProfileComponent {
   });
 
   protected readonly focusActiveIndex = signal(NaN);
+  protected readonly activityActiveIndex = signal(NaN);
 
   private readonly focusStats = computed(() => {
     const sorted = [...(this.stats()?.projectFocus ?? [])].sort(
@@ -136,7 +142,47 @@ export class UserProfileComponent {
     const i = this.focusActiveIndex();
     const values = this.focusValue();
     const minutes = isNaN(i) ? values.reduce((a, b) => a + b, 0) : (values[i] ?? 0);
-    return this.spentLabel(minutes);
+    return this.formatMinutes.transform(minutes);
+  });
+
+  protected readonly activityValue = computed((): ReadonlyArray<number> => {
+    const s = this.stats();
+    if (!s) return [];
+    return [
+      s.assignedTasksCount,
+      s.authoredTasksCount,
+      s.participatedTasksCount,
+      s.commentsCount,
+      s.postsCount,
+    ];
+  });
+
+  private readonly activityLabelKeys = [
+    'models.user.profile.results.activity.assigned',
+    'models.user.profile.results.activity.authored',
+    'models.user.profile.results.activity.participated',
+    'models.user.profile.results.activity.comments',
+    'models.user.profile.results.activity.posts',
+  ] as const;
+
+  protected readonly activityActiveLabel = computed((): string => {
+    const i = this.activityActiveIndex();
+    if (isNaN(i)) return this.translate.instant('models.user.profile.results.activity.title');
+    return this.translate.instant(this.activityLabelKeys[i] ?? '');
+  });
+
+  protected readonly activityActiveDisplayValue = computed((): string => {
+    const i = this.activityActiveIndex();
+    const values = this.activityValue();
+    if (isNaN(i)) {
+      const s = this.stats();
+      if (!s) return '0';
+      return String(
+        s.assignedTasksCount + s.authoredTasksCount + s.participatedTasksCount +
+        s.commentsCount + s.postsCount,
+      );
+    }
+    return String(values[i] ?? 0);
   });
 
   constructor() {
@@ -178,17 +224,6 @@ export class UserProfileComponent {
       });
   }
 
-  protected spentLabel(minutes: number): string {
-    const h = this.translate.instant('generic.time.hoursShort');
-    const m = this.translate.instant('generic.time.minutesShort');
-    if (minutes <= 0) return `0${h}`;
-    const hours = Math.floor(minutes / 60);
-    const rest = minutes % 60;
-    if (!hours) return `${rest}${m}`;
-    if (!rest) return `${hours}${h}`;
-    return `${hours}${h} ${rest}${m}`;
-  }
-
   protected workDynamicsFullLabel(index: number): string {
     return this.workDynamicsLabelsX()[index] ?? '';
   }
@@ -196,6 +231,6 @@ export class UserProfileComponent {
   protected workDynamicsTotalLabel(): string {
     const total = this.workDynamicsValue()[0]?.reduce((sum, value) => sum + value, 0) ?? 0;
 
-    return this.spentLabel(total);
+    return this.formatMinutes.transform(total);
   }
 }

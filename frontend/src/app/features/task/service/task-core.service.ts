@@ -4,10 +4,13 @@ import { Observable } from 'rxjs';
 import {
   CreateTaskInput,
   DeadlinePressure,
+  StatusDistributionItem,
+  StatusTasksPage,
   Task,
   TaskDetailed,
   TaskSuggestion,
   UpdateTaskInput,
+  VelocityData,
 } from '../types/task.model';
 
 @Injectable({ providedIn: 'root' })
@@ -63,5 +66,19 @@ export class TaskCoreService {
 
   getDeadlinePressure(): Observable<DeadlinePressure> {
     return this.http.get<DeadlinePressure>(`${this.baseURL}/metrics/deadline`);
+  }
+
+  getStatusDistribution(): Observable<StatusDistributionItem[]> {
+    return this.http.get<StatusDistributionItem[]>(`${this.baseURL}/metrics/status-distribution`);
+  }
+
+  getStatusTasks(statusId: number, page: number): Observable<StatusTasksPage> {
+    return this.http.get<StatusTasksPage>(`${this.baseURL}/metrics/status-tasks`, {
+      params: new HttpParams().set('statusId', statusId).set('pageNumber', page),
+    });
+  }
+
+  getVelocity(): Observable<VelocityData> {
+    return this.http.get<VelocityData>(`${this.baseURL}/metrics/velocity`);
   }
 }

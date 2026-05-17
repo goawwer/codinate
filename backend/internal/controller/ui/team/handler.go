@@ -47,12 +47,12 @@ func allTeams(s ui.UIService) (any, error) {
 //	@Failure	500	{object}	string	"Internal Server Error"
 //	@Router		/api/teams/{id}/members [get]
 func getTeam(s ui.UIService) (any, error) {
-	id, err := s.GetPathParameterAsString("id")
+	id, err := s.GetPathParamAsInt("id")
 	if err != nil {
-		return nil, err
+		return nil, ui.NewHttpCodeError(nil, http.StatusBadRequest, "invalid team id parameter")
 	}
 
-	return s.GetService().(*service).getTeam(s.GetRequest().Context(), uuid.MustParse(id))
+	return s.GetService().(*service).getTeam(s.GetRequest().Context(), id)
 }
 
 // createTeam

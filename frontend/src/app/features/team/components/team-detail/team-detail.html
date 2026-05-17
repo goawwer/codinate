@@ -162,7 +162,7 @@
                   [entityId]="numericId()?.toString() ?? null"
                 />
               } @else if (t.description) {
-                <div class="prose" [innerHTML]="t.description | safeHtml" appMentionLinks></div>
+                <div class="prose" [innerHTML]="t.description | safeHtml" appMentionLinks (appMentionClick)="openMentionProfile($event)"></div>
               } @else {
                 <p class="empty-text">{{ 'generic.statuses.empty' | translate }}</p>
               }
@@ -185,10 +185,11 @@
             @for (member of t.members; track member.id) {
               <a class="participant-row" [routerLink]="['/users', member.id]">
                 <div class="participant-avatar">
-                  <app-picture [name]="member.name" [surname]="member.surname" size="s" entityType="users" pictureName="" />
+                  <app-picture [name]="member.name" [surname]="member.surname" size="s" entityType="users" [pictureName]="member.picture ?? ''" />
                 </div>
                 <div class="participant-info">
                   <span class="participant-name">{{ member.name }} {{ member.surname }}</span>
+                  <span class="participant-role">{{ member.role | employeeRole }}</span>
                 </div>
               </a>
             }

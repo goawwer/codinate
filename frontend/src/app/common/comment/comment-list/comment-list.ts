@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { switchMap } from 'rxjs';
+import { Router } from '@angular/router';
 import { TuiButton, TuiIcon, TuiLoader, tuiLoaderOptionsProvider } from '@taiga-ui/core';
 import { CommentItem } from '../comment-item/comment-item';
 import { CommentService } from '../comment.service';
@@ -51,12 +52,14 @@ export class CommentList implements OnInit {
   @Input({ required: true }) entityId!: string;
   @Input() hideComposer = false;
   @Output() filesChanged = new EventEmitter<void>();
+  @Output() mentionClicked = new EventEmitter<string>();
 
   @ViewChild('commentTop') private commentTop!: ElementRef<HTMLElement>;
   @ViewChild('commentBottom') private commentBottom!: ElementRef<HTMLElement>;
 
   private readonly commentService = inject(CommentService);
   private readonly pendingUploads = inject(PendingEditorUploads);
+  private readonly router = inject(Router);
   private readonly alert = inject(AlertService);
   private readonly translate = inject(TranslateService);
   protected readonly userStore = inject(UserStore);
@@ -167,6 +170,11 @@ export class CommentList implements OnInit {
           if (event.newAttachedFiles?.length) this.filesChanged.emit();
         },
       });
+  }
+
+  protected onMentionClicked(userId: string): void {
+    this.mentionClicked.emit(userId);
+    void this.router.navigate(['/users', userId]);
   }
 
   protected onDeleted(id: string): void {

@@ -9,7 +9,13 @@ import {
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TuiBlockStatus } from '@taiga-ui/layout';
-import { TuiButton, TuiIcon, tuiLoaderOptionsProvider, TuiLoader, TuiTextfield } from '@taiga-ui/core';
+import {
+  TuiButton,
+  TuiIcon,
+  tuiLoaderOptionsProvider,
+  TuiLoader,
+  TuiTextfield,
+} from '@taiga-ui/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AppSize } from '../../../../core/declarations/tokens/size.token';
 import { TeamStore } from '../../../team/store/team.store';
@@ -21,6 +27,7 @@ import {
   TeamDialogComponent,
   TeamDialogData,
 } from '../../../team/components/dialog/team-dialog.component';
+import { StripHtmlPipe } from '../../../../common/pipes/strip-html.pipe';
 
 @Component({
   selector: 'app-teams',
@@ -35,6 +42,7 @@ import {
     TuiBlockStatus,
     TranslatePipe,
     TuiLoader,
+    StripHtmlPipe,
   ],
   templateUrl: './teams.html',
   styleUrl: './teams.scss',
@@ -63,9 +71,7 @@ export class AllTeamsComponent implements OnInit {
     const teams = this.store.teams();
     if (!q) return teams;
     return teams.filter(
-      (t) =>
-        t.name.toLowerCase().includes(q) ||
-        (t.description ?? '').toLowerCase().includes(q),
+      (t) => t.name.toLowerCase().includes(q) || (t.description ?? '').toLowerCase().includes(q),
     );
   });
 

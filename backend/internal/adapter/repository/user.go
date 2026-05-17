@@ -231,6 +231,51 @@ func (r *userRepoImpl) GetUserProfileStats(ctx context.Context, userId uuid.UUID
 		return res, err
 	}
 
+	if err := r.QueryRowContext(ctx, `
+		SELECT COUNT(*)::int
+		FROM tasks
+		WHERE assignee_id = $1
+		  AND (closed_at IS NULL OR closed_at < '0002-01-01'::timestamp)
+	`, userId).Scan(&res.AssignedTasksCount); err != nil {
+		return res, err
+	}
+
+	if err := r.QueryRowContext(ctx, `
+		SELECT COUNT(*)::int
+		FROM tasks
+		WHERE author_id = $1
+	`, userId).Scan(&res.AuthoredTasksCount); err != nil {
+		return res, err
+	}
+
+	if err := r.QueryRowContext(ctx, `
+		SELECT COUNT(*)::int
+		FROM task_participants
+		WHERE user_id = $1
+	`, userId).Scan(&res.ParticipatedTasksCount); err != nil {
+		return res, err
+	}
+
+	if err := r.QueryRowContext(ctx, `
+		SELECT COUNT(*)::int
+		FROM comments
+		WHERE user_id = $1 AND deleted_at IS NULL
+		  AND created_at >= $2::date
+		  AND created_at < ($3::date + interval '1 day')
+	`, userId, d.From, d.To).Scan(&res.CommentsCount); err != nil {
+		return res, err
+	}
+
+	if err := r.QueryRowContext(ctx, `
+		SELECT COUNT(*)::int
+		FROM posts
+		WHERE author_id = $1 AND deleted_at IS NULL
+		  AND created_at >= $2::date
+		  AND created_at < ($3::date + interval '1 day')
+	`, userId, d.From, d.To).Scan(&res.PostsCount); err != nil {
+		return res, err
+	}
+
 	return res, nil
 }
 

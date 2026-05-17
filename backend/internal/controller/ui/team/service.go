@@ -10,8 +10,8 @@ import (
 
 type service struct{}
 
-func (s *service) getTeam(ctx context.Context, id uuid.UUID) (team.Row, error) {
-	return repository.GetTeamRepo().GetTeamBy(ctx, id)
+func (s *service) getTeam(ctx context.Context, id int) (team.Row, error) {
+	return repository.GetTeamRepo().GetTeamById(ctx, id)
 }
 
 func (s *service) getAllTeams(ctx context.Context) ([]team.Row, error) {

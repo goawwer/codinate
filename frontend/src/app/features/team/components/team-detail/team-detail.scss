@@ -241,6 +241,14 @@
   text-overflow: ellipsis;
 }
 
+.participant-role {
+  font-size: 0.7rem;
+  color: var(--tui-text-tertiary);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+}
+
 .empty-text {
   padding: 0.25rem 0;
   font-size: 0.8125rem;
@@ -286,7 +294,6 @@
   margin: 0;
   line-height: 1.5;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

@@ -85,7 +85,7 @@
             tuiSurface="floating"
             class="profile-stat profile-stat--main"
           >
-            <span class="profile-stat__value">{{ spentLabel(totalSpentMinutes()) }}</span>
+            <span class="profile-stat__value">{{ totalSpentMinutes() | formatMinutes }}</span>
             <span class="profile-stat__label">{{ 'models.user.profile.stats.allSpent' | translate }}</span>
           </div>
 
@@ -146,7 +146,7 @@
                           tuiHintDirection="right"
                           [tuiHint]="'models.user.profile.projects.totalSpent' | translate"
                         >
-                          {{ spentLabel(project.spentMinutes) }}
+                          {{ project.spentMinutes | formatMinutes }}
                         </strong>
 
                         @if (project.recentMinutes > 0) {
@@ -155,7 +155,7 @@
                             tuiHintDirection="right"
                             [tuiHint]="'models.user.profile.projects.recentSpent' | translate"
                           >
-                            {{ spentLabel(project.recentMinutes) }}
+                            {{ project.recentMinutes | formatMinutes }}
                           </span>
                         }
                       </div>
@@ -239,30 +239,63 @@
         <ng-template #workDynamicsHint let-index>
           <div class="work-dynamics-hint">
             <strong>{{ workDynamicsFullLabel(index) }}</strong>
-            <span>{{ spentLabel(workDynamicsValue()[0]?.[index] ?? 0) }}</span>
+            <span>{{ workDynamicsValue()[0]?.[index] ?? 0 | formatMinutes }}</span>
           </div>
         </ng-template>
       </article>
 
-      <article class="results-card">
+      <article class="results-card results-card--chart">
         <h3 class="results-card__title">
-          {{ 'models.user.profile.results.focus.title' | translate }}
+          {{
+            metricsCarouselIndex() === 0
+              ? ('models.user.profile.results.focus.title' | translate)
+              : ('models.user.profile.results.activity.title' | translate)
+          }}
         </h3>
         <p class="results-card__subtitle">
-          {{ 'models.user.profile.results.focus.subtitle' | translate }}
+          {{
+            metricsCarouselIndex() === 0
+              ? ('models.user.profile.results.focus.subtitle' | translate)
+              : ('models.user.profile.results.activity.subtitle' | translate)
+          }}
         </p>
 
-        @if (focusValue().length) {
-          <tui-ring-chart
-            class="focus-ring"
-            [value]="focusValue()"
-            [activeItemIndex]="focusActiveIndex()"
-            (activeItemIndexChange)="focusActiveIndex.set($event)"
-          >
-            <b>{{ focusActiveTime() }}</b>
-            <div>{{ focusActiveLabel() }}</div>
-          </tui-ring-chart>
-        }
+        <tui-carousel
+          class="metrics-carousel"
+          [duration]="6000"
+          [(index)]="metricsCarouselIndex"
+        >
+          <div *tuiItem class="metrics-slide">
+            <tui-ring-chart
+              class="focus-ring"
+              [value]="focusValue()"
+              [activeItemIndex]="focusActiveIndex()"
+              (activeItemIndexChange)="focusActiveIndex.set($event)"
+            >
+              <b>{{ focusActiveTime() }}</b>
+              <div>{{ focusActiveLabel() }}</div>
+            </tui-ring-chart>
+          </div>
+
+          <div *tuiItem class="metrics-slide">
+            <tui-ring-chart
+              class="focus-ring"
+              [value]="activityValue()"
+              [activeItemIndex]="activityActiveIndex()"
+              (activeItemIndexChange)="activityActiveIndex.set($event)"
+            >
+              <b>{{ activityActiveDisplayValue() }}</b>
+              <div>{{ activityActiveLabel() }}</div>
+            </tui-ring-chart>
+          </div>
+        </tui-carousel>
+
+        <tui-pagination
+          size="s"
+          class="metrics-pagination"
+          [length]="2"
+          [(index)]="metricsCarouselIndex"
+        />
       </article>
     </section>
     }

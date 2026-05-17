@@ -34,12 +34,20 @@
   font-weight: 600;
   color: var(--tui-text-primary);
   line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
 }
 
 .navbar__dropdown-sub {
   font-size: 0.75rem;
   color: var(--tui-text-tertiary);
   margin-top: 0.125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
 }
 
 .navbar__dropdown-logout {

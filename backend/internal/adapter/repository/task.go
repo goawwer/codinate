@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"fmt"
+	"math"
+	"time"
 
 	"github.com/goawwer/codinate/internal/adapter/database"
 	"github.com/goawwer/codinate/internal/adapter/dto/shared"
@@ -34,6 +36,9 @@ type TaskRepo interface {
 	DeleteTaskBy(ctx context.Context, id uuid.UUID) error
 	RecordHistoryBatch(ctx context.Context, entries []model.TaskHistory) error
 	GetDeadlinePressure(ctx context.Context) (task.DeadlinePressure, error)
+	GetStatusDistribution(ctx context.Context) ([]task.StatusDistributionItem, error)
+	GetTasksByStatus(ctx context.Context, statusId, page int) (task.StatusTasksPage, error)
+	GetVelocity(ctx context.Context) (task.VelocityData, error)
 
 	// Priorities
 	GetTaskPriorities(ctx context.Context) ([]shared.IdWithName, error)
@@ -543,34 +548,180 @@ func (r *taskRepoImpl) DeleteCategorty(ctx context.Context, id int) error {
 }
 
 func (r *taskRepoImpl) GetDeadlinePressure(ctx context.Context) (task.DeadlinePressure, error) {
-	var overdue int
+	overdue := make([]task.DeadlineTask, 0)
 
-	if err := r.QueryRowContext(ctx, `
-		SELECT COUNT(*)
+	if err := r.SelectContext(ctx, &overdue, `
+		SELECT id, title, due_at
 		FROM tasks
 		WHERE due_at IS NOT NULL
 			AND due_at::date < CURRENT_DATE
 			AND (closed_at IS NULL OR closed_at < '0002-01-01'::timestamp)
-	`).Scan(&overdue); err != nil {
+		ORDER BY due_at DESC
+	`); err != nil {
 		return task.DeadlinePressure{}, err
 	}
 
-	upcoming := make([]task.DeadlineDayCount, 0)
+	upcoming := make([]task.DeadlineTask, 0)
 
 	if err := r.SelectContext(ctx, &upcoming, `
-		SELECT
-			due_at::date::text AS date,
-			COUNT(*)::int AS count
+		SELECT id, title, due_at
 		FROM tasks
 		WHERE due_at IS NOT NULL
 			AND due_at::date >= CURRENT_DATE
-			AND due_at::date < CURRENT_DATE + INTERVAL '7 days'
+			AND due_at::date < CURRENT_DATE + INTERVAL '14 days'
 			AND (closed_at IS NULL OR closed_at < '0002-01-01'::timestamp)
-		GROUP BY due_at::date
-		ORDER BY due_at::date
+		ORDER BY due_at ASC
 	`); err != nil {
 		return task.DeadlinePressure{}, err
 	}
 
 	return task.DeadlinePressure{Overdue: overdue, Upcoming: upcoming}, nil
+}
+
+func (r *taskRepoImpl) GetStatusDistribution(ctx context.Context) ([]task.StatusDistributionItem, error) {
+	res := make([]task.StatusDistributionItem, 0)
+
+	err := r.SelectContext(ctx, &res, `
+		SELECT ts.name AS status, COUNT(t.id) AS count
+		FROM tasks t
+		JOIN task_statuses ts ON t.status_id = ts.id
+		WHERE (t.closed_at IS NULL OR t.closed_at < '0002-01-01'::timestamp)
+		GROUP BY ts.name
+		ORDER BY count DESC
+	`)
+
+	return res, err
+}
+
+func (r *taskRepoImpl) GetTasksByStatus(ctx context.Context, statusId, page int) (task.StatusTasksPage, error) {
+	const pageSize = 5
+	offset := page * pageSize
+
+	var total int
+	if err := r.QueryRowContext(ctx, `
+		SELECT COUNT(*)
+		FROM tasks
+		WHERE status_id = $1
+			AND (closed_at IS NULL OR closed_at < '0002-01-01'::timestamp)
+	`, statusId).Scan(&total); err != nil {
+		return task.StatusTasksPage{}, err
+	}
+
+	items := make([]task.Row, 0)
+	if err := r.SelectContext(ctx, &items, `
+		SELECT
+			t.id,
+			u.username  AS assignee_username,
+			p.name      AS project_name,
+			p.picture_name AS project_picture,
+			pr.title    AS release,
+			tc.name     AS category,
+			tp.name     AS priority,
+			ts.name     AS status,
+			t.identifier,
+			t.title,
+			t.description,
+			t.created_at,
+			t.due_at,
+			t.closed_at
+		FROM tasks t
+		LEFT JOIN users u              ON t.assignee_id  = u.id
+		LEFT JOIN projects p           ON t.project_id   = p.id
+		LEFT JOIN project_releases pr  ON t.release_id   = pr.id
+		LEFT JOIN task_categories tc   ON t.category_id  = tc.id
+		LEFT JOIN task_priorities tp   ON t.priority_id  = tp.id
+		LEFT JOIN task_statuses ts     ON t.status_id    = ts.id
+		WHERE t.status_id = $1
+			AND (t.closed_at IS NULL OR t.closed_at < '0002-01-01'::timestamp)
+		ORDER BY t.updated_at DESC
+		LIMIT $2 OFFSET $3
+	`, statusId, pageSize, offset); err != nil {
+		return task.StatusTasksPage{}, err
+	}
+
+	return task.StatusTasksPage{Items: items, Total: total}, nil
+}
+
+func (r *taskRepoImpl) GetVelocity(ctx context.Context) (task.VelocityData, error) {
+	type rawRow struct {
+		Day   time.Time `db:"day"`
+		Count int       `db:"count"`
+	}
+
+	rows := make([]rawRow, 0)
+	if err := r.SelectContext(ctx, &rows, `
+		SELECT day, SUM(cnt) AS count FROM (
+			SELECT created_at::date AS day, COUNT(*) AS cnt
+			FROM tasks
+			WHERE created_at::date >= CURRENT_DATE - INTERVAL '13 days'
+			GROUP BY day
+			UNION ALL
+			SELECT closed_at::date AS day, COUNT(*) AS cnt
+			FROM tasks
+			WHERE closed_at IS NOT NULL
+				AND closed_at >= '0002-01-01'::timestamp
+				AND closed_at::date >= CURRENT_DATE - INTERVAL '13 days'
+			GROUP BY day
+			UNION ALL
+			SELECT created_at::date AS day, COUNT(*) AS cnt
+			FROM posts
+			WHERE deleted_at IS NULL
+				AND created_at::date >= CURRENT_DATE - INTERVAL '13 days'
+			GROUP BY day
+			UNION ALL
+			SELECT created_at::date AS day, COUNT(*) AS cnt
+			FROM comments
+			WHERE deleted_at IS NULL
+				AND created_at::date >= CURRENT_DATE - INTERVAL '13 days'
+			GROUP BY day
+		) sub
+		GROUP BY day
+		ORDER BY day ASC
+	`); err != nil {
+		return task.VelocityData{}, err
+	}
+
+	byDay := make(map[string]int, len(rows))
+	for _, row := range rows {
+		byDay[row.Day.Format("2006-01-02")] = row.Count
+	}
+
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+
+	lastWeek := make([]task.VelocityDay, 7)
+	thisWeek := make([]task.VelocityDay, 7)
+
+	for i := 0; i < 7; i++ {
+		lwDay := today.AddDate(0, 0, -(13 - i))
+		lwKey := lwDay.Format("2006-01-02")
+		lastWeek[i] = task.VelocityDay{Day: lwKey, Count: byDay[lwKey]}
+
+		twDay := today.AddDate(0, 0, -(6 - i))
+		twKey := twDay.Format("2006-01-02")
+		thisWeek[i] = task.VelocityDay{Day: twKey, Count: byDay[twKey]}
+	}
+
+	var lastWeekTotal, thisWeekTotal int
+	for _, d := range lastWeek {
+		lastWeekTotal += d.Count
+	}
+	for _, d := range thisWeek {
+		thisWeekTotal += d.Count
+	}
+
+	var changePercent int
+	if lastWeekTotal > 0 {
+		changePercent = int(math.Round(float64(thisWeekTotal-lastWeekTotal) / float64(lastWeekTotal) * 100))
+	} else if thisWeekTotal > 0 {
+		changePercent = 100
+	}
+
+	return task.VelocityData{
+		ThisWeek:      thisWeek,
+		LastWeek:      lastWeek,
+		ThisWeekTotal: thisWeekTotal,
+		LastWeekTotal: lastWeekTotal,
+		ChangePercent: changePercent,
+	}, nil
 }

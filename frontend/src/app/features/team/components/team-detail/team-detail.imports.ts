@@ -21,6 +21,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SafeHtmlPipe } from '../../../../common/pipes/safe-html.pipe';
 import { StripHtmlPipe } from '../../../../common/pipes/strip-html.pipe';
 import { MentionLinksDirective } from '../../../../common/directives/mention-link.directive';
+import { EmployeeRolePipe } from '../../../../common/pipes/employee-role.pipe';
 
 export const TEAMDETAILIMPORTS = [
   ReactiveFormsModule,
@@ -44,4 +45,5 @@ export const TEAMDETAILIMPORTS = [
   SafeHtmlPipe,
   StripHtmlPipe,
   MentionLinksDirective,
+  EmployeeRolePipe,
 ] as const;

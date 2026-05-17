@@ -21,6 +21,7 @@ import { Team } from '../../../team/types/model/team.model';
 import { UserStore } from '../../../user/store/user.store';
 import { AppDialogService } from '../../../../common/dialogs/dialog.service';
 import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 
 export interface PostDialogData {
   post: Post;
@@ -42,6 +43,7 @@ export class PostDialogComponent implements OnInit {
   private readonly userStore = inject(UserStore);
   private readonly dialogs = inject(AppDialogService);
   private readonly translate = inject(TranslateService);
+  private readonly router = inject(Router);
 
   protected readonly context = injectContext<TuiDialogContext<boolean, PostDialogData>>();
 
@@ -191,5 +193,14 @@ export class PostDialogComponent implements OnInit {
           next: () => this.context.completeWith(true),
         });
       });
+  }
+
+  protected openMentionProfile(userId: string): void {
+    this.context.completeWith(false);
+    void this.router.navigate(['/users', userId]);
+  }
+
+  protected closeDialogOnMention(): void {
+    this.context.completeWith(false);
   }
 }

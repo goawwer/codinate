@@ -44,8 +44,13 @@ type UpdateProfileInput struct {
 }
 
 type ProfileStats struct {
-	WorkDynamics []DailyWorkStat    `json:"workDynamics"`
-	ProjectFocus []ProjectFocusStat `json:"projectFocus"`
+	WorkDynamics            []DailyWorkStat    `json:"workDynamics"`
+	ProjectFocus            []ProjectFocusStat `json:"projectFocus"`
+	AssignedTasksCount      int                `json:"assignedTasksCount"`
+	AuthoredTasksCount      int                `json:"authoredTasksCount"`
+	ParticipatedTasksCount  int                `json:"participatedTasksCount"`
+	CommentsCount           int                `json:"commentsCount"`
+	PostsCount              int                `json:"postsCount"`
 }
 
 type DailyWorkStat struct {

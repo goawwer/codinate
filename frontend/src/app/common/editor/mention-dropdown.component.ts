@@ -2,19 +2,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   ElementRef,
   inject,
   input,
   OnInit,
   output,
-  signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TuiDataList, TuiOption } from '@taiga-ui/core';
 import { AppPicture } from '../picture/app-picture';
-import { UserApiService } from '../../features/user/service/user.service';
+import { UserStore } from '../../features/user/store/user.store';
 import { User } from '../../features/user/types/model/user.model';
 
 @Component({
@@ -47,7 +44,7 @@ import { User } from '../../features/user/types/model/user.model';
             </div>
 
             <div class="flex flex-col items-start">
-              <span>{{ user.name }} {{ user.surname }}</span>
+              <span class="mention-name">{{ user.name }} {{ user.surname }}</span>
               <span class="mention-hint">@{{ user.username }}</span>
             </div>
           </button>
@@ -64,11 +61,25 @@ import { User } from '../../features/user/types/model/user.model';
         color: var(--tui-text-tertiary);
       }
 
+      .mention-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 140px;
+      }
+
+      .mention-hint {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 140px;
+      }
+
       button {
       }
       button[tuiOption] {
         display: flex;
-        width: 12rem;
+        width: 14rem;
         align-items: center;
         gap: 0.5rem;
       }
@@ -79,7 +90,7 @@ import { User } from '../../features/user/types/model/user.model';
       tui-data-list[data-size='l'] {
         --tui-data-list-padding: 0rem;
         --tui-data-list-margin: 0rem;
-        min-width: 12rem;
+        min-width: 14rem;
       }
       tui-data-list [tuiOption] {
         display: flex;
@@ -95,27 +106,19 @@ export class MentionDropdownComponent implements OnInit {
 
   protected readonly container = viewChild<ElementRef<HTMLElement>>('container');
 
-  private readonly userService = inject(UserApiService);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly allUsers = signal<User[]>([]);
+  private readonly userStore = inject(UserStore);
 
   readonly filteredUsers = computed(() => {
     const query = this.mentionSuggestions().trim().toLowerCase();
-
-    if (!query) {
-      return this.allUsers();
-    }
-
-    return this.allUsers().filter((user) => {
-      return user.username.toLowerCase().includes(query);
-    });
+    const users = this.userStore.users();
+    if (!query) return users;
+    return users.filter((user) => user.username.toLowerCase().includes(query));
   });
 
   ngOnInit(): void {
-    this.userService
-      .getAll()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((users) => this.allUsers.set(users));
+    if (!this.userStore.users().length) {
+      this.userStore.loadUsers({});
+    }
   }
 
   protected down(event: Event, isDown: boolean): void {
