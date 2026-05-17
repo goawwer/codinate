@@ -10,7 +10,7 @@ export class AppInitService {
 
   init(): Promise<unknown> {
     return Promise.all([
-      firstValueFrom(this.translate.use('ru')),
+      firstValueFrom(this.translate.use(localStorage.getItem('lang') ?? 'ru')),
       this.authStore.restoreSession(),
     ]);
   }

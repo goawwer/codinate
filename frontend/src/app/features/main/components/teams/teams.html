@@ -1,19 +1,31 @@
 <div class="h-full flex flex-col items-center pt-12 px-4">
   <div class="w-full max-w-3xl flex flex-col gap-4">
 
-    <tui-textfield
-      class="w-full"
-      [tuiTextfieldSize]="$any(inputSize)"
-      iconStart="@tui.search"
-    >
-      <input
-        tuiTextfield
-        type="search"
-        [placeholder]="'generic.actions.search' | translate: { value: '' }"
-        [ngModel]="searchQuery()"
-        (ngModelChange)="searchQuery.set($event)"
-      />
-    </tui-textfield>
+    <div class="flex gap-2 items-center">
+      <tui-textfield
+        class="w-full"
+        [tuiTextfieldSize]="$any(inputSize)"
+        iconStart="@tui.search"
+      >
+        <input
+          tuiTextfield
+          type="search"
+          [placeholder]="'generic.actions.search' | translate: { value: '' }"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+      </tui-textfield>
+      @if (isAdmin()) {
+        <button
+          tuiButton
+          class="btn-primary"
+          iconStart="@tui.plus"
+          size="m"
+          type="button"
+          (click)="openCreateDialog()"
+        ></button>
+      }
+    </div>
 
     <div class="flex items-center justify-between px-1">
       <span class="text-sm text-(--tui-text-tertiary)">
@@ -48,7 +60,7 @@
 
           @if (team.description) {
             <div class="text-sm text-(--tui-text-secondary) truncate mt-0.5">
-              {{ team.description }}
+              {{ team.description | stripHtml }}
             </div>
           }
 

@@ -3,11 +3,11 @@ package util
 import (
 	"fmt"
 
-	"github.com/goawwer/codinate/internal/adapter/dto/task"
+	"github.com/goawwer/codinate/internal/adapter/dto/file"
 	"github.com/google/uuid"
 )
 
-func ParseAttachedFileIds(files []task.AttachedFileInput) ([]uuid.UUID, error) {
+func ParseAttachedFileIds(files []file.AttachedFileInput) ([]uuid.UUID, error) {
 	if len(files) == 0 {
 		return []uuid.UUID{}, nil
 	}
@@ -24,4 +24,18 @@ func ParseAttachedFileIds(files []task.AttachedFileInput) ([]uuid.UUID, error) {
 	}
 
 	return ids, nil
+}
+
+func ResolveStringsToUUIDs(s []string) []uuid.UUID {
+	if len(s) == 0 {
+		return []uuid.UUID{}
+	}
+
+	ids := make([]uuid.UUID, 0, len(s))
+
+	for _, strID := range s {
+		ids = append(ids, uuid.MustParse(strID))
+	}
+
+	return ids
 }

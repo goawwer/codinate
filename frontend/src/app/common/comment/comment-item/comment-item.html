@@ -1,0 +1,140 @@
+<div class="comment-item" [class.comment-item--owned]="canModify">
+
+  <div class="comment-header">
+    <a class="flex items-center gap-2" [routerLink]="['/users', comment.employeeId]">
+      <div class="w-11 h-11 rounded-full">
+        <app-picture
+          [name]="comment.employeeName"
+          [surname]="comment.employeeSurname"
+          [pictureName]="comment.employeePicture"
+          size="m"
+          entityType="users"
+        />
+      </div>
+      <div class="flex flex-col">
+        <span class="comment-name">{{ comment.employeeName }} {{ comment.employeeSurname }}</span>
+        <span class="comment-username">@{{ comment.employeeUsername }}</span>
+      </div>
+    </a>
+
+    <div class="flex">
+      @if (canModify && !isEditing()) {
+        <div class="comment-actions">
+          <button
+            tuiIconButton
+            appearance="ghost"
+            size="xs"
+            type="button"
+            iconStart="@tui.pencil"
+            (click)="startEdit()"
+          ></button>
+          <button
+            tuiIconButton
+            appearance="ghost"
+            size="xs"
+            type="button"
+            iconStart="@tui.trash"
+            (click)="confirmDelete(comment.id)"
+          ></button>
+        </div>
+      }
+      <div
+        class="comment-meta"
+        [class.comment-meta--toggle]="isEdited"
+        (click)="isEdited && toggleTime()"
+      >
+        @if (isEdited && !showCreated()) {
+          <span class="comment-time">{{ comment.updatedAt | appDate }}</span>
+          <span class="comment-edited">({{ 'generic.statuses.edited' | translate | lowercase}})</span>
+        } @else {
+          <span class="comment-time">{{ comment.createdAt | appDate }}</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="comment-content">
+
+
+    @if (isEditing()) {
+      <div class="comment-edit-body">
+        <app-editor
+          [formControl]="editControl"
+          entityType="comments"
+        />
+        @if (existingFiles().length || pendingFiles().length) {
+          <div class="comment-files">
+            @for (file of existingFiles(); track file.id) {
+              <div class="comment-file-chip comment-file-chip--removable">
+                <tui-icon icon="@tui.file" [style.font-size.rem]="0.75"/>
+                <span>{{ file.name }}</span>
+                <button
+                  tuiIconButton
+                  appearance="ghost"
+                  type="button"
+                  size="xs"
+                  iconStart="@tui.x"
+                  (click)="removeExistingFile(file.id)"
+                ></button>
+              </div>
+            }
+            @for (item of pendingFiles(); track item.blobUrl) {
+              <div class="comment-file-chip comment-file-chip--removable">
+                @if (isImage(item.type)) {
+                  <img [src]="item.blobUrl" class="pending-chip-thumb" [alt]="item.name" />
+                } @else {
+                  <tui-icon icon="@tui.file" [style.font-size.rem]="0.75"/>
+                }
+                <span>{{ item.name }}</span>
+                <button
+                  tuiIconButton
+                  appearance="ghost"
+                  type="button"
+                  size="xs"
+                  iconStart="@tui.x"
+                  (click)="removeFile(item.blobUrl)"
+                ></button>
+              </div>
+            }
+          </div>
+        }
+        <div class="comment-edit-actions">
+          <button tuiButton appearance="ghost" size="xs" type="button" (click)="cancelEdit()">
+            {{ 'generic.actions.cancel' | translate }}
+          </button>
+          <button tuiButton appearance="action" size="xs" type="button" (click)="submitEdit()">
+            {{ 'generic.actions.save' | translate }}
+          </button>
+        </div>
+      </div>
+    } @else {
+      @if (hasChanges) {
+        <div class="comment-changes">
+          @for (change of comment.changes; track change.id) {
+            <tui-badge [appearance]="changeBadgeAppearance(change)" size="s">
+              <tui-icon [icon]="fieldIcon(change.fieldName)" [style.font-size.rem]="0.75"/>
+              <span>{{ changeFieldLabel(change.fieldName) }}{{ changeLabel(change) }}</span>
+            </tui-badge>
+          }
+        </div>
+      }
+      @if (comment.body) {
+        <div class="comment-body" [innerHTML]="comment.body | safeHtml" appMentionLinks (appMentionClick)="openMentionProfile($event)"></div>
+      }
+      @if (comment.attachedFiles.length) {
+        <div class="comment-files">
+          @for (file of comment.attachedFiles; track file.id) {
+            <button
+              type="button"
+              class="comment-file-chip"
+              (click)="fileService.download(comment.entityType + 's', comment.entityId, file)"
+            >
+              <tui-icon icon="@tui.download" [style.font-size.rem]="1"/>
+              <span>{{ file.name }}</span>
+            </button>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>

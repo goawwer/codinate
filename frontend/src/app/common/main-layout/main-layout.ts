@@ -3,7 +3,6 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { NavbarComponent } from './navbar/navbar';
-import { TuiNavigation } from '@taiga-ui/layout';
 import { TuiTabs } from '@taiga-ui/kit';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TuiDropdown, TuiDataList } from '@taiga-ui/core';
@@ -13,16 +12,16 @@ import { UserStore } from '../../features/user/store/user.store';
 import { StoreStatus } from '../../core/declarations/types/store-statuses.type';
 import { TuiItem } from '@taiga-ui/cdk/directives/item';
 
-const ADMIN_ROUTES = ['/admin/users', '/admin/teams', '/admin/projects', '/admin/settings'];
+const ADMIN_ROUTES = ['/admin/users', '/admin/settings'];
 const MAIN_ROUTES = ['/main/feed', '/main/projects', '/main/teams'];
 const MINE_ROUTES = ['/mine/assigned', '/mine/created', '/mine/history'];
+const WORKLOG_SUBNAV = ['/worklog/general', '/worklog/tasks'];
 
 @Component({
   selector: 'app-main-layout',
   imports: [
     RouterOutlet,
     NavbarComponent,
-    TuiNavigation,
     TuiTabs,
     RouterLink,
     RouterLinkActive,
@@ -56,6 +55,8 @@ export class MainLayoutComponent implements OnInit {
     if (adminIdx !== -1) return adminIdx;
     const mineIdx = MINE_ROUTES.findIndex((r) => url.startsWith(r));
     if (mineIdx !== -1) return mineIdx;
+    const worklogIdx = WORKLOG_SUBNAV.findIndex((r) => url.startsWith(r));
+    if (worklogIdx !== -1) return worklogIdx;
     const mainIdx = MAIN_ROUTES.findIndex((r) => url.startsWith(r));
     if (mainIdx !== -1) return mainIdx;
     if (url.startsWith('/projects')) return 1;
@@ -79,6 +80,10 @@ export class MainLayoutComponent implements OnInit {
 
   protected isMineSection(): boolean {
     return this.currentUrl().startsWith('/mine');
+  }
+
+  protected isWorklogSection(): boolean {
+    return this.currentUrl().startsWith('/worklog');
   }
 
   protected isAdminSection(): boolean {

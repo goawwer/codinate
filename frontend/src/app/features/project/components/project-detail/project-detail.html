@@ -17,6 +17,7 @@
         </div>
         <div class="project-header-info">
           <h1 class="project-name">{{ p.projectName }}</h1>
+          <span>{{ p.projectAbout }}</span>
           <div class="project-meta">
             <span class="meta-item">
               <span class="text-(--tui-text-tertiary)">
@@ -43,20 +44,44 @@
         </div>
       </div>
 
-      @if (userStore.isAtLeastAdmin()) {
-      <button
-        appearance="action"
-        iconStart="@tui.settings"
-        size="m"
-        tuiIconButton
-        tuiHintAppearance="primary-tooltip"
-        tuiHintDirection="bottom"
-        [tuiHint]="'admin.dashboard.projects.hints.edit' | translate"
-        type="button"
-        (click)="openEditDialog(p)"
-      ></button>
-      }
+      <div class="flex items-center gap-2">
+        <button
+          iconStart="@tui.plus"
+          size="s"
+          tuiButton
+          class="btn-primary"
+          type="button"
+          [tuiDropdown]="createDropdown"
+          [tuiDropdownOpen]="createMenuOpen()"
+          (tuiDropdownOpenChange)="createMenuOpen.set($event)"
+        ></button>
 
+        <ng-template #createDropdown>
+          <tui-data-list size="m" class="p-1">
+            <button tuiOption type="button" (click)="openCreateTaskDialog()" iconStart="@tui.check-square">
+              {{ 'models.task.title.default' | translate }}
+            </button>
+
+            <button tuiOption type="button" (click)="openCreatePostDialog()" iconStart="@tui.file-text">
+              {{ 'feed.posts.title' | translate }}
+            </button>
+          </tui-data-list>
+        </ng-template>
+
+        @if (userStore.isAtLeastAdmin()) {
+        <button
+          appearance="action"
+          iconStart="@tui.settings"
+          size="m"
+          tuiIconButton
+          tuiHintAppearance="primary-tooltip"
+          tuiHintDirection="bottom"
+          [tuiHint]="'admin.dashboard.projects.hints.edit' | translate"
+          type="button"
+          (click)="openEditDialog(p)"
+        ></button>
+        }
+      </div>
     </div>
 
     <!-- Two-column layout -->
@@ -70,12 +95,49 @@
             [activeItemIndex]="activeTab()"
             (activeItemIndexChange)="activeTab.set($event)"
           >
+            <button tuiTab>{{ 'generic.titles.feed' | translate }}</button>
             <button tuiTab>{{ 'generic.titles.info' | translate }}</button>
             <button tuiTab>{{ 'generic.titles.progress' | translate }}</button>
           </tui-tabs>
 
-          <!-- Info tab -->
+          <!-- Feed tab -->
           @if (activeTab() === 0) {
+            @if (isPostsLoading()) {
+              <tui-loader />
+            } @else if (posts().length) {
+              <div class="post-list">
+                @for (post of posts(); track post.id) {
+                  <div class="post-card" (click)="openPostDialog(post)">
+                    <p class="post-card-title">{{ post.title }}</p>
+                    <p class="post-card-description">{{ post.body | stripHtml }}</p>
+                    <div class="post-card-footer">
+                      <span class="post-card-meta">
+                        <tui-icon icon="@tui.user" class="post-meta-icon" />
+                        {{ post.authorUsername }}
+                      </span>
+                      <span class="post-card-meta">
+                        <tui-icon icon="@tui.clock" class="post-meta-icon" />
+                        {{ post.createdAt | appDate: 'dd MMMM yyyy' }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <tui-block-status>
+                <img
+                  alt="{{ 'generic.statuses.empty' | translate }}"
+                  src="assets/images/not-found.svg"
+                  tuiSlot="top"
+                  class="image"
+                />
+                <h4>{{ 'generic.statuses.empty' | translate }}</h4>
+              </tui-block-status>
+            }
+          }
+
+          <!-- Info tab -->
+          @if (activeTab() === 1) {
             <div class="content-card">
               <div class="content-card-header">
                 <span class="content-card-title">
@@ -112,7 +174,7 @@
                   [entityId]="numericId()?.toString() ?? null"
                 />
               } @else if (p.projectDescription) {
-                <div class="prose" [innerHTML]="p.projectDescription"></div>
+                <div class="prose" [innerHTML]="p.projectDescription | safeHtml" appMentionLinks (appMentionClick)="openMentionProfile($event)"></div>
               } @else {
                 <p class="empty-text">{{ 'generic.statuses.empty | translate}}</p>
               }
@@ -120,7 +182,7 @@
           }
 
           <!-- Progress tab -->
-          @if (activeTab() === 1) {
+          @if (activeTab() === 2) {
             <div class="flex flex-col gap-3">
               @if (!releases().length) {
                 <tui-block-status>
@@ -140,9 +202,13 @@
                   <div class="release-card-header">
                     <span class="release-title">{{ release.title }}</span>
                     <tui-badge
-                    [style.background]="'var(--tui-chart-categorical-01)'"
+                    [style.background]="'var(--app-badge-color)'"
                     size="m">
                       {{ release.status | releaseStatus }}</tui-badge>
+                  </div>
+
+                  <div>
+                    {{ release.description }}
                   </div>
 
                   @if (validDate(release.startAt) || validDate(release.endAt)) {
@@ -210,15 +276,18 @@
           </div>
           <div class="widget-body">
             @for (member of p.members; track member.id) {
-              <div class="participant-row">
+              <a class="participant-row" [routerLink]="['/users', member.id]">
                 <div class="participant-avatar">
-                  <app-picture [name]="member.name" size="s" entityType="users" pictureName="" />
+                  <app-picture [name]="member.name" [surname]="member.surname" size="s" entityType="users" [pictureName]="member.picture ?? ''" />
                 </div>
                 <div class="participant-info">
-                  <span class="participant-name">{{ member.name }} {{ member.surname }}</span>
+                  <tui-line-clamp
+                    [content]="member.name + ' ' + member.surname"
+                    [lineHeight]="20"
+                  />
                   <span class="participant-role">{{ member.role | employeeRole }}</span>
                 </div>
-              </div>
+              </a>
             }
             @if (!p.members.length) {
               <span class="empty-text">{{ 'generic.statuses.empty' | translate }}</span>
@@ -226,7 +295,7 @@
           </div>
         </div>
 
-        <!-- Recent tasks widget -->
+        <!-- Recent widget -->
         <div class="widget">
           <div class="widget-header widget-header--clickable" (click)="recentExpanded.set(!recentExpanded())">
             <div class="flex items-center gap-2">
@@ -244,7 +313,16 @@
                 </a>
               }
               @if (!tasks().length) {
-                <span class="empty-text">No tasks yet</span>
+                <span class="empty-text">{{ 'generic.statuses.empty' | translate }}</span>
+              }
+              @for (post of recentPosts(); track post.id) {
+                <button type="button" class="post-link-row" (click)="openPostDialog(post)">
+                  <tui-icon icon="@tui.file-text" class="post-link-icon" />
+                  <span class="task-link-title">{{ post.title }}</span>
+                </button>
+              }
+              @if (!posts().length) {
+                <span class="empty-text">{{ 'generic.statuses.empty' | translate }}</span>
               }
             </div>
           }

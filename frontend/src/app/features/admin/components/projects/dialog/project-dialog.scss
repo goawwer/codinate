@@ -1,7 +1,0 @@
-:host {
-  --tui-radius-xs: var(--tui-radius-s);
-}
-
-::ng-deep [tuiLabel]:not([data-orientation='vertical']) {
-  font: var(--tui-font-text-s);
-}

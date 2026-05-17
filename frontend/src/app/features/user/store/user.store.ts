@@ -63,7 +63,7 @@ export const UserStore = signalStore(
               catchError((error) => {
                 console.error('Error loading current user: ', error);
                 patchState(store, { ...initialState, status: StoreStatus.LoadError });
-                alertService.error(translate.instant('cmd.user.errors.currentUserLoadFailed'));
+                alertService.error(translate.instant('cmd.users.errors.currentUserLoadFailed'));
                 return EMPTY;
               }),
             ),
@@ -98,7 +98,7 @@ export const UserStore = signalStore(
               tap((users) => patchState(store, { users, status: StoreStatus.Loaded })),
               catchError(() => {
                 patchState(store, { status: StoreStatus.LoadError });
-                alertService.error(translate.instant('cmd.user.errors.loadFailed'));
+                alertService.error(translate.instant('cmd.users.errors.loadFailed'));
                 return EMPTY;
               }),
             ),
@@ -114,11 +114,11 @@ export const UserStore = signalStore(
               switchMap(() => usersService.getAll()),
               tap((users) => {
                 patchState(store, { users, status: StoreStatus.Saved });
-                alertService.success(translate.instant('cmd.user.success.created'));
+                alertService.success(translate.instant('cmd.users.success.created'));
               }),
               catchError(() => {
                 patchState(store, { status: StoreStatus.SaveError });
-                alertService.error(translate.instant('cmd.user.errors.createFailed'));
+                alertService.error(translate.instant('cmd.users.errors.createFailed'));
                 return EMPTY;
               }),
             ),
@@ -134,11 +134,11 @@ export const UserStore = signalStore(
               switchMap(() => usersService.getAll()),
               tap((users) => {
                 patchState(store, { users, status: StoreStatus.Saved });
-                alertService.success(translate.instant('cmd.user.success.updated'));
+                alertService.success(translate.instant('cmd.users.success.updated'));
               }),
               catchError(() => {
                 patchState(store, { status: StoreStatus.SaveError });
-                alertService.error(translate.instant('cmd.user.errors.updateFailed'));
+                alertService.error(translate.instant('cmd.users.errors.updateFailed'));
                 return EMPTY;
               }),
             ),
@@ -154,11 +154,11 @@ export const UserStore = signalStore(
               switchMap(() => usersService.getAll()),
               tap((users) => {
                 patchState(store, { users, status: StoreStatus.Saved });
-                alertService.success(translate.instant('cmd.user.success.deleted'));
+                alertService.success(translate.instant('cmd.users.success.deleted'));
               }),
               catchError(() => {
                 patchState(store, { status: StoreStatus.SaveError });
-                alertService.error(translate.instant('cmd.user.errors.deleteFailed'));
+                alertService.error(translate.instant('cmd.users.errors.deleteFailed'));
                 return EMPTY;
               }),
             ),
@@ -174,11 +174,11 @@ export const UserStore = signalStore(
               switchMap(() => usersService.getAll()),
               tap((users) => {
                 patchState(store, { users, status: StoreStatus.Saved });
-                alertService.success(translate.instant('cmd.user.success.deleted'));
+                alertService.success(translate.instant('cmd.users.success.deleted'));
               }),
               catchError(() => {
                 patchState(store, { status: StoreStatus.SaveError });
-                alertService.error(translate.instant('cmd.user.errors.deleteFailed'));
+                alertService.error(translate.instant('cmd.users.errors.deleteFailed'));
                 return EMPTY;
               }),
             ),

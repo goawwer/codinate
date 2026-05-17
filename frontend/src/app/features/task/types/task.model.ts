@@ -3,6 +3,7 @@ export interface TaskMember {
   name: string;
   surname: string;
   role: string;
+  picture: string;
 }
 
 export interface TaskFile {
@@ -38,6 +39,7 @@ export interface TaskDetailed extends Task {
   assigneeId: string;
   assigneeName: string;
   assigneeSurname: string;
+  assigneePicture: string;
   members: TaskMember[];
   attachedFiles: TaskFile[];
   updatedAt: string;
@@ -66,4 +68,50 @@ export interface CreateTaskInput {
 
 export interface UpdateTaskInput extends Partial<CreateTaskInput> {
   closedAt?: string | null;
+  commentBody?: string;
+  assigneeName?: string;
+  statusName?: string;
+  categoryName?: string;
+  priorityName?: string;
+  releaseName?: string;
+}
+
+export interface TaskSuggestion {
+  id: string;
+  identifier: number;
+  title: string;
+}
+
+export interface DeadlineTask {
+  id: string;
+  title: string;
+  dueAt: string;
+}
+
+export interface DeadlinePressure {
+  overdue: DeadlineTask[];
+  upcoming: DeadlineTask[];
+}
+
+export interface StatusDistributionItem {
+  status: string;
+  count: number;
+}
+
+export interface StatusTasksPage {
+  items: Task[];
+  total: number;
+}
+
+export interface VelocityDay {
+  day: string;
+  count: number;
+}
+
+export interface VelocityData {
+  thisWeek: VelocityDay[];
+  lastWeek: VelocityDay[];
+  thisWeekTotal: number;
+  lastWeekTotal: number;
+  changePercent: number;
 }

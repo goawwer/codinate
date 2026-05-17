@@ -15,6 +15,203 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/comments/add": {
+            "post": {
+                "description": "Creates a new comment on an entity; author is taken from the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Add a comment",
+                "parameters": [
+                    {
+                        "description": "Comment data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.CreateCommentInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/comment.Row"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/comments/{entity}/{entity_id}": {
+            "get": {
+                "description": "Returns all comments for a given entity (e.g. task) by its UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Get comments for an entity",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity type (e.g. task)",
+                        "name": "entity",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Entity UUID",
+                        "name": "entity_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/comment.Row"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/comments/{id}/delete": {
+            "delete": {
+                "description": "Deletes a comment by UUID; only the author or an admin can delete",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Delete a comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Comment UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/comments/{id}/update": {
+            "patch": {
+                "description": "Updates the body or attachments of a comment; only the author or an admin can update",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Update a comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Comment UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated comment data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.UpdateCommentInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/current/user": {
             "get": {
                 "description": "Takes user from access token cookie",
@@ -2557,6 +2754,84 @@ const docTemplate = `{
                 }
             }
         },
+        "comment.CreateCommentInput": {
+            "type": "object",
+            "properties": {
+                "attachedFiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/file.AttachedFileInput"
+                    }
+                },
+                "body": {
+                    "type": "string"
+                },
+                "entityId": {
+                    "type": "string"
+                },
+                "entityType": {
+                    "type": "string"
+                }
+            }
+        },
+        "comment.Row": {
+            "type": "object",
+            "properties": {
+                "attachedFiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/file.AttachedFileInfo"
+                    }
+                },
+                "body": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "employeeId": {
+                    "type": "string"
+                },
+                "employeeName": {
+                    "type": "string"
+                },
+                "employeePicture": {
+                    "type": "string"
+                },
+                "employeeSurname": {
+                    "type": "string"
+                },
+                "employeeUsername": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "comment.UpdateCommentInput": {
+            "type": "object",
+            "properties": {
+                "attachedFiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/file.AttachedFileInput"
+                    }
+                },
+                "body": {
+                    "type": "string"
+                },
+                "entityId": {
+                    "type": "string"
+                },
+                "entityType": {
+                    "type": "string"
+                }
+            }
+        },
         "enum.PermissionRole": {
             "type": "string",
             "enum": [
@@ -2571,6 +2846,31 @@ const docTemplate = `{
                 "UserPermissionRole",
                 "NoPermissionRole"
             ]
+        },
+        "file.AttachedFileInfo": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "file.AttachedFileInput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
         },
         "file.fileUploadResponse": {
             "type": "object",
@@ -2678,13 +2978,13 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string"
-                },
                 "startAt": {
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 },
                 "updateAt": {
@@ -2725,31 +3025,6 @@ const docTemplate = `{
                 }
             }
         },
-        "task.AttachedFileInfo": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "task.AttachedFileInput": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "integer"
-                }
-            }
-        },
         "task.CreateTaskInput": {
             "type": "object",
             "properties": {
@@ -2759,7 +3034,7 @@ const docTemplate = `{
                 "attachedFiles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/task.AttachedFileInput"
+                        "$ref": "#/definitions/file.AttachedFileInput"
                     }
                 },
                 "authorId": {
@@ -2859,7 +3134,7 @@ const docTemplate = `{
                 "attachedFiles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/task.AttachedFileInfo"
+                        "$ref": "#/definitions/file.AttachedFileInfo"
                     }
                 },
                 "authorId": {
@@ -2939,7 +3214,7 @@ const docTemplate = `{
                 "attachedFiles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/task.AttachedFileInput"
+                        "$ref": "#/definitions/file.AttachedFileInput"
                     }
                 },
                 "authorId": {

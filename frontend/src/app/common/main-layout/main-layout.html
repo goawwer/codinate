@@ -1,6 +1,6 @@
 <div class="h-screen flex flex-col overflow-hidden bg-app-bg">
   <header class="sticky top-0 z-10 py-4 bg-app-bg">
-    <div class="mx-auto w-full max-w-362.5 px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto w-full max-w-362.5 px-4 sm:px-6 lg:px-30">
       <div class="rounded-3xl bg-(--app-grey-100) overflow-hidden">
         <app-navbar></app-navbar>
         @if (isAdminSection()) {
@@ -11,8 +11,6 @@
               [activeItemIndex]="activeItemIndex()"
             >
               <a tuiTab *tuiItem routerLink="/admin/users" routerLinkActive>{{ 'admin.subnav.users' | translate }}</a>
-              <a tuiTab *tuiItem routerLink="/admin/teams" routerLinkActive>{{ 'admin.subnav.teams' | translate }}</a>
-              <a tuiTab *tuiItem routerLink="/admin/projects" routerLinkActive>{{ 'admin.subnav.projects' | translate }}</a>
               <a tuiTab *tuiItem routerLink="/admin/settings" routerLinkActive>{{ 'admin.subnav.settings' | translate }}</a>
             </tui-tabs-with-more>
           </div>
@@ -26,6 +24,17 @@
               <a tuiTab *tuiItem routerLink="/mine/assigned" routerLinkActive>{{ 'models.task.state.assigned' | translate }}</a>
               <a tuiTab *tuiItem routerLink="/mine/created" routerLinkActive>{{ 'models.task.state.created' | translate }}</a>
               <a tuiTab *tuiItem routerLink="/mine/history" routerLinkActive>{{ 'models.task.state.history' | translate }}</a>
+            </tui-tabs-with-more>
+          </div>
+        } @else if (isWorklogSection()) {
+          <div class="bg-(--app-grey-600)/20">
+            <tui-tabs-with-more
+              class="custom"
+              [underline]="false"
+              [activeItemIndex]="activeItemIndex()"
+            >
+              <a tuiTab *tuiItem routerLink="/worklog/overview" routerLinkActive>{{ 'models.worklog.subnav.overview' | translate }}</a>
+              <a tuiTab *tuiItem routerLink="/worklog/daily-plan" routerLinkActive>{{ 'models.worklog.subnav.dailyPlan' | translate }}</a>
             </tui-tabs-with-more>
           </div>
         } @else {
@@ -45,7 +54,7 @@
     </div>
   </header>
 
-  <main tuiNavigationMain class="flex-1 overflow-hidden mx-auto w-full max-w-362.5 sm:px-2">
+  <main class="flex-1 overflow-hidden mx-auto w-full h-full max-w-362.5 px-4 sm:px-6 lg:px-30 mt-2">
     <router-outlet></router-outlet>
   </main>
 </div>

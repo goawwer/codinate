@@ -1,0 +1,88 @@
+@use '../../../../../styles/theme/_prose.scss' as *;
+
+.post-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.25rem 0 1rem;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.post-meta-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-author {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tui-text-primary);
+}
+
+.post-sep {
+  font-size: 1rem;
+  color: var(--tui-text-tertiary);
+}
+
+.post-date {
+  font-size: 0.75rem;
+  color: var(--tui-text-tertiary);
+}
+
+.post-username {
+  font-size: 0.9rem;
+  color: var(--tui-text-tertiary);
+}
+
+.post-meta {
+  position: relative;
+}
+
+.post-actions {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.edit-body-field {
+  ::ng-deep tui-editor {
+    height: 40vh !important;
+  }
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.post-body {
+  font-size: 0.9rem;
+  color: var(--tui-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  flex-shrink: 0;
+  padding: 1rem 1.25rem;
+  background: var(--tui-background-neutral-1);
+  border-radius: 0.75rem;
+
+  &--empty {
+    color: var(--tui-text-tertiary);
+    font-style: italic;
+  }
+
+  &::ng-deep {
+    @include prose;
+  }
+}

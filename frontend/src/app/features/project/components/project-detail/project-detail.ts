@@ -8,9 +8,9 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { HttpParams } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { forkJoin, map } from 'rxjs';
+import { filter, forkJoin, map } from 'rxjs';
 import { provideTuiEditor } from '@taiga-ui/editor';
 import { tuiScrollbarOptionsProvider } from '@taiga-ui/core';
 import { PROJECTDETAILSIMPORTS } from './project-detail.imports';
@@ -22,16 +22,24 @@ import { AlertService } from '../../../../core/declarations/services/alert.servi
 import { Project, ProjectLink } from '../../types/model/project.model';
 import { Task } from '../../../task/types/task.model';
 import { UserStore } from '../../../user/store/user.store';
-import {
-  ProjectDialogComponent,
-  ProjectDialogData,
-} from '../../../admin/components/projects/dialog/project-dialog.component';
+import { ProjectDialogComponent, ProjectDialogData } from '../dialog/project-dialog.component';
 import { AppDialogService } from '../../../../common/dialogs/dialog.service';
 import { TranslateService } from '@ngx-translate/core';
+import { PostService } from '../../../post/service/post.service';
+import {
+  PostDialogComponent,
+  PostDialogData,
+} from '../../../post/components/dialog/post-dialog.component';
+import {
+  CreatePostDialogComponent,
+  CreatePostDialogData,
+} from '../../../post/components/create-post-dialog/create-post-dialog.component';
+import { Post } from '../../../post/types/post.model';
+import { TaskDialogComponent } from '../../../task/components/dialog/task-dialog.component';
 
 @Component({
   selector: 'app-project-detail',
-  imports: [PROJECTDETAILSIMPORTS],
+  imports: [...PROJECTDETAILSIMPORTS],
   templateUrl: './project-detail.html',
   styleUrl: './project-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,12 +51,14 @@ import { TranslateService } from '@ngx-translate/core';
 })
 export class ProjectDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly projectService = inject(ProjectApiService);
   private readonly releaseService = inject(ReleaseService);
   private readonly taskService = inject(TaskCoreService);
   private readonly alert = inject(AlertService);
   private readonly dialogs = inject(AppDialogService);
   private readonly translate = inject(TranslateService);
+  private readonly postService = inject(PostService);
   protected readonly userStore = inject(UserStore);
 
   protected readonly routeId = toSignal(this.route.params.pipe(map((p) => p['id'] as string)));
@@ -66,7 +76,10 @@ export class ProjectDetailComponent implements OnInit {
   protected readonly linksExpanded = signal(false);
 
   protected readonly project = signal<Project | null>(null);
+  protected readonly posts = signal<Post[]>([]);
+  protected readonly isPostsLoading = signal(false);
   protected readonly releases = signal<Release[]>([]);
+  protected readonly createMenuOpen = signal(false);
   protected readonly tasks = signal<Task[]>([]);
   protected readonly editableLinks = signal<ProjectLink[]>([]);
 
@@ -75,6 +88,7 @@ export class ProjectDetailComponent implements OnInit {
   protected readonly RELEASE_TASKS_LIMIT = 3;
 
   protected readonly recentTasks = computed(() => this.tasks().slice(0, 5));
+  protected readonly recentPosts = computed(() => this.posts().slice(0, 5));
 
   protected readonly expandedReleases = signal<Set<string>>(new Set());
 
@@ -98,6 +112,15 @@ export class ProjectDetailComponent implements OnInit {
         this.alert.error('Failed to load project');
         this.isLoading.set(false);
       },
+    });
+
+    this.isPostsLoading.set(true);
+    this.postService.getByProject(id).subscribe({
+      next: (posts) => {
+        this.posts.set(posts);
+        this.isPostsLoading.set(false);
+      },
+      error: () => this.isPostsLoading.set(false),
     });
   }
 
@@ -199,11 +222,65 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
+  protected openPostDialog(post: Post): void {
+    const id = this.numericId();
+    this.dialogs
+      .component<PostDialogComponent, void, PostDialogData>(PostDialogComponent, {
+        label: post.title,
+        size: 'l',
+        data: {
+          post,
+          contextParents: id ? [{ postParentType: 'project', parentId: id }] : undefined,
+        },
+      })
+      .subscribe();
+  }
+
+  protected openCreatePostDialog(): void {
+    const id = this.numericId();
+    if (!id) return;
+    this.dialogs
+      .component<CreatePostDialogComponent, boolean, CreatePostDialogData>(
+        CreatePostDialogComponent,
+        {
+          label: this.translate.instant('feed.posts.create'),
+          size: 'l',
+          data: {
+            lockedParents: [{ type: 'project', id, name: this.project()?.projectName ?? '' }],
+          },
+        },
+      )
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        this.isPostsLoading.set(true);
+        this.postService.getByProject(id).subscribe({
+          next: (posts) => {
+            this.posts.set(posts);
+            this.isPostsLoading.set(false);
+          },
+          error: () => this.isPostsLoading.set(false),
+        });
+      });
+  }
+
+  protected openCreateTaskDialog(): void {
+    this.createMenuOpen.set(false);
+    this.dialogs
+      .component<TaskDialogComponent, boolean>(TaskDialogComponent, {
+        label: this.translate.instant('generic.actions.create', {
+          value: this.translate.instant('models.task.title.accusative'),
+        }),
+        size: 'fullscreen',
+      })
+      .pipe(filter(Boolean))
+      .subscribe();
+  }
+
   protected openEditDialog(project: Project): void {
     this.dialogs
       .component<ProjectDialogComponent, void, ProjectDialogData>(ProjectDialogComponent, {
         label: this.translate.instant('admin.dashboard.projects.dialogs.editTitle'),
-        size: 'l',
+        size: 'fullscreen',
         data: { project },
       })
       .subscribe();
@@ -215,5 +292,9 @@ export class ProjectDetailComponent implements OnInit {
 
   protected validDate(dateStr: string | null | undefined): boolean {
     return !!dateStr && !String(dateStr).startsWith('0001');
+  }
+
+  protected openMentionProfile(userId: string): void {
+    void this.router.navigate(['/users', userId]);
   }
 }

@@ -6,6 +6,7 @@ import { TuiBlockStatus } from '@taiga-ui/layout';
 import { TranslatePipe } from '@ngx-translate/core';
 import { StripHtmlPipe } from '../../../../common/pipes/strip-html.pipe';
 import { RouterLink } from '@angular/router';
+import { AppDatePipe } from '../../../../common/pipes/app-date.pipe';
 
 export const USERTASKSIMPORTS = [
   DatePipe,
@@ -22,4 +23,5 @@ export const USERTASKSIMPORTS = [
   TuiTextfield,
   StripHtmlPipe,
   RouterLink,
+  AppDatePipe,
 ];

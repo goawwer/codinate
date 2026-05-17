@@ -1,0 +1,59 @@
+<div class="composer">
+  @if (!isExpanded()) {
+    <button type="button" class="composer-placeholder" (click)="expand()">
+      {{ 'generic.actions.addComment' | translate }}
+    </button>
+  } @else {
+    <div class="composer-body">
+      <div class="grid grid-cols-2 gap-1 mb-2">
+        <tui-textfield tuiChevron [tuiTextfieldSize]="'m'" [stringify]="stringifyStatus">
+          <label tuiLabel>{{ 'generic.titles.status' | translate }}</label>
+          <input tuiSelect [formControl]="statusControl" />
+          <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="statuses" [emptyContent]="'generic.statuses.notFound' | translate" />
+        </tui-textfield>
+
+        <tui-textfield tuiChevron [tuiTextfieldSize]="'m'" [stringify]="stringifyUser">
+          <label tuiLabel>{{ 'models.task.fields.assignee' | translate }}</label>
+          <input tuiSelect [formControl]="assigneeControl" />
+          <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="users" [emptyContent]="'generic.statuses.notFound' | translate" />
+        </tui-textfield>
+
+        <tui-textfield tuiChevron [tuiTextfieldSize]="'m'" [stringify]="stringifyCategory">
+          <label tuiLabel>{{ 'models.task.fields.category' | translate }}</label>
+          <input tuiSelect [formControl]="categoryControl" />
+          <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="categories" [emptyContent]="'generic.statuses.notFound' | translate" />
+        </tui-textfield>
+
+        <tui-textfield tuiChevron [tuiTextfieldSize]="'m'" [stringify]="stringifyPriority">
+          <label tuiLabel>{{ 'generic.titles.priority' | translate }}</label>
+          <input tuiSelect [formControl]="priorityControl" />
+          <tui-data-list-wrapper *tuiTextfieldDropdown new [items]="priorities" [emptyContent]="'generic.statuses.notFound' | translate" />
+        </tui-textfield>
+      </div>
+
+      <app-editor
+        class="composer-editor"
+        [formControl]="bodyControl"
+        entityType="tasks"
+        [entityId]="taskId"
+        [placeholder]="'generic.actions.addComment' | translate"
+      />
+
+      <div class="composer-actions">
+        <button tuiButton appearance="ghost" size="s" type="button" (click)="cancel()">
+          {{ 'generic.actions.cancel' | translate }}
+        </button>
+        <button
+          tuiButton
+          appearance="primary"
+          size="s"
+          type="button"
+          [disabled]="isSubmitting()"
+          (click)="submit()"
+        >
+          {{ 'generic.actions.save' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+</div>

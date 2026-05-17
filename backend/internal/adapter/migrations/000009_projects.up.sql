@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS projects(
     id BIGSERIAL PRIMARY KEY,
     author_id UUID NOT NULL REFERENCES users(id),
     name VARCHAR(200) NOT NULL UNIQUE,
+    about VARCHAR(250),
     description TEXT,
     links JSONB NOT NULL DEFAULT '[]',
     picture_name TEXT,

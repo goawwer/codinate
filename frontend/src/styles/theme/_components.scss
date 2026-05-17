@@ -49,6 +49,10 @@ tui-badge,
   padding: 3rem 5rem !important;
 }
 
-.ProseMirror {
+tui-editor .ProseMirror {
   @include prose;
+}
+
+tui-dialog .t-heading {
+  margin: 0 0 1.5rem !important;
 }

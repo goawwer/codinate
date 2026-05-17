@@ -1,0 +1,23 @@
+.create-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.post-dialog-textarea-field {
+  ::ng-deep tui-editor {
+    height: 45vh !important;
+  }
+}
+
+.parent-selector {
+  flex-shrink: 0;
+}
+
+.create-post-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}

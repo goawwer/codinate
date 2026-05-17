@@ -3,10 +3,11 @@ package shared
 import "encoding/json"
 
 type MemberShort struct {
-	Id      string `json:"id"`
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
-	Role    string `json:"role"`
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Surname     string `json:"surname"`
+	Role        string `json:"role"`
+	PictureName string `json:"picture"`
 }
 
 type MembersShort []MemberShort

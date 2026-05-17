@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS teams(
     author_id UUID NOT NULL REFERENCES users(id),
     name VARCHAR(200) NOT NULL UNIQUE,
     description TEXT,
+    links JSONB NOT NULL DEFAULT '[]',
     picture_name TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT current_timestamp,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT current_timestamp

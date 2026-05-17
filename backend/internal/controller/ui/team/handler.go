@@ -13,8 +13,9 @@ import (
 func Register() {
 	ui.RegisterPost("/teams/create", enum.AtLeastAdmin, reflect.TypeOf(service{}), createTeam)
 	ui.RegisterGet("/teams", enum.AnyUser, reflect.TypeOf(service{}), allTeams)
+	ui.RegisterGet("/teams/{id}", enum.AnyUser, reflect.TypeOf(service{}), getTeam)
 	ui.RegisterPatch("/teams/{id}/update", enum.AtLeastAdmin, reflect.TypeOf(service{}), update)
-	ui.RegisterGet("/teams/{id}/members", enum.AnyUser, reflect.TypeOf(service{}), teamMembers)
+	ui.RegisterPatch("/teams/{id}/links", enum.AtLeastAdmin, reflect.TypeOf(service{}), updateLinks)
 	ui.RegisterDelete("/teams/{id}/delete", enum.AtLeastOwner, reflect.TypeOf(service{}), deleteTeam)
 	ui.RegisterDelete("/teams/{team_id}/delete/{member_id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), removeMember)
 	ui.RegisterDelete("/teams/{team_id}/delete/picture", enum.AtLeastAdmin, reflect.TypeOf(service{}), removePicture)
@@ -45,13 +46,13 @@ func allTeams(s ui.UIService) (any, error) {
 //	@Failure	400	{object}	string	"Bad Request"
 //	@Failure	500	{object}	string	"Internal Server Error"
 //	@Router		/api/teams/{id}/members [get]
-func teamMembers(s ui.UIService) (any, error) {
-	id, err := s.GetPathParameterAsString("id")
+func getTeam(s ui.UIService) (any, error) {
+	id, err := s.GetPathParamAsInt("id")
 	if err != nil {
-		return nil, err
+		return nil, ui.NewHttpCodeError(nil, http.StatusBadRequest, "invalid team id parameter")
 	}
 
-	return s.GetService().(*service).getTeamMembersBy(s.GetRequest().Context(), uuid.MustParse(id))
+	return s.GetService().(*service).getTeam(s.GetRequest().Context(), id)
 }
 
 // createTeam
@@ -74,7 +75,50 @@ func createTeam(s ui.UIService) (any, error) {
 	}
 	input.PictureName = pictureName
 
+	currentUser, err := s.GetCurrentUser()
+	if err != nil {
+		return nil, err
+	}
+	input.AuthorId = currentUser.Id.String()
+	input.MembersIds = appendIfMissing(input.MembersIds, input.AuthorId)
+
 	return nil, s.GetService().(*service).addNewTeam(s.GetRequest().Context(), input)
+}
+
+func appendIfMissing(ids []string, id string) []string {
+	for _, v := range ids {
+		if v == id {
+			return ids
+		}
+	}
+	return append(ids, id)
+}
+
+// updateLinks
+//
+//	@Tags		teams
+//	@Summary	Update team links
+//	@Description	Updates the links list for a team
+//	@Accept		json
+//	@Produce	json
+//	@Param		id		path		int						true	"Team ID"
+//	@Param		payload	body		team.UpdateLinksInput	true	"Links payload"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/teams/{id}/links [patch]
+func updateLinks(s ui.UIService) (any, error) {
+	id, err := s.GetPathParamAsInt("id")
+	if err != nil {
+		return nil, ui.NewHttpCodeError(nil, http.StatusBadRequest, "invalid team id parameter")
+	}
+
+	var input team.UpdateLinksInput
+	if err := s.GetBodyAs(&input); err != nil {
+		return nil, err
+	}
+
+	return nil, s.GetService().(*service).updateLinks(s.GetRequest().Context(), id, input.Links)
 }
 
 // update
@@ -92,6 +136,11 @@ func createTeam(s ui.UIService) (any, error) {
 //	@Failure	500	{object}	string	"Internal Server Error"
 //	@Router		/api/teams/{id}/update [patch]
 func update(s ui.UIService) (any, error) {
+	id, err := s.GetPathParamAsInt("id")
+	if err != nil {
+		return nil, err
+	}
+
 	input, pictureName, err := ui.ParseMultipartPayload[team.UpdateTeamInput](s, "avatar", "teams")
 	if err != nil {
 		return nil, err
@@ -99,7 +148,7 @@ func update(s ui.UIService) (any, error) {
 
 	input.PictureName = &pictureName
 
-	return nil, s.GetService().(*service).update(s.GetRequest().Context(), input, input.Id)
+	return nil, s.GetService().(*service).update(s.GetRequest().Context(), input, id)
 }
 
 // deleteTeam

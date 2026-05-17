@@ -7,8 +7,9 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { TUI_LANGUAGE, TUI_RUSSIAN_LANGUAGE } from '@taiga-ui/i18n';
-import { of } from 'rxjs';
+import { TUI_LANGUAGE, TUI_RUSSIAN_LANGUAGE, TUI_ENGLISH_LANGUAGE } from '@taiga-ui/i18n';
+import { TranslateService } from '@ngx-translate/core';
+import { of, switchMap, startWith } from 'rxjs';
 import { APP_SIZE } from './core/declarations/tokens/size.token';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -41,6 +42,18 @@ export const appConfig: ApplicationConfig = {
     }),
     provideEventPlugins(),
     { provide: APP_SIZE, useValue: 'm' },
-    { provide: TUI_LANGUAGE, useValue: of(TUI_RUSSIAN_LANGUAGE) },
+    {
+      provide: TUI_LANGUAGE,
+      useFactory: () => {
+        const translate = inject(TranslateService);
+        return translate.onLangChange.pipe(
+          startWith(null),
+          switchMap(() => {
+            const lang = translate.currentLang ?? translate.defaultLang ?? 'ru';
+            return lang === 'ru' ? of(TUI_RUSSIAN_LANGUAGE) : of(TUI_ENGLISH_LANGUAGE);
+          }),
+        );
+      },
+    },
   ],
 };

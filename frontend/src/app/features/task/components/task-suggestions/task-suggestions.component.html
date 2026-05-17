@@ -1,0 +1,12 @@
+@for (task of suggestions; track task.id; let i = $index) {
+  <button
+    type="button"
+    class="suggestion-item"
+    [class.suggestion-item--active]="i === activeIndex()"
+    (mousedown)="$event.preventDefault()"
+    (click)="select(task)"
+  >
+    <span class="suggestion-id">#{{ task.identifier }}</span>
+    <span class="suggestion-title">{{ task.title }}</span>
+  </button>
+}

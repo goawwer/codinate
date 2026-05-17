@@ -1,0 +1,105 @@
+<div class="comment-list">
+  <div #commentTop>
+  </div>
+
+  @if (!hideComposer) {
+  <div class="compose-wrapper">
+    <div class="comment-compose">
+      @if (!isInputActive()) {
+        <button
+          type="button"
+          class="compose-placeholder"
+          (click)="activateInput()"
+        >
+          {{ 'generic.actions.addComment' | translate }}
+        </button>
+      } @else {
+        <div class="compose-body">
+          <app-editor
+            [formControl]="newCommentControl"
+            entityType="comments"
+            [placeholder]="'generic.actions.addComment' | translate"
+          />
+
+          @if (pendingFiles().length) {
+            <div class="pending-chips">
+              @for (item of pendingFiles(); track item.blobUrl) {
+                <div class="pending-chip">
+                  @if (isImage(item.type)) {
+                    <img [src]="item.blobUrl" class="pending-chip-thumb" [alt]="item.name" />
+                  } @else {
+                    <tui-icon icon="@tui.file" class="pending-chip-icon" />
+                  }
+                  <span class="pending-chip-name" [title]="item.name">{{ item.name }}</span>
+                  <button
+                    tuiIconButton
+                    appearance="ghost"
+                    type="button"
+                    size="xs"
+                    iconStart="@tui.x"
+                    (click)="removeFile(item.blobUrl)"
+                  ></button>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="compose-actions">
+            <button
+              tuiButton
+              appearance="ghost"
+              size="s"
+              type="button"
+              (click)="cancelInput()"
+            >
+              {{ 'generic.actions.cancel' | translate }}
+            </button>
+
+            <button
+              tuiIconButton
+              iconStart="@tui.forward"
+              size="s"
+              type="button"
+              class="btn-primary"
+              [disabled]="isSubmitting()"
+              (click)="submit()"
+            ></button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+  }
+
+  <div class="flex justify-between p-1 text-(--tui-text-secondary)">
+    <div class="flex gap-1.5 items-center">
+      <tui-icon icon="@tui.message-circle-more" [style.font-size.rem]="1"/>
+      <span>{{ 'models.task.detailed.comments' | translate }}</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span>({{ comments().length }})</span>
+      @if (canScroll()) {
+        <button class="scroll-btn" type="button" (click)="scrollToBottom()">
+          <tui-icon icon="@tui.arrow-down" />
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <tui-loader />
+  } @else if (comments().length > 0) {
+    @for (comment of comments(); track comment.id) {
+      <app-comment-item
+        [comment]="comment"
+        [currentUserId]="currentUserId()"
+        [isAdmin]="isAdmin()"
+        (deleted)="onDeleted($event)"
+        (updated)="onUpdated($event)"
+        (mentionClicked)="onMentionClicked($event)"
+      />
+    }
+  }
+
+  <div #commentBottom></div>
+</div>

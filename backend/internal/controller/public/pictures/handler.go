@@ -12,7 +12,8 @@ import (
 type service struct{}
 
 func Register() {
-	public.RegisterGet("/{entity_type}", reflect.TypeOf(service{}), getEntityAvatar)
+	public.RegisterGet("/{entity_type}/avatars", reflect.TypeOf(service{}), getEntityAvatar)
+	public.RegisterGet("/users/backgrounds/{user_id}", reflect.TypeOf(service{}), getProfileBackground)
 }
 
 // getEntityPicture
@@ -38,5 +39,19 @@ func getEntityAvatar(s public.PublicService) (any, error) {
 
 	http.ServeFile(s.GetResponse(), s.GetRequest(), file)
 
+	return nil, nil
+}
+
+func getProfileBackground(s public.PublicService) (any, error) {
+	userId, err := s.GetPathParameterAsString("user_id")
+	if err != nil {
+		return nil, err
+	}
+
+	filename, _ := s.GetUrlParamAsString("filename")
+
+	http.ServeFile(s.GetResponse(), s.GetRequest(), path.Join(
+		viper.GetString("UPLOADS_DIR"), "users", "backgrounds", userId, filename),
+	)
 	return nil, nil
 }

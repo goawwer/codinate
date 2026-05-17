@@ -3,6 +3,7 @@ package controller
 type BasicQueryParams struct {
 	PageNumber int
 	PageSize   int
+	PagesLimit int
 
 	From string
 	To   string

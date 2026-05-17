@@ -12,6 +12,7 @@
       "default": "Actions",
       "add": "Add",
       "delete": "Delete",
+      "deleteModel": "Удалить {{ model }}",
       "cancel": "Cancel",
       "create": "Create {{ value }}",
       "save": "Save",
@@ -25,7 +26,10 @@
       "assign": "Assign",
       "send": "Send",
       "show": "Show {{ n }} more",
-      "showLess": "Show less"
+      "showMore": "Show more",
+      "showLess": "Show less",
+      "addComment": "Add a comment...",
+      "deleteConfirm": "Are you sure you want to delete {{ model }}? This action cannot be undone."
     },
     "statuses": {
       "active": "Active",
@@ -34,7 +38,8 @@
       "notFoundDetails": "Please try another options",
       "empty": "Nothing here yet",
       "updated": "Updated",
-      "created": "Created"
+      "created": "Created",
+      "edited": "Edited"
     },
     "permissions": {
       "owner": "Owner",
@@ -43,11 +48,14 @@
     },
     "operations": {
       "success": "Completed",
-      "fail": "Failed"
+      "fail": "Failed",
+      "deleting": "Deleting",
+      "deletingEntity": "Deleting {{ entity }}"
     },
     "hints": {
       "changePicture": "Change picture",
-      "deletePicture": "Delete picture"
+      "deletePicture": "Delete picture",
+      "rank": "Activity ranking: #{{ rank }}. More time spent working can move you higher."
     },
     "titles": {
       "status": "Status",
@@ -57,13 +65,73 @@
       "sort": "Sort",
       "info": "Info",
       "progress": "Progress",
-      "feed": "Feed"
+      "feed": "Feed",
+      "period": "Period",
+      "others": "Others",
+      "plural": {
+        "status": "Statuses",
+        "priority": "Priorities",
+        "project": "Projects"
+      }
     },
     "tabs": {
       "general": "General",
       "details": "Details"
     },
-    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "daysShort": ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+    "timePeriods": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "thisWeek": "This week",
+      "thisMonth": "This month",
+      "allTime": "All time"
+    },
+    "widgets": {
+      "leaderboard": "LeaderBoard",
+      "season": {
+        "dayOne": "Day 1",
+        "days": "Day {{ days }}",
+        "hint": "Current monthly ranking season. The leaderboard resets at the beginning of each month.",
+        "progress": "Day {{ current }} · {{ left }} days left"
+      },
+      "deadlinePressure": {
+        "title": "Deadline Pressure",
+        "subtitle": "Tasks due within the next 2 weeks",
+        "overdue": "{{ count }} overdue",
+        "allClear": "All clear",
+        "allClearDetails": "No upcoming or overdue tasks",
+        "loading": "Loading...",
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "yesterday": "Yesterday",
+        "daysOverdue": "{{ count }}d overdue",
+        "inDays": "In {{ count }}d"
+      },
+      "taskHealth": {
+        "title": "Task Health",
+        "subtitle": "Distribution of active tasks by current status",
+        "totalLabel": "Total open",
+        "empty": "No open tasks",
+        "emptyDetails": "All tasks are closed or none exist yet"
+      },
+      "momentumScore": {
+        "title": "Team Activity",
+        "subtitle": "Team activity trends compared to last week",
+        "changeHint": "Change in total actions compared to the previous week",
+        "loading": "Loading...",
+        "summary": "{{ count }} actions this week",
+        "lastWeek": "Last week",
+        "thisWeek": "This week"
+      }
+    },
+    "time": {
+      "hoursShort": "h",
+      "minutesShort": "m"
+    },
+    "warnings": {
+      "deleteEntity": "{{ entity }} \"{{ name }}\" will be permanently deleted. This action cannot be undone."
+    }
   },
   "auth": {
     "title": "Login",
@@ -95,7 +163,10 @@
   "navbar": {
     "main": "Main",
     "mine": "My tasks",
-    "admin": "Admin-dashboard"
+    "worklog": "Worklog",
+    "admin": "Admin-dashboard",
+    "profile": "Profile",
+    "logout": "Log out"
   },
   "employee_roles": {
     "owner": "Owner",
@@ -124,12 +195,14 @@
     },
     "project": {
       "title": {
+        "all": "All projects",
         "default": "Project",
         "plural": "Projects"
       },
       "projectName": "Name",
       "projectDescription": "Description",
       "projectPictureName": "Picture",
+      "projectAbout": "About",
       "authorName": "Author",
       "members": "Members",
       "noAvailableMembers": "All users are already members",
@@ -139,6 +212,18 @@
       "links": "Links",
       "detailed": {
         "recent": "Recent"
+      },
+      "releases": {
+        "title": "Project releases",
+        "subtitle": "Releases represent milestones in your project timeline. Tasks can be linked to a release to track delivery scope.",
+        "empty": "No releases yet",
+        "add": "Add release",
+        "fields": {
+          "title": "Title",
+          "description": "Description",
+          "startAt": "Start date",
+          "endAt": "End date"
+        }
       }
     },
     "user": {
@@ -152,7 +237,55 @@
       "disabled": "Disabled",
       "status": "Status",
       "createdAt": "Created at",
-      "updatedAt": "Update at"
+      "updatedAt": "Update at",
+      "profile": {
+        "createdAt": "Registered since",
+        "settings": "Profile settings",
+        "stats": {
+          "projects": "Projects",
+          "allSpent": "Total time",
+          "recentSpent": "Last 30 days"
+        },
+        "tabs": {
+          "activity": "Activity",
+          "results": "Results"
+        },
+        "projects": {
+          "totalSpent": "Total time spent on project",
+          "recentSpent": "Time spent in the last 2 weeks"
+        },
+        "results": {
+          "workDynamics": {
+            "title": "Work dynamics",
+            "subtitle": "Activity for the last 14 days",
+            "period": "For period",
+            "workingHours": "Working hours"
+          },
+          "focus": {
+            "title": "Focus",
+            "subtitle": "Time distribution between projects"
+          },
+          "activity": {
+            "title": "Activity",
+            "subtitle": "Your personal metrics",
+            "assigned": "Assigned",
+            "authored": "Authored",
+            "participated": "Participated",
+            "comments": "Comments",
+            "posts": "Posts"
+          }
+        },
+        "tooltips": {
+          "allSpent": "Total logged time across all projects",
+          "recentSpent": "Logged time during the last 30 days"
+        },
+        "dialog": {
+          "description": "About me",
+          "changeBg": "Change background",
+          "language": "Language"
+        },
+        "recentTasks": "Recently touched tasks"
+      }
     },
     "task": {
       "title": {
@@ -172,7 +305,8 @@
       "categories": {
         "title": "Task categories",
         "subtitle": "Categories help organize tasks within this project. Each task can be assigned one category — use them to group work by feature, module, or any other logical area.",
-        "empty": "No categories provided"
+        "empty": "No categories provided",
+        "new": "New category"
       },
       "detailed": {
         "additionalInfo": "Additional Info",
@@ -181,13 +315,13 @@
         "closedAt": "Closed",
         "noDescription": "No description provided",
         "comments": "Comments",
-        "addComment": "Add a comment...",
-        "commentsEmpty": "No comments yet",
-        "commentsEmptySub": "Comments will appear here once added",
+        "worklogs": "Worklogs",
         "participants": "Participants",
         "assignee": "Assignee",
         "author": "Author",
-        "properties": "Properties"
+        "properties": "Properties",
+        "addParticipant": "Add participant",
+        "noAvailableParticipants": "All users are already participants"
       },
       "state": {
         "assigned": "Assigned",
@@ -199,6 +333,30 @@
         "createdEmptySub": "Everything is ahead!",
         "historyEmptyLabel": "Your tasks history is empty",
         "historyEmptySub": "Histore just have started"
+      },
+      "activity": {
+        "closed": "Task closed",
+        "reopened": "Task reopened",
+        "changed": "changed",
+        "commentPlaceholder": "Add a comment about these changes (optional)...",
+        "fields": {
+          "status": "Status",
+          "assignee": "Assignee",
+          "category": "Category",
+          "priority": "Priority",
+          "release": "Release",
+          "title": "Title",
+          "description": "Description",
+          "dueAt": "Due date",
+          "closed": "Task"
+        }
+      },
+      "actions": {
+        "close": "Close task",
+        "reopen": "Reopen task",
+        "saveChanges": "Save changes",
+        "deleteTask": "Delete task",
+        "change": "Change task conditions"
       }
     },
     "release": {
@@ -207,6 +365,107 @@
         "finished": "Finished",
         "archived": "Archived",
         "closed": "Closed"
+      }
+    },
+    "comment": {
+      "title": "Comment"
+    },
+    "worklog": {
+      "title": "Record",
+      "logTime": "Log Time",
+      "editTime": "Edit Log",
+      "allProjects": "All projects",
+      "fields": {
+        "date": "Date",
+        "startAt": "Start",
+        "endAt": "End",
+        "description": "Description",
+        "taskIdentifier": "Task identifier"
+      },
+      "columns": {
+        "date": "Date",
+        "time": "Time",
+        "hours": "Hours",
+        "hoursUnit": "h",
+        "minutesUnit": "min",
+        "description": "Description",
+        "project": "Project",
+        "total": "Total",
+        "noLogs": "No logs"
+      },
+      "taskSearch": {
+        "notFound": "Task not found"
+      },
+      "subnav": {
+        "overview": "Overview",
+        "dailyPlan": "Daily plan"
+      },
+      "dailyPlan": {
+        "create": "Create new record",
+        "subtitle": "Arrange tasks in the order you plan to complete them.",
+        "planned": "Planned",
+        "done": "done",
+        "noEstimate": "No estimate",
+        "addTask": "Add task",
+        "editItem": "Editing task",
+        "clearPlan": "Clear plan",
+        "empty": {
+          "title": "Plan is empty",
+          "subtitle": "Add tasks you plan to complete today."
+        },
+        "priority": {
+          "high": "High",
+          "medium": "Medium",
+          "low": "Low",
+          "default": "No priority"
+        },
+        "addForm": {
+          "title": "Task title",
+          "identifier": "Identifier",
+          "project": "Project",
+          "plannedMinutes": "Planned time (min)",
+          "add": "Add to plan"
+        }
+      }
+    },
+    "feed": {
+      "feed": {
+        "items": "items",
+        "tabs": {
+          "all": "All",
+          "tasks": "Tasks",
+          "posts": "Posts"
+        },
+        "segments": {
+          "all": "All tasks",
+          "open": "Open",
+          "closed": "Closed"
+        },
+        "posts": {
+          "title": "Post",
+          "titlePlural": "Posts",
+          "accusative": "post",
+          "create": "Create post",
+          "pinned": "Pinned",
+          "types": {
+            "note": "Note",
+            "announcement": "Announcement",
+            "poll": "Poll"
+          },
+          "priorities": {
+            "low": "Low",
+            "normal": "Normal",
+            "high": "High",
+            "critical": "Critical"
+          },
+          "form": {
+            "title": "Title",
+            "titlePlaceholder": "Post title...",
+            "body": "Content",
+            "bodyPlaceholder": "What would you like to share?",
+            "postTo": "Post to"
+          }
+        }
       }
     }
   },
@@ -243,7 +502,8 @@
           "editTitle": "Update team",
           "tabs": {
             "general": "General",
-            "members": "Members"
+            "members": "Members",
+            "danger": "Deletion"
           }
         }
       },
@@ -264,7 +524,8 @@
           "tabs": {
             "general": "General",
             "members": "Members",
-            "additional": "Additional"
+            "additional": "Additional",
+            "danger": "Deletion"
           }
         }
       },
@@ -285,11 +546,26 @@
           "deleteContent": "Are you sure you want to delete {{ count }} user(s)? This action cannot be undone.",
           "createTitle": "Create user",
           "editTitle": "Update user"
+        },
+        "periods": {
+          "label": "Period",
+          "last_month": "Last month",
+          "current_month": "Current month",
+          "first_20_days": "First 20 days"
+        },
+        "columns": {
+          "hours": "Hours worked"
         }
       }
     }
   },
   "cmd": {
+    "comments": {
+      "success": {
+        "updated": "Comment updated successfully",
+        "deleted": "Comment deleted successfully"
+      }
+    },
     "teams": {
       "success": {
         "created": "Team created successfully",
@@ -310,7 +586,9 @@
         "created": "Project created successfully",
         "updated": "Project updated successfully",
         "deleted": "Project(s) deleted successfully",
-        "pictureDeleted": "Project picture deleted successfully"
+        "pictureDeleted": "Project picture deleted successfully",
+        "releaseCreated": "Release created successfully",
+        "releaseUpdated": "Release updated successfully"
       },
       "errors": {
         "loadFailed": "Failed to load projects",
@@ -346,11 +624,65 @@
         "deleteFailed": "Failed to delete task",
         "createFailed": "Failed to create task",
         "closeFailed": "Failed to close task",
-        "reopenFailed": "Failed to reopen task"
+        "reopenFailed": "Failed to reopen task",
+        "participantAddFailed": "Failed to add participant"
       },
       "dialogs": {
         "deleteTitle": "Delete task",
         "deleteContent": "Are you sure you want to delete this task? This action cannot be undone."
+      }
+    },
+    "worklog": {
+      "success": {
+        "created": "Time logged successfully",
+        "updated": "Time log updated",
+        "deleted": "Time log deleted"
+      },
+      "errors": {
+        "createFailed": "Failed to log time",
+        "updateFailed": "Failed to update time log",
+        "deleteFailed": "Failed to delete time log"
+      }
+    },
+    "user": {
+      "profile": {
+        "success": {
+          "updated": "Profile updated successfully"
+        },
+        "errors": {
+          "updateFailed": "Failed to update profile"
+        }
+      }
+    }
+  },
+  "feed": {
+    "items": "items",
+    "modes": {
+      "all": "All",
+      "tasks": "Tasks",
+      "posts": "Posts"
+    },
+    "segments": {
+      "all": "All tasks",
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "posts": {
+      "title": "Post",
+      "titlePlural": "Posts",
+      "accusative": "post",
+      "create": "Create post",
+      "pinned": "Pinned",
+      "types": {
+        "note": "Note",
+        "announcement": "Announcement",
+        "poll": "Poll"
+      },
+      "priorities": {
+        "low": "Low",
+        "normal": "Normal",
+        "high": "High",
+        "critical": "Critical"
       }
     }
   }

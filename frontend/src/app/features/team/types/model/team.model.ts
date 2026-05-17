@@ -1,7 +1,14 @@
 export interface TeamMember {
+  id: string;
   name: string;
   surname: string;
-  id: string;
+  role: string;
+  picture?: string;
+}
+
+export interface TeamLink {
+  title: string;
+  url: string;
 }
 
 export interface Team {
@@ -10,6 +17,7 @@ export interface Team {
   name: string;
   description: string;
   pictureName: string;
+  links: TeamLink[];
   createdAt: string;
   updatedAt: string;
   members: TeamMember[];

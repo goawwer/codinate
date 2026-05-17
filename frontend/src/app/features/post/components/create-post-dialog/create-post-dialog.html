@@ -1,0 +1,103 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="create-post-form">
+
+  <div class="flex items-center gap-2">
+    <tui-textfield [tuiTextfieldSize]="'m'" class="flex-1">
+      <label tuiLabel>{{ 'feed.posts.form.title' | translate }}</label>
+      <input
+        tuiTextfield
+        formControlName="title"
+        [placeholder]="'feed.posts.form.titlePlaceholder' | translate"
+        autocomplete="off"
+      />
+    </tui-textfield>
+
+    @if (!isEditMode) {
+      <div class="parent-selector">
+        @if (isLoadingEntities()) {
+          <tui-loader />
+        } @else {
+          <button
+            tuiButton
+            tuiButtonSelect
+            type="button"
+            appearance="secondary-grayscale"
+            iconStart="@tui.folder"
+            size="m"
+            [formControl]="form.controls.parents"
+            [disabled]="hasLockedParents()"
+          >
+            {{ parentLabel() }}
+            <tui-data-list *tuiTextfieldDropdown>
+              <tui-opt-group [label]="'models.project.title.plural' | translate" tuiMultiSelectGroup>
+                @for (project of projects(); track project.id) {
+                  <button new tuiOption type="button" [value]="project">{{ project.projectName }}</button>
+                }
+              </tui-opt-group>
+              <tui-opt-group [label]="'models.team.title.plural' | translate" tuiMultiSelectGroup>
+                @for (team of teams(); track team.id) {
+                  <button new tuiOption type="button" [value]="team">{{ team.name }}</button>
+                }
+              </tui-opt-group>
+            </tui-data-list>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="post-dialog-textarea-field">
+    <app-editor
+      formControlName="body"
+      [placeholder]="'models.task.fields.description' | translate"
+      entityType="posts"
+    />
+    @if (pendingFiles().length) {
+      <div class="pending-chips">
+        @for (item of pendingFiles(); track item.blobUrl) {
+          <div class="pending-chip">
+            @if (isImage(item.type)) {
+              <img [src]="item.blobUrl" class="pending-chip-thumb" [alt]="item.name" />
+            } @else {
+              <tui-icon icon="@tui.file" class="pending-chip-icon" />
+            }
+            <span class="pending-chip-name" [title]="item.name">{{ item.name }}</span>
+            <button
+              tuiIconButton
+              appearance="ghost"
+              type="button"
+              size="xs"
+              iconStart="@tui.x"
+              (click)="removeFile(item.blobUrl)"
+            ></button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="create-post-footer">
+    <button
+      tuiButton
+      type="button"
+      appearance="flat"
+      size="m"
+      (click)="context.completeWith(false)"
+    >
+      {{ 'generic.actions.cancel' | translate }}
+    </button>
+    <button
+      tuiButton
+      type="submit"
+      class="btn-primary"
+      size="m"
+      [disabled]="isSubmitting() || (!isEditMode && !form.getRawValue().parents.length)"
+    >
+      @if (isEditMode) {
+        {{ 'generic.actions.save' | translate }}
+      } @else {
+        {{ 'generic.actions.create' | translate: { value: ('feed.posts.accusative' | translate) } }}
+      }
+    </button>
+  </div>
+
+</form>

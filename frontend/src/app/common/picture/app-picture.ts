@@ -1,4 +1,4 @@
-import { Component, computed, inject, Input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { TuiAvatar } from '@taiga-ui/kit';
 import { TuiIcon, TuiSizeXS, TuiSizeXXL } from '@taiga-ui/core';
 import { avatarColor, avatarLetters } from './picture-color.util';
@@ -16,55 +16,55 @@ export type AvatarSize = TuiSizeXS | TuiSizeXXL;
   },
   template: `
     @if (src()) {
-      @if (entityType === 'users') {
-        <tui-avatar [size]="size" [src]="src()" />
-      } @else if (!isAvatar) {
+      @if (entityType() === 'users') {
+        <tui-avatar [size]="size()" [src]="src()" [round]="isRound()" />
+      } @else if (!isAvatar()) {
         <img [src]="src()" />
       } @else {
-        <tui-avatar [size]="size" [src]="src()" />
+        <tui-avatar [size]="size()" [src]="src()" />
       }
-    } @else if (entityType === 'users') {
+    } @else if (entityType() === 'users') {
       <tui-avatar
-        [size]="size"
+        [size]="size()"
         [src]="letters()"
         [style.background]="color()"
         [style.color]="'var(--app-avatar-leter-color)'"
       />
-    } @else if (isAvatar) {
+    } @else if (isAvatar()) {
       <tui-icon
         icon="@tui.image"
         class="text-(--tui-text-tertiary) m-auto"
-        style="font-size: {{ this.fontSize }}; padding: 0"
+        style="font-size: {{ fontSize() }}; padding: 0"
       />
     } @else {
       <tui-avatar
-        [size]="size"
+        [size]="size()"
         [src]="letters()"
         [style.background]="color()"
         [style.color]="'var(--app-avatar-leter-color)'"
-        [round]="isRound"
+        [round]="isRound()"
       />
     }
   `,
 })
 export class AppPicture {
-  @Input({ required: true }) name = '';
-  @Input() surname = '';
-  @Input() pictureName = '';
-  @Input() size: AvatarSize = 'm';
-  @Input() fontSize = '';
-  @Input() entityType = '';
-  @Input() isAvatar = false;
-  @Input() isRound = true;
+  readonly name = input.required<string>();
+  readonly surname = input('');
+  readonly pictureName = input('');
+  readonly size = input<AvatarSize>('m');
+  readonly fontSize = input('');
+  readonly entityType = input('');
+  readonly isAvatar = input(false);
+  readonly isRound = input(true);
 
   private readonly apiConfig = inject(API_CONFIG);
 
   protected readonly src = computed(() =>
-    this.pictureName
-      ? `${this.apiConfig.rootUrl}/apipublic/${this.entityType}?filename=${this.pictureName}`
+    this.pictureName()
+      ? `${this.apiConfig.rootUrl}/apipublic/${this.entityType()}/avatars?filename=${this.pictureName()}`
       : '',
   );
 
-  protected readonly letters = computed(() => avatarLetters(this.name, this.surname));
+  protected readonly letters = computed(() => avatarLetters(this.name(), this.surname()));
   protected readonly color = computed(() => avatarColor(this.letters()));
 }

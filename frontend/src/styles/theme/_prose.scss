@@ -79,4 +79,78 @@
       padding: 0;
     }
   }
+
+  p[style*='text-align: center'],
+  p[style*='text-align:center'] {
+    text-align: center;
+  }
+
+  p[style*='text-align: right'],
+  p[style*='text-align:right'] {
+    text-align: right;
+  }
+
+  p[style*='text-align: left'],
+  p[style*='text-align:left'] {
+    text-align: left;
+  }
+
+  p[style*='text-align: justify'],
+  p[style*='text-align:justify'] {
+    text-align: justify;
+  }
+
+  .my-mention {
+    color: var(--app-brand-500);
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.6;
+    }
+  }
+
+  .mention-hint {
+    margin-left: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--tui-text-tertiary);
+    font-weight: 400;
+  }
+
+  .tui-table-wrapper {
+    overflow-x: auto;
+    margin: 0 0 0.5rem;
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.875rem;
+
+      th,
+      td {
+        border: 1px solid var(--tui-border-normal);
+        padding: 0.5rem 0.75rem;
+        vertical-align: top;
+        min-width: 25px;
+
+        p {
+          margin: 0;
+        }
+      }
+
+      th {
+        background: var(--tui-background-neutral-1);
+        font-weight: 600;
+        color: var(--tui-text-primary);
+      }
+
+      td {
+        color: var(--tui-text-secondary);
+      }
+
+      tr:hover td {
+        background: var(--tui-background-neutral-1);
+      }
+    }
+  }
 }

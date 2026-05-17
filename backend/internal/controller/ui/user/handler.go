@@ -15,7 +15,14 @@ func Register() {
 	ui.RegisterDelete("/users/delete/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), delete)
 	ui.RegisterDelete("/users/delete", enum.AtLeastAdmin, reflect.TypeOf(service{}), deleteMany)
 	ui.RegisterGet("/users/{id}", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUser)
-	ui.RegisterGet("/users/all", enum.AtLeastAdmin, reflect.TypeOf(service{}), getUsers)
+	ui.RegisterGet("/users/all", enum.AnyUser, reflect.TypeOf(service{}), getUsers)
+
+	ui.RegisterGet("/users/hours", enum.AtLeastAdmin, reflect.TypeOf(service{}), usersHours)
+
+	// profile
+	ui.RegisterGet("/users/profile/{user_id}", enum.AnyUser, reflect.TypeOf(service{}), profile)
+	ui.RegisterGet("/users/profile/{user_id}/stats", enum.AnyUser, reflect.TypeOf(service{}), profileStats)
+	ui.RegisterPatch("/users/profile/{user_id}", enum.AnyUser, reflect.TypeOf(service{}), updateProfile)
 }
 
 // create
@@ -149,6 +156,56 @@ func deleteMany(s ui.UIService) (any, error) {
 	}
 
 	return nil, s.GetService().(*service).deleteUsersByIds(s.GetRequest().Context(), input.IDs)
+}
+
+func usersHours(s ui.UIService) (any, error) {
+	from, to := s.GetDateRange()
+	return s.GetService().(*service).getAllUsersHours(s.GetRequest().Context(), from, to)
+}
+
+func profile(s ui.UIService) (any, error) {
+	userId, err := s.GetPathParameterAsString("user_id")
+	if err != nil {
+		return nil, err
+	}
+
+	return s.GetService().(*service).getUserProfileBy(s.GetRequest().Context(), uuid.MustParse(userId))
+}
+
+func profileStats(s ui.UIService) (any, error) {
+	userId, err := s.GetPathParameterAsString("user_id")
+	if err != nil {
+		return nil, err
+	}
+
+	from, to := s.GetDateRange()
+
+	return s.GetService().(*service).getUserProfileStats(s.GetRequest().Context(), userId, from, to)
+}
+
+func updateProfile(s ui.UIService) (any, error) {
+	id, err := s.GetPathParameterAsString("user_id")
+	if err != nil {
+		return nil, err
+	}
+
+	input, avatarPictureName, err := ui.ParseMultipartPayload[user.UpdateProfileInput](s, "avatar", "users")
+	if err != nil {
+		return nil, err
+	}
+	if avatarPictureName != "" {
+		input.ProfilePicture = &avatarPictureName
+	}
+
+	_, backgroundPictureName, err := ui.ParseMultipartPayload[user.UpdateProfileInput](s, "background", "users/backgrounds", id)
+	if err != nil {
+		return nil, err
+	}
+	if backgroundPictureName != "" {
+		input.ProfileBackgroundPicture = &backgroundPictureName
+	}
+
+	return nil, s.GetService().(*service).updateProfile(s.GetRequest().Context(), input, uuid.MustParse(id))
 }
 
 func parseFilterParams(s ui.UIService) (*user.Filters, error) {

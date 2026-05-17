@@ -9,18 +9,32 @@ import {
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TuiBlockStatus } from '@taiga-ui/layout';
-import { TuiIcon, tuiLoaderOptionsProvider, TuiLoader, TuiTextfield } from '@taiga-ui/core';
+import {
+  TuiButton,
+  TuiIcon,
+  tuiLoaderOptionsProvider,
+  TuiLoader,
+  TuiTextfield,
+} from '@taiga-ui/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AppSize } from '../../../../core/declarations/tokens/size.token';
 import { TeamStore } from '../../../team/store/team.store';
 import { AppPicture } from '../../../../common/picture/app-picture';
 import { AppDatePipe } from '../../../../common/pipes/app-date.pipe';
-import { TranslatePipe } from '@ngx-translate/core';
+import { UserStore } from '../../../user/store/user.store';
+import { AppDialogService } from '../../../../common/dialogs/dialog.service';
+import {
+  TeamDialogComponent,
+  TeamDialogData,
+} from '../../../team/components/dialog/team-dialog.component';
+import { StripHtmlPipe } from '../../../../common/pipes/strip-html.pipe';
 
 @Component({
   selector: 'app-teams',
   imports: [
     TuiTextfield,
     TuiIcon,
+    TuiButton,
     FormsModule,
     AppPicture,
     AppDatePipe,
@@ -28,6 +42,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     TuiBlockStatus,
     TranslatePipe,
     TuiLoader,
+    StripHtmlPipe,
   ],
   templateUrl: './teams.html',
   styleUrl: './teams.scss',
@@ -43,20 +58,32 @@ import { TranslatePipe } from '@ngx-translate/core';
 export class AllTeamsComponent implements OnInit {
   protected readonly inputSize: AppSize = 'm';
   private readonly store = inject(TeamStore);
+  private readonly userStore = inject(UserStore);
+  private readonly dialogs = inject(AppDialogService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly searchQuery = signal('');
   protected readonly isLoading = this.store.isLoading;
+  protected readonly isAdmin = computed(() => this.userStore.isAtLeastAdmin());
 
   protected readonly filteredTeams = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     const teams = this.store.teams();
     if (!q) return teams;
     return teams.filter(
-      (t) =>
-        t.name.toLowerCase().includes(q) ||
-        (t.description ?? '').toLowerCase().includes(q),
+      (t) => t.name.toLowerCase().includes(q) || (t.description ?? '').toLowerCase().includes(q),
     );
   });
+
+  protected openCreateDialog(): void {
+    this.dialogs
+      .component<TeamDialogComponent, void, TeamDialogData>(TeamDialogComponent, {
+        label: this.translate.instant('admin.dashboard.teams.dialogs.createTitle'),
+        size: 'l',
+        data: { team: null },
+      })
+      .subscribe();
+  }
 
   ngOnInit(): void {
     this.store.loadTeams();

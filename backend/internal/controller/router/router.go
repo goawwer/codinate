@@ -43,7 +43,6 @@ func InitializeAppRouter() *chi.Mux {
 	publicRouter.Use(render.SetContentType(render.ContentTypeJSON))
 	publicRouter.Group(func(r chi.Router) {
 		r.Use(middleware.RedirectSlashes)
-		r.Use(serviceMiddleware.HandleMiddlewareWithAccessToken)
 		r.Mount("/", public.Router())
 	})
 

@@ -8,6 +8,10 @@
       {{ 'navbar.mine' | translate }}
     </a>
 
+    <a class="cursor-pointer" routerLink="/worklog" routerLinkActive="font-bold">
+      {{ 'navbar.worklog' | translate }}
+    </a>
+
     @if (userStore.isAtLeastAdmin()) {
       <a class="cursor-pointer" routerLink="/admin" routerLinkActive="font-bold" [routerLinkActiveOptions]="{exact: false}">
         {{ 'navbar.admin' | translate }}
@@ -15,18 +19,45 @@
     }
   </div>
 
-  <div class="flex items-center gap-8">
-    <button type="button" class="cursor-pointer hover:opacity-60" (click)="this.theme.toggle()">
-      <tui-icon [icon]="this.theme.isDark() ? '@tui.sun' : '@tui.moon'" />
+  <div class="flex items-center gap-4">
+    <button type="button" class="cursor-pointer hover:opacity-60" (click)="theme.toggle()">
+      <tui-icon [style.font-size.rem]="1.5" [icon]="theme.isDark() ? '@tui.sun' : '@tui.moon'" />
     </button>
 
-    <a>
+    <button
+      class="navbar__avatar-btn"
+      type="button"
+      [tuiDropdown]="profileDropdown"
+      [tuiDropdownOpen]="isProfileDropdownOpen()"
+      (tuiDropdownOpenChange)="isProfileDropdownOpen.set($event)"
+      (click)="toggleProfileDropdown()"
+    >
       <app-picture
-        [name]="this.userStore.user()?.name ?? ''"
+        [name]="userStore.user()?.name ?? ''"
+        [surname]="userStore.user()?.surname ?? ''"
         size="s"
-        [pictureName]="this.userStore.user()?.picture ?? ''"
+        [pictureName]="userStore.user()?.picture ?? ''"
         entityType="users"
-      ></app-picture>
-    </a>
+      />
+    </button>
   </div>
 </nav>
+
+<ng-template #profileDropdown>
+  <tui-data-list class="navbar__dropdown">
+    <div class="navbar__dropdown-user">
+      <span class="navbar__dropdown-name">{{ userStore.user()?.name }} {{ userStore.user()?.surname }}</span>
+      <span class="navbar__dropdown-sub">&#64;{{ userStore.user()?.username }}</span>
+    </div>
+
+    <a tuiOption [routerLink]="['/users', userStore.user()?.id]" (click)="isProfileDropdownOpen.set(false)">
+      <tui-icon icon="@tui.user" [style.font-size.rem]="1"/>
+      {{ 'navbar.profile' | translate }}
+    </a>
+
+    <button tuiOption type="button" class="navbar__dropdown-logout" (click)="logout()">
+      <tui-icon icon="@tui.log-out" [style.font-size.rem]="1"/>
+      {{ 'navbar.logout' | translate }}
+    </button>
+  </tui-data-list>
+</ng-template>
