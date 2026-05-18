@@ -261,7 +261,7 @@
                   [users]="users()"
                   (submitted)="reloadTask()"
                 />
-                <app-comment-list entityType="task" [entityId]="taskId" [hideComposer]="true" (filesChanged)="reloadTask()" />
+                <app-comment-list entityType="task" [entityId]="taskId" [hideComposer]="true" [highlightCommentId]="highlightCommentId" (filesChanged)="reloadTask()" />
               }
 
               @if (activeTab() === 1) {

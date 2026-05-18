@@ -2,11 +2,13 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/goawwer/codinate/internal/adapter/database"
 	"github.com/goawwer/codinate/internal/adapter/dto/post"
 	"github.com/goawwer/codinate/internal/adapter/model"
+	"github.com/goawwer/codinate/pkg/logger"
 	"github.com/goawwer/codinate/pkg/util"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -140,7 +142,69 @@ func (r *postRepoImpl) CreatePost(ctx context.Context, input model.Post) (uuid.U
 		return nil
 	})
 
+	if err == nil {
+		go notifyPostCreated(input, id, mentionIDs)
+	}
+
 	return id, err
+}
+
+func notifyPostCreated(input model.Post, postId uuid.UUID, mentionIDs []uuid.UUID) {
+	ctx := context.Background()
+	notifRepo := GetNotificationRepo()
+
+	postRelated, _ := json.Marshal(map[string]any{
+		"postId":    postId.String(),
+		"postTitle": input.Title,
+	})
+
+	for _, parent := range input.Parents {
+		memberIDs, err := notifRepo.GetMembersForParent(ctx, string(parent.ParentType), int(parent.ParentId), input.AuthorId)
+		if err != nil {
+			logger.Errorf("notifyPostCreated: get members for %s %d: %v", parent.ParentType, parent.ParentId, err)
+			continue
+		}
+
+		related, _ := json.Marshal(map[string]any{
+			"postId":     postId.String(),
+			"postTitle":  input.Title,
+			"parentType": string(parent.ParentType),
+			"parentId":   parent.ParentId,
+		})
+
+		for _, memberId := range memberIDs {
+			n := model.Notification{
+				Id:               uuid.New(),
+				UserId:           memberId,
+				ActorId:          input.AuthorId,
+				NotificationType: "post",
+				Related:          related,
+				Title:            "New post published",
+				Body:             fmt.Sprintf(`"%s"`, input.Title),
+			}
+			if err := notifRepo.Create(ctx, n); err != nil {
+				logger.Errorf("notifyPostCreated: create post notification: %v", err)
+			}
+		}
+	}
+
+	for _, mentionedId := range mentionIDs {
+		if mentionedId == input.AuthorId {
+			continue
+		}
+		n := model.Notification{
+			Id:               uuid.New(),
+			UserId:           mentionedId,
+			ActorId:          input.AuthorId,
+			NotificationType: "mention",
+			Related:          postRelated,
+			Title:            "You were mentioned",
+			Body:             fmt.Sprintf(`in post "%s"`, input.Title),
+		}
+		if err := notifRepo.Create(ctx, n); err != nil {
+			logger.Errorf("notifyPostCreated: create mention notification: %v", err)
+		}
+	}
 }
 
 func (r *postRepoImpl) GetPostAuthorId(ctx context.Context, postId uuid.UUID) (uuid.UUID, error) {

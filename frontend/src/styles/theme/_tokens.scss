@@ -74,6 +74,7 @@
   --app-success-pale: var(--app-success-200);
   --app-error-pale: var(--app-error-100);
   --app-badge-color: var(--app-brand-200);
+  --app-navbar-background: var(--app-grey-100);
 }
 
 [tuiTheme='dark'] {
@@ -107,4 +108,5 @@
   --app-success-pale: var(--app-success-600);
   --app-error-pale: var(--app-error-600);
   --app-badge-color: var(--app-brand-300);
+  --app-navbar-background: var(--tui-background-base-alt);
 }

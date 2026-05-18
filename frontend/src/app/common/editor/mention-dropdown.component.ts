@@ -79,7 +79,7 @@ import { User } from '../../features/user/types/model/user.model';
       }
       button[tuiOption] {
         display: flex;
-        width: 14rem;
+        width: 100%;
         align-items: center;
         gap: 0.5rem;
       }

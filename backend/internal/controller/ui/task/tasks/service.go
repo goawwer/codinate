@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"slices"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"github.com/goawwer/codinate/internal/adapter/model/enum"
 	"github.com/goawwer/codinate/internal/adapter/repository"
 	"github.com/goawwer/codinate/internal/controller"
+	"github.com/goawwer/codinate/pkg/logger"
 	"github.com/goawwer/codinate/pkg/util"
 	"github.com/google/uuid"
 )
@@ -44,10 +46,13 @@ func (s *service) addTask(ctx context.Context, input task.CreateTaskInput) (uuid
 		return uuid.Nil, err
 	}
 
-	return repository.GetTaskRepo().AddNewTask(ctx, model.Task{
+	authorId := uuid.MustParse(input.AuthorId)
+	assigneeId := uuid.MustParse(input.AssigneeId)
+
+	taskModel := model.Task{
 		Id:               uuid.MustParse(input.Id),
-		AuthorId:         uuid.MustParse(input.AuthorId),
-		AssigneeId:       uuid.MustParse(input.AssigneeId),
+		AuthorId:         authorId,
+		AssigneeId:       assigneeId,
 		ProjectId:        input.ProjectId,
 		ReleaseId:        input.ReleaseId,
 		CategoryId:       input.CategoryId,
@@ -58,8 +63,39 @@ func (s *service) addTask(ctx context.Context, input task.CreateTaskInput) (uuid
 		Description:      input.Description,
 		DueAt:            dueAt,
 		AttachedFilesIds: attachedFileIds,
-		Participants:     uniqueUUIDs(uuid.MustParse(input.AuthorId), uuid.MustParse(input.AssigneeId)),
+		Participants:     uniqueUUIDs(authorId, assigneeId),
+	}
+
+	id, err := repository.GetTaskRepo().AddNewTask(ctx, taskModel)
+	if err == nil && assigneeId != authorId {
+		go notifyTaskAssigned(taskModel, id)
+	}
+
+	return id, err
+}
+
+func notifyTaskAssigned(t model.Task, taskId uuid.UUID) {
+	ctx := context.Background()
+
+	related, _ := json.Marshal(map[string]any{
+		"taskId":         taskId.String(),
+		"taskTitle":      t.Title,
+		"taskIdentifier": t.Identifier,
 	})
+
+	n := model.Notification{
+		Id:               uuid.New(),
+		UserId:           t.AssigneeId,
+		ActorId:          t.AuthorId,
+		NotificationType: "task",
+		Related:          related,
+		Title:            "Task assigned to you",
+		Body:             fmt.Sprintf(`"%s"`, t.Title),
+	}
+
+	if err := repository.GetNotificationRepo().Create(ctx, n); err != nil {
+		logger.Errorf("notifyTaskAssigned: %v", err)
+	}
 }
 
 func (s *service) updateTask(ctx context.Context, input task.UpdateTaskInput, id, userId uuid.UUID) error {
@@ -76,6 +112,8 @@ func (s *service) updateTask(ctx context.Context, input task.UpdateTaskInput, id
 
 	assigneeId := uuid.MustParse(input.AssigneeId)
 
+	assigneeChanged := current.AssigneeId != assigneeId
+
 	if err := repository.GetTaskRepo().UpdateTaskBy(ctx, model.Task{
 		AssigneeId:  assigneeId,
 		ProjectId:   input.ProjectId,
@@ -90,6 +128,14 @@ func (s *service) updateTask(ctx context.Context, input task.UpdateTaskInput, id
 		UpdatedAt:   time.Now(),
 	}, id); err != nil {
 		return err
+	}
+
+	if assigneeChanged {
+		go notifyTaskAssigned(model.Task{
+			AssigneeId: assigneeId,
+			AuthorId:   userId,
+			Title:      input.Title,
+		}, id)
 	}
 
 	if err := repository.GetTaskRepo().AddParticipant(ctx, id, assigneeId); err != nil {

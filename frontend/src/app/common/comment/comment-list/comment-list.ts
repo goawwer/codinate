@@ -51,6 +51,7 @@ export class CommentList implements OnInit {
   @Input({ required: true }) entityType!: CommentEntityType;
   @Input({ required: true }) entityId!: string;
   @Input() hideComposer = false;
+  @Input() highlightCommentId?: string;
   @Output() filesChanged = new EventEmitter<void>();
   @Output() mentionClicked = new EventEmitter<string>();
 
@@ -88,6 +89,13 @@ export class CommentList implements OnInit {
       next: (comments) => {
         this.comments.set(comments);
         this.isLoading.set(false);
+        if (this.highlightCommentId) {
+          setTimeout(() => {
+            document
+              .getElementById('comment-' + this.highlightCommentId)
+              ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 150);
+        }
       },
       error: () => this.isLoading.set(false),
     });

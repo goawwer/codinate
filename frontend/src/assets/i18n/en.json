@@ -166,7 +166,21 @@
     "worklog": "Worklog",
     "admin": "Admin-dashboard",
     "profile": "Profile",
-    "logout": "Log out"
+    "logout": "Log out",
+    "notifications": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications yet",
+    "notif": {
+      "mention": {
+        "post":        { "title": "You were mentioned", "body": "in post \"{{title}}\"" },
+        "postComment": { "title": "You were mentioned", "body": "in a post comment" },
+        "task":        { "title": "You were mentioned", "body": "in a task comment" }
+      },
+      "post":     { "title": "New post", "body": "\"{{title}}\"" },
+      "task":     { "title": "Task assigned to you", "body": "\"{{title}}\"" },
+      "rank":     { "title": "You're #{{rank}} on the leaderboard!", "body": "{{totalMinutes}} minutes logged" },
+      "due_soon": { "title": "Task due soon", "body": "\"{{title}}\" is due soon" }
+    }
   },
   "employee_roles": {
     "owner": "Owner",

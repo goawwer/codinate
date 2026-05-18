@@ -110,6 +110,7 @@
         <app-comment-list
           [entityId]="post.id"
           entityType="post"
+          [highlightCommentId]="highlightCommentId"
           (mentionClicked)="closeDialogOnMention()"
         ></app-comment-list>
       </div>

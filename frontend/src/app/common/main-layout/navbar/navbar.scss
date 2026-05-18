@@ -1,3 +1,176 @@
+.navbar__icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.65;
+  }
+}
+
+.navbar__bell-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+::ng-deep tui-dropdown {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  width: 22rem;
+  overflow: hidden !important;
+
+  .t-bar_vertical {
+    top: 2.75rem !important;
+  }
+}
+
+.navbar__badge {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.55rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: var(--tui-status-negative);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.1rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+.navbar__notif-panel {
+  width: 22rem;
+  display: flex;
+  flex-direction: column;
+  background: var(--tui-background-base-alt);
+  border-radius: var(--tui-radius-m);
+  border: 1px solid var(--tui-background-neutral-1-hover);
+}
+
+.navbar__notif-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem 0.625rem;
+  border-bottom: 1px solid var(--tui-border-normal);
+  background: var(--tui-background-base-alt);
+  flex-shrink: 0;
+}
+
+.navbar__notif-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tui-text-primary);
+}
+
+.navbar__notif-mark-all {
+  font-size: 0.75rem;
+  color: var(--tui-text-action);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.navbar__notif-empty {
+  padding: 1.5rem 1rem;
+  font-size: 0.875rem;
+  color: var(--tui-text-tertiary);
+  text-align: center;
+}
+
+.navbar__notif-list {
+}
+
+.navbar__notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--tui-border-normal);
+  }
+
+  &:hover {
+    cursor: pointer;
+    background: var(--tui-background-neutral-1);
+  }
+}
+
+.navbar__notif-icon-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--tui-background-neutral-1);
+  color: var(--tui-text-secondary);
+  margin-top: 0.5rem;
+}
+
+.navbar__notif-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.navbar__notif-item-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--tui-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar__notif-item-body {
+  font-size: 0.75rem;
+  color: var(--tui-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar__notif-time {
+  font-size: 0.7rem;
+  color: var(--tui-text-tertiary);
+  margin-top: 0.1rem;
+}
+
+.navbar__notif-dot {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--tui-status-info);
+  margin-top: 0.4rem;
+}
+
 .navbar__avatar-btn {
   display: flex;
   align-items: center;
