@@ -91,6 +91,8 @@
   } @else if (comments().length > 0) {
     @for (comment of comments(); track comment.id) {
       <app-comment-item
+        [id]="'comment-' + comment.id"
+        [class.comment--highlighted]="comment.id === highlightCommentId"
         [comment]="comment"
         [currentUserId]="currentUserId()"
         [isAdmin]="isAdmin()"

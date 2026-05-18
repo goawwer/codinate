@@ -2,10 +2,13 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/goawwer/codinate/internal/adapter/database"
 	"github.com/goawwer/codinate/internal/adapter/dto/comment"
 	"github.com/goawwer/codinate/internal/adapter/model"
+	"github.com/goawwer/codinate/pkg/logger"
 	"github.com/goawwer/codinate/pkg/util"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -100,7 +103,42 @@ func (r *commentRepoImpl) Create(ctx context.Context, c model.Comment) (uuid.UUI
 		return nil
 	})
 
+	if err == nil && len(mentionIDs) > 0 {
+		go notifyCommentMentions(c, id, mentionIDs)
+	}
+
 	return id, err
+}
+
+func notifyCommentMentions(c model.Comment, commentId uuid.UUID, mentionIDs []uuid.UUID) {
+	ctx := context.Background()
+	notifRepo := GetNotificationRepo()
+
+	related, _ := json.Marshal(map[string]any{
+		"commentId":  commentId.String(),
+		"entityType": string(c.EntityType),
+		"entityId":   c.EntityId.String(),
+	})
+
+	entityLabel := fmt.Sprintf("a %s", c.EntityType)
+
+	for _, mentionedId := range mentionIDs {
+		if mentionedId == c.UserId {
+			continue
+		}
+		n := model.Notification{
+			Id:               uuid.New(),
+			UserId:           mentionedId,
+			ActorId:          c.UserId,
+			NotificationType: "mention",
+			Related:          related,
+			Title:            "You were mentioned",
+			Body:             fmt.Sprintf("in a comment on %s", entityLabel),
+		}
+		if err := notifRepo.Create(ctx, n); err != nil {
+			logger.Errorf("notifyCommentMentions: create notification: %v", err)
+		}
+	}
 }
 
 func (r *commentRepoImpl) IsAuthor(ctx context.Context, userId, commentId uuid.UUID) (bool, error) {

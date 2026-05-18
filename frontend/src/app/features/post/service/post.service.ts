@@ -43,6 +43,10 @@ export class PostService {
     return this.getAll({ ...query, parentType: 'project', parentId: projectId });
   }
 
+  getById(id: string): Observable<Post> {
+    return this.http.get<Post>(`/api/posts/${id}`);
+  }
+
   create(input: CreatePostInput): Observable<Post> {
     return this.http.post<Post>('/api/posts/create', input);
   }

@@ -104,6 +104,7 @@ export class Detailed implements OnInit {
   });
 
   protected taskId = '';
+  protected highlightCommentId?: string;
 
   protected readonly descriptionTools = [
     TuiEditorTool.Bold,
@@ -179,6 +180,8 @@ export class Detailed implements OnInit {
 
   ngOnInit(): void {
     this.taskId = this.route.snapshot.paramMap.get('id')!;
+    const commentParam = this.route.snapshot.queryParamMap.get('comment');
+    if (commentParam) this.highlightCommentId = commentParam;
 
     forkJoin([
       this.taskService.getById(this.taskId),

@@ -40,4 +40,15 @@ export class AlertService {
       .pipe(take(1))
       .subscribe();
   }
+
+  public notification(content: PolymorpheusContent, label?: string) {
+    return this.alertService
+      .open(content, {
+        autoClose: 5000,
+        appearance: 'info',
+        label,
+      })
+      .pipe(take(1))
+      .subscribe();
+  }
 }

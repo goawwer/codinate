@@ -25,6 +25,22 @@
     </button>
 
     <button
+      class="navbar__icon-btn"
+      type="button"
+      [tuiDropdown]="notificationDropdown"
+      [tuiDropdownOpen]="isNotificationDropdownOpen()"
+      (tuiDropdownOpenChange)="isNotificationDropdownOpen.set($event)"
+      (click)="toggleNotificationDropdown()"
+    >
+      <span class="navbar__bell-wrapper">
+        <tui-icon [style.font-size.rem]="1.35" icon="@tui.bell" />
+        @if (notificationStore.unreadCount() > 0) {
+          <span class="navbar__badge">{{ notificationStore.unreadCount() > 99 ? '99+' : notificationStore.unreadCount() }}</span>
+        }
+      </span>
+    </button>
+
+    <button
       class="navbar__avatar-btn"
       type="button"
       [tuiDropdown]="profileDropdown"
@@ -42,6 +58,47 @@
     </button>
   </div>
 </nav>
+
+<ng-template #notificationDropdown>
+  <div class="navbar__notif-panel">
+    <div class="navbar__notif-header">
+      <span class="navbar__notif-title">{{ 'navbar.notifications' | translate }}</span>
+      @if (notificationStore.hasUnread()) {
+        <button type="button" class="navbar__notif-mark-all" (click)="markAllAsRead()">
+          {{ 'navbar.markAllRead' | translate }}
+        </button>
+      }
+    </div>
+
+    @if (notificationStore.notifications().length === 0) {
+      <div class="navbar__notif-empty">{{ 'navbar.noNotifications' | translate }}</div>
+    } @else {
+      <div class="navbar__notif-list">
+        @for (n of notificationStore.notifications(); track n.id) {
+          <div
+            class="navbar__notif-item"
+            [class.navbar__notif-item--unread]="!n.readAt"
+            (click)="navigateTo(n)"
+          >
+            <div class="navbar__notif-icon-wrap">
+              <tui-icon [icon]="notificationIcon(n.notificationType)" [style.font-size.rem]="1" />
+            </div>
+            <div class="navbar__notif-content">
+              <span class="navbar__notif-item-title">{{ notifTitle(n) }}</span>
+              @if (notifBody(n)) {
+                <span class="navbar__notif-item-body">{{ notifBody(n) }}</span>
+              }
+              <span class="navbar__notif-time">{{ n.createdAt | appDate: 'd MMM, HH:mm' }}</span>
+            </div>
+            @if (!n.readAt) {
+              <span class="navbar__notif-dot"></span>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</ng-template>
 
 <ng-template #profileDropdown>
   <tui-data-list class="navbar__dropdown">

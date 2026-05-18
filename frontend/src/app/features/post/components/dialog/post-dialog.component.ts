@@ -26,6 +26,7 @@ import { Router } from '@angular/router';
 export interface PostDialogData {
   post: Post;
   contextParents?: PostParent[];
+  highlightCommentId?: string;
 }
 
 @Component({
@@ -48,6 +49,7 @@ export class PostDialogComponent implements OnInit {
   protected readonly context = injectContext<TuiDialogContext<boolean, PostDialogData>>();
 
   protected readonly post = this.context.data.post;
+  protected readonly highlightCommentId = this.context.data.highlightCommentId;
   protected readonly comments = signal<PostComment[]>([]);
   protected readonly isLoadingComments = signal(true);
   protected readonly isSubmitting = signal(false);

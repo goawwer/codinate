@@ -171,7 +171,24 @@
     "worklog": "Учёт времени",
     "admin": "Админ-панель",
     "profile": "Профиль",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "notifications": "Уведомления",
+    "markAllRead": "Отметить все прочитанными",
+    "noNotifications": "Нет уведомлений",
+    "notif": {
+      "mention": {
+        "post":        { "title": "Вас упомянули", "body": "в посте «{{title}}»" },
+        "postComment": { "title": "Вас упомянули", "body": "в комментарии к посту" },
+        "task":        { "title": "Вас упомянули", "body": "в комментарии к задаче" }
+      },
+      "post": { "title": "Новый пост", "body": "«{{title}}»" },
+      "task": { "title": "Задача назначена вам", "body": "«{{title}}»" },
+      "rank": {
+        "title": "Вы #{{rank}} в рейтинге!",
+        "body": "Всего учтено {{totalMinutes}} минут"
+      },
+      "due_soon": { "title": "Срок задачи истекает", "body": "«{{title}}» скоро истечёт" }
+    }
   },
   "employee_roles": {
     "owner": "Владелец",

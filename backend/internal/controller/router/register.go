@@ -6,6 +6,7 @@ import (
 	"github.com/goawwer/codinate/internal/controller/ui/current"
 	"github.com/goawwer/codinate/internal/controller/ui/employee"
 	"github.com/goawwer/codinate/internal/controller/ui/file"
+	"github.com/goawwer/codinate/internal/controller/ui/notification"
 	"github.com/goawwer/codinate/internal/controller/ui/post"
 	"github.com/goawwer/codinate/internal/controller/ui/project"
 	"github.com/goawwer/codinate/internal/controller/ui/task/categories"
@@ -31,6 +32,7 @@ func init() {
 	comment.Register()
 	worklog.Register()
 	post.Register()
+	notification.Register()
 
 	// public
 	pictures.Register()

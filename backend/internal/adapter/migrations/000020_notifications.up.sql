@@ -1,4 +1,4 @@
-CREATE TYPE notification_type AS ENUM('mention', 'post', 'task');
+CREATE TYPE notification_type AS ENUM('mention', 'post', 'task', 'rank', 'due_soon');
 
 CREATE TABLE IF NOT EXISTS notifications(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
