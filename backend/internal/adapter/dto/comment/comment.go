@@ -9,10 +9,10 @@ import (
 )
 
 type HistoryChange struct {
-	Id        uuid.UUID       `db:"id" json:"id"`
-	FieldName string          `db:"field_name" json:"fieldName"`
-	OldValue  json.RawMessage `db:"old_value" json:"oldValue"`
-	NewValue  json.RawMessage `db:"new_value" json:"newValue"`
+	Id        uuid.UUID `db:"id" json:"id"`
+	FieldName string    `db:"field_name" json:"fieldName"`
+	OldValue  any       `db:"old_value" json:"oldValue"`
+	NewValue  any       `db:"new_value" json:"newValue"`
 }
 
 type HistoryChanges []HistoryChange

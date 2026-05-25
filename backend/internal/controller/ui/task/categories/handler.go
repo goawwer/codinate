@@ -17,7 +17,7 @@ func Register() {
 
 // getAll
 //
-//	@Tags		categories
+//	@Tags		task/categories
 //	@Summary	Get task categories
 //	@Description	Returns all task categories for a given project
 //	@Produce	json
@@ -37,7 +37,7 @@ func getAll(s ui.UIService) (any, error) {
 
 // add
 //
-//	@Tags		categories
+//	@Tags		task/categories
 //	@Summary	Add task category
 //	@Description	Creates a new task category for a given project
 //	@Accept		json
@@ -65,7 +65,7 @@ func add(s ui.UIService) (any, error) {
 
 // update
 //
-//	@Tags		categories
+//	@Tags		task/categories
 //	@Summary	Update task category
 //	@Description	Updates the name of an existing task category
 //	@Accept		json
@@ -93,7 +93,7 @@ func update(s ui.UIService) (any, error) {
 
 // delete
 //
-//	@Tags		categories
+//	@Tags		task/categories
 //	@Summary	Delete task category
 //	@Description	Deletes a task category by ID
 //	@Produce	json

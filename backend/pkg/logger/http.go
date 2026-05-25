@@ -18,12 +18,12 @@ type HttpLoggerEntry struct {
 }
 
 func NewHttpLooger() func(next http.Handler) http.Handler {
-	return middleware.RequestLogger(&HttpMiddlewareLogger{mainDebugLogger})
+	return middleware.RequestLogger(&HttpMiddlewareLogger{mainHttpLogger})
 }
 
 func (l *HttpMiddlewareLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	entry := &HttpLoggerEntry{
-		Entry: logrus.NewEntry(mainDebugLogger),
+		Entry: logrus.NewEntry(mainHttpLogger),
 	}
 
 	logFields := logrus.Fields{}

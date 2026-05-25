@@ -199,6 +199,13 @@ func (qb *QueryFiltersBuilder) Add(column string, f Filter) {
 	qb.whereConditions = append(qb.whereConditions, fmt.Sprintf("%s %v '%v'", column, f.Op, f.Arg))
 }
 
+func (qb *QueryFiltersBuilder) Raw(condition string) *QueryFiltersBuilder {
+	if condition != "" {
+		qb.whereConditions = append(qb.whereConditions, condition)
+	}
+	return qb
+}
+
 func (qb *QueryFiltersBuilder) checkOperator(operator ...string) string {
 	op := ""
 	if len(operator) > 0 {

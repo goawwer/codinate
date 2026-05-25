@@ -55,10 +55,16 @@ func getById(s ui.UIService) (any, error) {
 //	@Failure	500	{object}	string	"Internal Server Error"
 //	@Router		/api/tasks [get]
 func getAll(s ui.UIService) (any, error) {
+	u, err := s.GetCurrentUser()
+	if err != nil {
+		return nil, err
+	}
+
 	filters, err := parseFilterParams(s)
 	if err != nil {
 		return nil, err
 	}
+	filters.MemberUserId = &u.Id
 
 	return s.GetService().(*service).getAllTasks(s.GetRequest().Context(), filters)
 }
@@ -196,6 +202,18 @@ func deleteById(s ui.UIService) (any, error) {
 	)
 }
 
+// addParticipant
+//
+//	@Tags		tasks
+//	@Summary	Add task participant
+//	@Description	Adds a user as a participant to a task
+//	@Produce	json
+//	@Param		id		path	string	true	"Task UUID"
+//	@Param		userId	path	string	true	"User UUID"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/tasks/{id}/participants/{userId}/add [post]
 func addParticipant(s ui.UIService) (any, error) {
 	taskId, err := s.GetPathParameterAsString("id")
 	if err != nil {
@@ -210,23 +228,88 @@ func addParticipant(s ui.UIService) (any, error) {
 	)
 }
 
+// suggestions
+//
+//	@Tags		tasks
+//	@Summary	Get task suggestions
+//	@Description	Returns a paginated list of task suggestions for search/autocomplete
+//	@Produce	json
+//	@Success	200	{object}	[]task.Suggestion
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/tasks/suggestions [get]
 func suggestions(s ui.UIService) (any, error) {
 	return s.GetService().(*service).suggestionsBy(s.GetRequest().Context(), s.GetBasicSortingAndPagingParams())
 }
 
+// getDeadlinePressure
+//
+//	@Tags		tasks
+//	@Summary	Get deadline pressure metrics
+//	@Description	Returns overdue and upcoming tasks for deadline pressure visualization
+//	@Produce	json
+//	@Success	200	{object}	task.DeadlinePressure
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/tasks/metrics/deadline [get]
 func getDeadlinePressure(s ui.UIService) (any, error) {
-	return s.GetService().(*service).getDeadlinePressure(s.GetRequest().Context())
+	u, err := s.GetCurrentUser()
+	if err != nil {
+		return nil, err
+	}
+	return s.GetService().(*service).getDeadlinePressure(s.GetRequest().Context(), u.Id)
 }
 
+// getStatusDistribution
+//
+//	@Tags		tasks
+//	@Summary	Get task status distribution
+//	@Description	Returns the count of tasks grouped by status
+//	@Produce	json
+//	@Success	200	{object}	[]task.StatusDistributionItem
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/tasks/metrics/status-distribution [get]
 func getStatusDistribution(s ui.UIService) (any, error) {
-	return s.GetService().(*service).getStatusDistribution(s.GetRequest().Context())
+	u, err := s.GetCurrentUser()
+	if err != nil {
+		return nil, err
+	}
+	return s.GetService().(*service).getStatusDistribution(s.GetRequest().Context(), u.Id)
 }
 
+// getVelocity
+//
+//	@Tags		tasks
+//	@Summary	Get task velocity metrics
+//	@Description	Returns task completion velocity comparing this week vs last week
+//	@Produce	json
+//	@Success	200	{object}	task.VelocityData
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/tasks/metrics/velocity [get]
 func getVelocity(s ui.UIService) (any, error) {
-	return s.GetService().(*service).getVelocity(s.GetRequest().Context())
+	u, err := s.GetCurrentUser()
+	if err != nil {
+		return nil, err
+	}
+	return s.GetService().(*service).getVelocity(s.GetRequest().Context(), u.Id)
 }
 
+// getTasksByStatus
+//
+//	@Tags		tasks
+//	@Summary	Get tasks by status
+//	@Description	Returns a paginated list of tasks filtered by a specific status
+//	@Produce	json
+//	@Param		statusId	query		int	true	"Status ID"
+//	@Param		pageNumber	query		int	false	"Page number"
+//	@Success	200	{object}	task.StatusTasksPage
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/tasks/metrics/status-tasks [get]
 func getTasksByStatus(s ui.UIService) (any, error) {
+	u, err := s.GetCurrentUser()
+	if err != nil {
+		return nil, err
+	}
+
 	statusId, err := s.GetUrlParamAsInt("statusId")
 	if err != nil {
 		return nil, err
@@ -234,7 +317,7 @@ func getTasksByStatus(s ui.UIService) (any, error) {
 
 	page, _ := s.GetUrlParamAsInt("pageNumber")
 
-	return s.GetService().(*service).getTasksByStatus(s.GetRequest().Context(), statusId, page)
+	return s.GetService().(*service).getTasksByStatus(s.GetRequest().Context(), statusId, page, u.Id)
 }
 
 func parseFilterParams(s ui.UIService) (*task.Filters, error) {

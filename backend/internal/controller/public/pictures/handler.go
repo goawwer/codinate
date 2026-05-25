@@ -42,6 +42,18 @@ func getEntityAvatar(s public.PublicService) (any, error) {
 	return nil, nil
 }
 
+// getProfileBackground
+//
+//	@Tags		pictures
+//	@Summary	Get user profile background
+//	@Description	Serves the background picture for a given user
+//	@Produce	image/*
+//	@Param		user_id		path	string	true	"User UUID"
+//	@Param		filename	query	string	true	"Background picture filename"
+//	@Success	200
+//	@Failure	404	{object}	string	"Not Found"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/users/backgrounds/{user_id} [get]
 func getProfileBackground(s public.PublicService) (any, error) {
 	userId, err := s.GetPathParameterAsString("user_id")
 	if err != nil {

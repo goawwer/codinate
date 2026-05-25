@@ -35,10 +35,10 @@ type TaskRepo interface {
 	ReopenTaskBy(ctx context.Context, id uuid.UUID) error
 	DeleteTaskBy(ctx context.Context, id uuid.UUID) error
 	RecordHistoryBatch(ctx context.Context, entries []model.TaskHistory) error
-	GetDeadlinePressure(ctx context.Context) (task.DeadlinePressure, error)
-	GetStatusDistribution(ctx context.Context) ([]task.StatusDistributionItem, error)
-	GetTasksByStatus(ctx context.Context, statusId, page int) (task.StatusTasksPage, error)
-	GetVelocity(ctx context.Context) (task.VelocityData, error)
+	GetDeadlinePressure(ctx context.Context, userId uuid.UUID) (task.DeadlinePressure, error)
+	GetStatusDistribution(ctx context.Context, userId uuid.UUID) ([]task.StatusDistributionItem, error)
+	GetTasksByStatus(ctx context.Context, statusId, page int, userId uuid.UUID) (task.StatusTasksPage, error)
+	GetVelocity(ctx context.Context, userId uuid.UUID) (task.VelocityData, error)
 
 	// Priorities
 	GetTaskPriorities(ctx context.Context) ([]shared.IdWithName, error)
@@ -95,6 +95,14 @@ func (r *taskRepoImpl) GetTasksRows(ctx context.Context, f *task.Filters) ([]tas
 		return nil, err
 	}
 
+	memberJoin := ""
+	if f.MemberUserId != nil {
+		memberJoin = fmt.Sprintf(
+			"INNER JOIN project_members pm_scope ON pm_scope.project_id = t.project_id AND pm_scope.user_id = '%s'",
+			f.MemberUserId.String(),
+		)
+	}
+
 	err = r.SelectContext(ctx, &res, `
 			SELECT
 				t.id,
@@ -118,6 +126,7 @@ func (r *taskRepoImpl) GetTasksRows(ctx context.Context, f *task.Filters) ([]tas
 			LEFT JOIN task_categories tc ON t.category_id = tc.id
 			LEFT JOIN task_priorities tp ON t.priority_id = tp.id
 			LEFT JOIN task_statuses ts ON t.status_id = ts.id
+			`+memberJoin+`
 		`+
 		qb.In(util.GetDBColumnsFiltersValuesMap(customNames, model.Task{}, f)).
 			FilterWithOperator("t.due_at::TIMESTAMP", f.DateRange.From, ">=").
@@ -547,63 +556,67 @@ func (r *taskRepoImpl) DeleteCategorty(ctx context.Context, id int) error {
 	return err
 }
 
-func (r *taskRepoImpl) GetDeadlinePressure(ctx context.Context) (task.DeadlinePressure, error) {
+func (r *taskRepoImpl) GetDeadlinePressure(ctx context.Context, userId uuid.UUID) (task.DeadlinePressure, error) {
 	overdue := make([]task.DeadlineTask, 0)
 
 	if err := r.SelectContext(ctx, &overdue, `
-		SELECT id, title, due_at
-		FROM tasks
-		WHERE due_at IS NOT NULL
-			AND due_at::date < CURRENT_DATE
-			AND (closed_at IS NULL OR closed_at < '0002-01-01'::timestamp)
-		ORDER BY due_at DESC
-	`); err != nil {
+		SELECT t.id, t.title, t.due_at
+		FROM tasks t
+		INNER JOIN project_members pm ON pm.project_id = t.project_id AND pm.user_id = $1
+		WHERE t.due_at IS NOT NULL
+			AND t.due_at::date < CURRENT_DATE
+			AND (t.closed_at IS NULL OR t.closed_at < '0002-01-01'::timestamp)
+		ORDER BY t.due_at DESC
+	`, userId); err != nil {
 		return task.DeadlinePressure{}, err
 	}
 
 	upcoming := make([]task.DeadlineTask, 0)
 
 	if err := r.SelectContext(ctx, &upcoming, `
-		SELECT id, title, due_at
-		FROM tasks
-		WHERE due_at IS NOT NULL
-			AND due_at::date >= CURRENT_DATE
-			AND due_at::date < CURRENT_DATE + INTERVAL '14 days'
-			AND (closed_at IS NULL OR closed_at < '0002-01-01'::timestamp)
-		ORDER BY due_at ASC
-	`); err != nil {
+		SELECT t.id, t.title, t.due_at
+		FROM tasks t
+		INNER JOIN project_members pm ON pm.project_id = t.project_id AND pm.user_id = $1
+		WHERE t.due_at IS NOT NULL
+			AND t.due_at::date >= CURRENT_DATE
+			AND t.due_at::date < CURRENT_DATE + INTERVAL '14 days'
+			AND (t.closed_at IS NULL OR t.closed_at < '0002-01-01'::timestamp)
+		ORDER BY t.due_at ASC
+	`, userId); err != nil {
 		return task.DeadlinePressure{}, err
 	}
 
 	return task.DeadlinePressure{Overdue: overdue, Upcoming: upcoming}, nil
 }
 
-func (r *taskRepoImpl) GetStatusDistribution(ctx context.Context) ([]task.StatusDistributionItem, error) {
+func (r *taskRepoImpl) GetStatusDistribution(ctx context.Context, userId uuid.UUID) ([]task.StatusDistributionItem, error) {
 	res := make([]task.StatusDistributionItem, 0)
 
 	err := r.SelectContext(ctx, &res, `
 		SELECT ts.name AS status, COUNT(t.id) AS count
 		FROM tasks t
 		JOIN task_statuses ts ON t.status_id = ts.id
+		INNER JOIN project_members pm ON pm.project_id = t.project_id AND pm.user_id = $1
 		WHERE (t.closed_at IS NULL OR t.closed_at < '0002-01-01'::timestamp)
 		GROUP BY ts.name
 		ORDER BY count DESC
-	`)
+	`, userId)
 
 	return res, err
 }
 
-func (r *taskRepoImpl) GetTasksByStatus(ctx context.Context, statusId, page int) (task.StatusTasksPage, error) {
+func (r *taskRepoImpl) GetTasksByStatus(ctx context.Context, statusId, page int, userId uuid.UUID) (task.StatusTasksPage, error) {
 	const pageSize = 5
 	offset := page * pageSize
 
 	var total int
 	if err := r.QueryRowContext(ctx, `
 		SELECT COUNT(*)
-		FROM tasks
-		WHERE status_id = $1
-			AND (closed_at IS NULL OR closed_at < '0002-01-01'::timestamp)
-	`, statusId).Scan(&total); err != nil {
+		FROM tasks t
+		INNER JOIN project_members pm ON pm.project_id = t.project_id AND pm.user_id = $2
+		WHERE t.status_id = $1
+			AND (t.closed_at IS NULL OR t.closed_at < '0002-01-01'::timestamp)
+	`, statusId, userId).Scan(&total); err != nil {
 		return task.StatusTasksPage{}, err
 	}
 
@@ -631,18 +644,19 @@ func (r *taskRepoImpl) GetTasksByStatus(ctx context.Context, statusId, page int)
 		LEFT JOIN task_categories tc   ON t.category_id  = tc.id
 		LEFT JOIN task_priorities tp   ON t.priority_id  = tp.id
 		LEFT JOIN task_statuses ts     ON t.status_id    = ts.id
+		INNER JOIN project_members pm  ON pm.project_id  = t.project_id AND pm.user_id = $2
 		WHERE t.status_id = $1
 			AND (t.closed_at IS NULL OR t.closed_at < '0002-01-01'::timestamp)
 		ORDER BY t.updated_at DESC
-		LIMIT $2 OFFSET $3
-	`, statusId, pageSize, offset); err != nil {
+		LIMIT $3 OFFSET $4
+	`, statusId, userId, pageSize, offset); err != nil {
 		return task.StatusTasksPage{}, err
 	}
 
 	return task.StatusTasksPage{Items: items, Total: total}, nil
 }
 
-func (r *taskRepoImpl) GetVelocity(ctx context.Context) (task.VelocityData, error) {
+func (r *taskRepoImpl) GetVelocity(ctx context.Context, userId uuid.UUID) (task.VelocityData, error) {
 	type rawRow struct {
 		Day   time.Time `db:"day"`
 		Count int       `db:"count"`
@@ -651,33 +665,49 @@ func (r *taskRepoImpl) GetVelocity(ctx context.Context) (task.VelocityData, erro
 	rows := make([]rawRow, 0)
 	if err := r.SelectContext(ctx, &rows, `
 		SELECT day, SUM(cnt) AS count FROM (
-			SELECT created_at::date AS day, COUNT(*) AS cnt
-			FROM tasks
-			WHERE created_at::date >= CURRENT_DATE - INTERVAL '13 days'
+			SELECT t.created_at::date AS day, COUNT(*) AS cnt
+			FROM tasks t
+			INNER JOIN project_members pm ON pm.project_id = t.project_id AND pm.user_id = $1
+			WHERE t.created_at::date >= CURRENT_DATE - INTERVAL '13 days'
 			GROUP BY day
 			UNION ALL
-			SELECT closed_at::date AS day, COUNT(*) AS cnt
-			FROM tasks
-			WHERE closed_at IS NOT NULL
-				AND closed_at >= '0002-01-01'::timestamp
-				AND closed_at::date >= CURRENT_DATE - INTERVAL '13 days'
+			SELECT t.closed_at::date AS day, COUNT(*) AS cnt
+			FROM tasks t
+			INNER JOIN project_members pm ON pm.project_id = t.project_id AND pm.user_id = $1
+			WHERE t.closed_at IS NOT NULL
+				AND t.closed_at >= '0002-01-01'::timestamp
+				AND t.closed_at::date >= CURRENT_DATE - INTERVAL '13 days'
 			GROUP BY day
 			UNION ALL
-			SELECT created_at::date AS day, COUNT(*) AS cnt
-			FROM posts
-			WHERE deleted_at IS NULL
-				AND created_at::date >= CURRENT_DATE - INTERVAL '13 days'
+			SELECT p.created_at::date AS day, COUNT(*) AS cnt
+			FROM posts p
+			WHERE p.deleted_at IS NULL
+				AND p.created_at::date >= CURRENT_DATE - INTERVAL '13 days'
+				AND EXISTS (
+					SELECT 1 FROM post_parents pp_v
+					WHERE pp_v.post_id = p.id
+					  AND (
+					    (pp_v.parent_type = 'project' AND EXISTS (SELECT 1 FROM project_members WHERE project_id = pp_v.parent_id AND user_id = $1))
+					    OR
+					    (pp_v.parent_type = 'team'    AND EXISTS (SELECT 1 FROM team_members    WHERE team_id    = pp_v.parent_id AND user_id = $1))
+					  )
+				)
 			GROUP BY day
 			UNION ALL
-			SELECT created_at::date AS day, COUNT(*) AS cnt
-			FROM comments
-			WHERE deleted_at IS NULL
-				AND created_at::date >= CURRENT_DATE - INTERVAL '13 days'
+			SELECT c.created_at::date AS day, COUNT(*) AS cnt
+			FROM comments c
+			WHERE c.deleted_at IS NULL
+				AND c.created_at::date >= CURRENT_DATE - INTERVAL '13 days'
+				AND EXISTS (
+					SELECT 1 FROM tasks t
+					INNER JOIN project_members pm ON pm.project_id = t.project_id AND pm.user_id = $1
+					WHERE t.id = c.entity_id AND c.entity_type::text = 'task'
+				)
 			GROUP BY day
 		) sub
 		GROUP BY day
 		ORDER BY day ASC
-	`); err != nil {
+	`, userId); err != nil {
 		return task.VelocityData{}, err
 	}
 

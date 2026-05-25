@@ -3,6 +3,7 @@ package post
 import (
 	"github.com/goawwer/codinate/internal/adapter/dto/filters"
 	"github.com/goawwer/codinate/internal/controller"
+	"github.com/google/uuid"
 )
 
 type InputFilters struct {
@@ -11,12 +12,13 @@ type InputFilters struct {
 }
 
 type Filters struct {
-	DateRange  *filters.DateRange
-	SortBy     *filters.Sorting
-	SearchBy   *filters.Search
-	Paging     *filters.Page
-	ParentType string
-	ParentId   int
+	DateRange    *filters.DateRange
+	SortBy       *filters.Sorting
+	SearchBy     *filters.Search
+	Paging       *filters.Page
+	ParentType   string
+	ParentId     int
+	MemberUserId *uuid.UUID
 }
 
 func (in *InputFilters) ResolveFilters(basic controller.BasicQueryParams) *Filters {

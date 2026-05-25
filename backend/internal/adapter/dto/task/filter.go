@@ -3,6 +3,7 @@ package task
 import (
 	"github.com/goawwer/codinate/internal/adapter/dto/filters"
 	"github.com/goawwer/codinate/internal/controller"
+	"github.com/google/uuid"
 )
 
 type FiltersInput struct {
@@ -17,18 +18,19 @@ type FiltersInput struct {
 }
 
 type Filters struct {
-	DateRange  *filters.DateRange
-	SortBy     *filters.Sorting
-	SearchBy   *filters.Search
-	Paging     *filters.Page
-	ProjectId  []int    `json:"projectId"`
-	ReleaseId  []int    `json:"releaseId"`
-	CategotyId []int    `json:"categoryId"`
-	PriorityId []int    `json:"priorityId"`
-	StatusId   []int    `json:"statusId"`
-	AssigneeId []string `json:"assigneeId"`
-	AuthorId   []string `json:"authorId"`
-	Identifier int      `json:"identifier"`
+	DateRange    *filters.DateRange
+	SortBy       *filters.Sorting
+	SearchBy     *filters.Search
+	Paging       *filters.Page
+	ProjectId    []int    `json:"projectId"`
+	ReleaseId    []int    `json:"releaseId"`
+	CategotyId   []int    `json:"categoryId"`
+	PriorityId   []int    `json:"priorityId"`
+	StatusId     []int    `json:"statusId"`
+	AssigneeId   []string `json:"assigneeId"`
+	AuthorId     []string `json:"authorId"`
+	Identifier   int      `json:"identifier"`
+	MemberUserId *uuid.UUID
 }
 
 func (in *FiltersInput) ResolveFilters(basic controller.BasicQueryParams) *Filters {
