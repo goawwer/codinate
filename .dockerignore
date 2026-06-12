@@ -3,3 +3,7 @@
 
 .env
 !.env.example
+
+.git
+*.md
+docs/

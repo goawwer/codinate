@@ -17,15 +17,41 @@ func Register() {
 	ui.RegisterDelete("/posts/{id}/delete", enum.AnyUser, reflect.TypeOf(service{}), deletePost)
 }
 
+// getAll
+//
+//	@Tags		posts
+//	@Summary	Get all posts
+//	@Description	Returns a filtered list of posts
+//	@Produce	json
+//	@Success	200	{object}	[]post.Row
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/posts [get]
 func getAll(s ui.UIService) (any, error) {
-	f, err := parseFilterParams(s)
+	u, err := s.GetCurrentUser()
 	if err != nil {
 		return nil, err
 	}
 
+	f, err := parseFilterParams(s)
+	if err != nil {
+		return nil, err
+	}
+	f.MemberUserId = &u.Id
+
 	return s.GetService().(*service).getPosts(s.GetRequest().Context(), f)
 }
 
+// getPost
+//
+//	@Tags		posts
+//	@Summary	Get post by ID
+//	@Description	Returns a single post by its UUID
+//	@Produce	json
+//	@Param		id	path		string	true	"Post UUID"
+//	@Success	200	{object}	post.Row
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/posts/{id} [get]
 func getPost(s ui.UIService) (any, error) {
 	id, err := s.GetPathParameterAsString("id")
 	if err != nil {
@@ -35,6 +61,18 @@ func getPost(s ui.UIService) (any, error) {
 	return s.GetService().(*service).getPost(s.GetRequest().Context(), uuid.MustParse(id))
 }
 
+// add
+//
+//	@Tags		posts
+//	@Summary	Create post
+//	@Description	Creates a new post for the current user
+//	@Accept		json
+//	@Produce	json
+//	@Param		payload	body	post.CreatePostInput	true	"Post data"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/posts/create [post]
 func add(s ui.UIService) (any, error) {
 	user, err := s.GetCurrentUser()
 	if err != nil {
@@ -50,6 +88,20 @@ func add(s ui.UIService) (any, error) {
 	return s.GetService().(*service).addPost(s.GetRequest().Context(), input, user.Id)
 }
 
+// updatePost
+//
+//	@Tags		posts
+//	@Summary	Update post
+//	@Description	Updates fields of an existing post, only allowed for the post author or admins
+//	@Accept		json
+//	@Produce	json
+//	@Param		id		path	string				true	"Post UUID"
+//	@Param		payload	body	post.UpdatePostInput	true	"Fields to update"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	403	{object}	string	"Forbidden"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/posts/{id}/update [patch]
 func updatePost(s ui.UIService) (any, error) {
 	u, err := s.GetCurrentUser()
 	if err != nil {
@@ -71,6 +123,18 @@ func updatePost(s ui.UIService) (any, error) {
 	)
 }
 
+// deletePost
+//
+//	@Tags		posts
+//	@Summary	Delete post
+//	@Description	Deletes a post by ID, only allowed for the post author or admins
+//	@Produce	json
+//	@Param		id	path	string	true	"Post UUID"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	403	{object}	string	"Forbidden"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/posts/{id}/delete [delete]
 func deletePost(s ui.UIService) (any, error) {
 	u, err := s.GetCurrentUser()
 	if err != nil {

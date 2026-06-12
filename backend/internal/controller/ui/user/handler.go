@@ -158,11 +158,34 @@ func deleteMany(s ui.UIService) (any, error) {
 	return nil, s.GetService().(*service).deleteUsersByIds(s.GetRequest().Context(), input.IDs)
 }
 
+// usersHours
+//
+//	@Tags		user
+//	@Summary	Get all users hours
+//	@Description	Returns total logged hours per user within a date range (admin only)
+//	@Produce	json
+//	@Param		from	query		string	true	"Start date (RFC3339)"
+//	@Param		to		query		string	true	"End date (RFC3339)"
+//	@Success	200	{object}	[]user.UserHoursStat
+//	@Failure	401	{object}	string	"Unauthorized"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/users/hours [get]
 func usersHours(s ui.UIService) (any, error) {
 	from, to := s.GetDateRange()
 	return s.GetService().(*service).getAllUsersHours(s.GetRequest().Context(), from, to)
 }
 
+// profile
+//
+//	@Tags		user
+//	@Summary	Get user profile
+//	@Description	Returns the full profile of a user by their UUID
+//	@Produce	json
+//	@Param		user_id	path		string	true	"User UUID"
+//	@Success	200	{object}	user.Profile
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/users/profile/{user_id} [get]
 func profile(s ui.UIService) (any, error) {
 	userId, err := s.GetPathParameterAsString("user_id")
 	if err != nil {
@@ -172,6 +195,19 @@ func profile(s ui.UIService) (any, error) {
 	return s.GetService().(*service).getUserProfileBy(s.GetRequest().Context(), uuid.MustParse(userId))
 }
 
+// profileStats
+//
+//	@Tags		user
+//	@Summary	Get user profile stats
+//	@Description	Returns statistics for a user's profile (work dynamics, project focus, task counts)
+//	@Produce	json
+//	@Param		user_id	path		string	true	"User UUID"
+//	@Param		from	query		string	true	"Start date (RFC3339)"
+//	@Param		to		query		string	true	"End date (RFC3339)"
+//	@Success	200	{object}	user.ProfileStats
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/users/profile/{user_id}/stats [get]
 func profileStats(s ui.UIService) (any, error) {
 	userId, err := s.GetPathParameterAsString("user_id")
 	if err != nil {
@@ -183,6 +219,20 @@ func profileStats(s ui.UIService) (any, error) {
 	return s.GetService().(*service).getUserProfileStats(s.GetRequest().Context(), userId, from, to)
 }
 
+// updateProfile
+//
+//	@Tags		user
+//	@Summary	Update user profile
+//	@Description	Updates profile fields (username, about, avatar, background) via multipart form
+//	@Accept		multipart/form-data
+//	@Produce	json
+//	@Param		user_id		path		string	true	"User UUID"
+//	@Param		avatar		formData	file	false	"Avatar image"
+//	@Param		background	formData	file	false	"Background image"
+//	@Success	200
+//	@Failure	400	{object}	string	"Bad Request"
+//	@Failure	500	{object}	string	"Internal Server Error"
+//	@Router		/api/users/profile/{user_id} [patch]
 func updateProfile(s ui.UIService) (any, error) {
 	id, err := s.GetPathParameterAsString("user_id")
 	if err != nil {

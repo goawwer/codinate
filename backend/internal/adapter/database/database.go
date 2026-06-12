@@ -19,7 +19,7 @@ var (
 )
 
 func Initialize(ctx context.Context) error {
-	cfg, err := loadDabaseConfig()
+	cfg, err := loadDatabaseConfig()
 	if err != nil {
 		logger.Errorf("failed to load database configuration: %v", err)
 		return err
@@ -36,6 +36,8 @@ func Initialize(ctx context.Context) error {
 	db.SetConnMaxIdleTime(time.Duration(cfg.IdleTimeoutMinute) * time.Minute)
 	db.SetConnMaxLifetime(time.Duration(cfg.MaxRetries) * time.Minute)
 
+	stats = &healthStatus{}
+
 	if err := pingWithRetry(ctx, db, 3); err != nil {
 		logger.Errorf("failed to ping database after retries: %v", err)
 		db.Close()
@@ -50,9 +52,7 @@ func Initialize(ctx context.Context) error {
 
 	databaseMasterVariable.isAlive.Store(true)
 
-	stats = &healthStatus{
-		LastPingSuccess: time.Now(),
-	}
+	stats.LastPingSuccess = time.Now()
 
 	go databaseMasterVariable.healthMonitor(ctx)
 
@@ -61,12 +61,39 @@ func Initialize(ctx context.Context) error {
 	return nil
 }
 
-func loadDabaseConfig() (*config, error) {
-	var cfg config
+func loadDatabaseConfig() (*config, error) {
+	for _, key := range []string{
+		"DB_NAME",
+		"DB_HOST",
+		"DB_PORT",
+		"DB_USER",
+		"DB_PASSWORD",
+		"DB_POOLSIZE",
+		"DB_IDLE_TIMEOUT_MINUTE",
+		"DB_MAX_IDLE_CONNS",
+		"DB_MAX_RETRIES",
+		"DB_READ_TIMEOUT_MINUTE",
+		"DB_WRITE_TIMEOUT_MINUTE",
+		"DB_URL",
+	} {
+		if err := viper.BindEnv(key); err != nil {
+			return nil, err
+		}
+	}
 
-	if err := viper.Unmarshal(&cfg); err != nil {
-		logger.Errorf("failed to load database config: %v", err)
-		return nil, err
+	cfg := config{
+		Name:               viper.GetString("DB_NAME"),
+		Host:               viper.GetString("DB_HOST"),
+		Port:               viper.GetInt("DB_PORT"),
+		User:               viper.GetString("DB_USER"),
+		Password:           viper.GetString("DB_PASSWORD"),
+		PoolSize:           viper.GetInt("DB_POOLSIZE"),
+		IdleTimeoutMinute:  viper.GetInt("DB_IDLE_TIMEOUT_MINUTE"),
+		MaxIdleConns:       viper.GetInt("DB_MAX_IDLE_CONNS"),
+		MaxRetries:         viper.GetInt("DB_MAX_RETRIES"),
+		ReadTimeoutMinute:  viper.GetInt("DB_READ_TIMEOUT_MINUTE"),
+		WriteTimeoutMinute: viper.GetInt("DB_WRITE_TIMEOUT_MINUTE"),
+		URL:                viper.GetString("DB_URL"),
 	}
 
 	setupDefaults(&cfg)
@@ -104,5 +131,12 @@ func setupDefaults(cfg *config) {
 
 	if cfg.WriteTimeoutMinute == 0 {
 		cfg.WriteTimeoutMinute = 5
+	}
+
+	if cfg.URL == "" {
+		cfg.URL = fmt.Sprintf(
+			"postgresql://%s:%s@%s:%d/%s?sslmode=disable",
+			cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name,
+		)
 	}
 }

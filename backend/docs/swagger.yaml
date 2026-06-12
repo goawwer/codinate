@@ -18,6 +18,17 @@ definitions:
         type: string
       entityType:
         type: string
+      id:
+        type: string
+    type: object
+  comment.HistoryChange:
+    properties:
+      fieldName:
+        type: string
+      id:
+        type: string
+      newValue: {}
+      oldValue: {}
     type: object
   comment.Row:
     properties:
@@ -27,6 +38,10 @@ definitions:
         type: array
       body:
         type: string
+      changes:
+        items:
+          $ref: '#/definitions/comment.HistoryChange'
+        type: array
       createdAt:
         type: string
       employeeId:
@@ -38,6 +53,10 @@ definitions:
       employeeSurname:
         type: string
       employeeUsername:
+        type: string
+      entityId:
+        type: string
+      entityType:
         type: string
       id:
         type: string
@@ -56,6 +75,10 @@ definitions:
         type: string
       entityType:
         type: string
+      newAttachedFiles:
+        items:
+          $ref: '#/definitions/file.AttachedFileInput'
+        type: array
     type: object
   enum.PermissionRole:
     enum:
@@ -69,6 +92,24 @@ definitions:
     - AdminPermissionRole
     - UserPermissionRole
     - NoPermissionRole
+  enum.PostParentType:
+    enum:
+    - project
+    - team
+    type: string
+    x-enum-varnames:
+    - PostParentProject
+    - PostParentTeam
+  enum.PostType:
+    enum:
+    - basic
+    - announcement
+    - poll
+    type: string
+    x-enum-varnames:
+    - PostBasic
+    - PostAnnouncement
+    - PostPoll
   file.AttachedFileInfo:
     properties:
       id:
@@ -94,6 +135,107 @@ definitions:
       size:
         type: integer
       url:
+        type: string
+    type: object
+  notification.JSONField:
+    additionalProperties: {}
+    type: object
+  notification.Row:
+    properties:
+      actorName:
+        type: string
+      actorPicture:
+        type: string
+      actorSurname:
+        type: string
+      body:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      notificationType:
+        type: string
+      readAt:
+        type: string
+      related:
+        $ref: '#/definitions/notification.JSONField'
+      title:
+        type: string
+    type: object
+  notification.UnreadCount:
+    properties:
+      count:
+        type: integer
+    type: object
+  post.CreatePostInput:
+    properties:
+      attachedFiles:
+        items:
+          $ref: '#/definitions/file.AttachedFileInput'
+        type: array
+      authorId:
+        type: string
+      body:
+        type: string
+      id:
+        type: string
+      parents:
+        items:
+          $ref: '#/definitions/post.PostParent'
+        type: array
+      postType:
+        $ref: '#/definitions/enum.PostType'
+      title:
+        type: string
+    type: object
+  post.PostParent:
+    properties:
+      parentId:
+        type: integer
+      postParentType:
+        $ref: '#/definitions/enum.PostParentType'
+    type: object
+  post.Row:
+    properties:
+      attachedFiles:
+        items:
+          $ref: '#/definitions/file.AttachedFileInfo'
+        type: array
+      authorName:
+        type: string
+      authorPicture:
+        type: string
+      authorSurname:
+        type: string
+      authorUsername:
+        type: string
+      body:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  post.UpdatePostInput:
+    properties:
+      attachedFiles:
+        items:
+          $ref: '#/definitions/file.AttachedFileInput'
+        type: array
+      body:
+        type: string
+      parents:
+        items:
+          $ref: '#/definitions/post.PostParent'
+        type: array
+      postType:
+        $ref: '#/definitions/enum.PostType'
+      title:
         type: string
     type: object
   project.CreateReleaseInput:
@@ -134,6 +276,8 @@ definitions:
         items:
           $ref: '#/definitions/shared.MemberShort'
         type: array
+      projectAbout:
+        type: string
       projectDescription:
         type: string
       projectName:
@@ -174,6 +318,8 @@ definitions:
         type: string
       name:
         type: string
+      picture:
+        type: string
       role:
         type: string
       surname:
@@ -213,6 +359,26 @@ definitions:
       title:
         type: string
     type: object
+  task.DeadlinePressure:
+    properties:
+      overdue:
+        items:
+          $ref: '#/definitions/task.DeadlineTask'
+        type: array
+      upcoming:
+        items:
+          $ref: '#/definitions/task.DeadlineTask'
+        type: array
+    type: object
+  task.DeadlineTask:
+    properties:
+      dueAt:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+    type: object
   task.Row:
     properties:
       assigneeUsername:
@@ -249,6 +415,8 @@ definitions:
       assigneeId:
         type: string
       assigneeName:
+        type: string
+      assigneePicture:
         type: string
       assigneeSurname:
         type: string
@@ -303,9 +471,36 @@ definitions:
       updatedAt:
         type: string
     type: object
+  task.StatusDistributionItem:
+    properties:
+      count:
+        type: integer
+      status:
+        type: string
+    type: object
+  task.StatusTasksPage:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/task.Row'
+        type: array
+      total:
+        type: integer
+    type: object
+  task.Suggestion:
+    properties:
+      id:
+        type: string
+      identifier:
+        type: integer
+      title:
+        type: string
+    type: object
   task.UpdateTaskInput:
     properties:
       assigneeId:
+        type: string
+      assigneeName:
         type: string
       attachedFiles:
         items:
@@ -315,7 +510,11 @@ definitions:
         type: string
       categoryId:
         type: integer
+      categoryName:
+        type: string
       closedAt:
+        type: string
+      commentBody:
         type: string
       description:
         type: string
@@ -325,13 +524,43 @@ definitions:
         type: string
       priorityId:
         type: integer
+      priorityName:
+        type: string
       projectId:
         type: integer
       releaseId:
         type: integer
+      releaseName:
+        type: string
       statusId:
         type: integer
+      statusName:
+        type: string
       title:
+        type: string
+    type: object
+  task.VelocityData:
+    properties:
+      changePercent:
+        type: integer
+      lastWeek:
+        items:
+          $ref: '#/definitions/task.VelocityDay'
+        type: array
+      lastWeekTotal:
+        type: integer
+      thisWeek:
+        items:
+          $ref: '#/definitions/task.VelocityDay'
+        type: array
+      thisWeekTotal:
+        type: integer
+    type: object
+  task.VelocityDay:
+    properties:
+      count:
+        type: integer
+      day:
         type: string
     type: object
   team.Row:
@@ -344,6 +573,10 @@ definitions:
         type: string
       id:
         type: integer
+      links:
+        items:
+          $ref: '#/definitions/team.TeamLink'
+        type: array
       members:
         items:
           $ref: '#/definitions/shared.MemberShort'
@@ -354,6 +587,20 @@ definitions:
         type: string
       updatedAt:
         type: string
+    type: object
+  team.TeamLink:
+    properties:
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+  team.UpdateLinksInput:
+    properties:
+      links:
+        items:
+          $ref: '#/definitions/team.TeamLink'
+        type: array
     type: object
   user.CreateInput:
     properties:
@@ -372,12 +619,76 @@ definitions:
       username:
         type: string
     type: object
+  user.DailyWorkStat:
+    properties:
+      date:
+        type: string
+      spentMinutes:
+        type: integer
+    type: object
   user.DeleteMultiInput:
     properties:
       ids:
         items:
           type: string
         type: array
+    type: object
+  user.Profile:
+    properties:
+      about:
+        type: string
+      avatar:
+        type: string
+      backgroundPicture:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/user.UserProjectProfile'
+        type: array
+      recentMinutes:
+        type: integer
+      role:
+        type: string
+      surname:
+        type: string
+      username:
+        type: string
+    type: object
+  user.ProfileStats:
+    properties:
+      assignedTasksCount:
+        type: integer
+      authoredTasksCount:
+        type: integer
+      commentsCount:
+        type: integer
+      participatedTasksCount:
+        type: integer
+      postsCount:
+        type: integer
+      projectFocus:
+        items:
+          $ref: '#/definitions/user.ProjectFocusStat'
+        type: array
+      workDynamics:
+        items:
+          $ref: '#/definitions/user.DailyWorkStat'
+        type: array
+    type: object
+  user.ProjectFocusStat:
+    properties:
+      projectId:
+        type: integer
+      projectName:
+        type: string
+      spentMinutes:
+        type: integer
     type: object
   user.Row:
     properties:
@@ -404,6 +715,15 @@ definitions:
       username:
         type: string
     type: object
+  user.TaskRef:
+    properties:
+      id:
+        type: string
+      identifier:
+        type: integer
+      title:
+        type: string
+    type: object
   user.UpdateInput:
     properties:
       disabled:
@@ -423,6 +743,121 @@ definitions:
       surname:
         type: string
       username:
+        type: string
+    type: object
+  user.UserHoursStat:
+    properties:
+      totalMinutes:
+        type: integer
+      userId:
+        type: string
+    type: object
+  user.UserProjectProfile:
+    properties:
+      about:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      picture:
+        type: string
+      recentMinutes:
+        type: integer
+      spentMinutes:
+        type: integer
+      tasks:
+        items:
+          $ref: '#/definitions/user.TaskRef'
+        type: array
+    type: object
+  worklog.CreateLogInput:
+    properties:
+      description:
+        type: string
+      endAt:
+        type: string
+      startAt:
+        type: string
+      taskId:
+        type: string
+      userId:
+        type: string
+    type: object
+  worklog.LeaderboardEntry:
+    properties:
+      avatar:
+        type: string
+      logCount:
+        type: integer
+      name:
+        type: string
+      rank:
+        type: integer
+      surname:
+        type: string
+      totalMinutes:
+        type: integer
+      userId:
+        type: string
+      username:
+        type: string
+    type: object
+  worklog.Row:
+    properties:
+      date:
+        type: string
+      description:
+        type: string
+      endAt:
+        type: string
+      id:
+        type: string
+      projectName:
+        type: string
+      startAt:
+        type: string
+      taskId:
+        type: string
+      taskIdentifier:
+        type: integer
+      totalMinutes:
+        type: integer
+    type: object
+  worklog.TaskRow:
+    properties:
+      description:
+        type: string
+      endAt:
+        type: string
+      id:
+        type: string
+      startAt:
+        type: string
+      taskId:
+        type: string
+      totalMinutes:
+        type: integer
+      userAvatar:
+        type: string
+      userId:
+        type: string
+      userName:
+        type: string
+      userSurname:
+        type: string
+    type: object
+  worklog.UpdateLogInput:
+    properties:
+      description:
+        type: string
+      endAt:
+        type: string
+      startAt:
+        type: string
+      taskId:
+        type: string
+      userId:
         type: string
     type: object
 info:
@@ -829,6 +1264,245 @@ paths:
       summary: Upload entity file
       tags:
       - files
+  /api/notifications:
+    get:
+      description: Returns notifications for the current user, optionally filtered
+        by a since timestamp
+      parameters:
+      - description: RFC3339 timestamp to fetch notifications after
+        in: query
+        name: since
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/notification.Row'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: List notifications
+      tags:
+      - notifications
+  /api/notifications/{id}/read:
+    post:
+      description: Marks a specific notification as read for the current user
+      parameters:
+      - description: Notification UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Mark notification as read
+      tags:
+      - notifications
+  /api/notifications/read-all:
+    post:
+      description: Marks all notifications for the current user as read
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Mark all notifications as read
+      tags:
+      - notifications
+  /api/notifications/unread-count:
+    get:
+      description: Returns the number of unread notifications for the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notification.UnreadCount'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get unread notification count
+      tags:
+      - notifications
+  /api/posts:
+    get:
+      description: Returns a filtered list of posts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/post.Row'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all posts
+      tags:
+      - posts
+  /api/posts/{id}:
+    get:
+      description: Returns a single post by its UUID
+      parameters:
+      - description: Post UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/post.Row'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get post by ID
+      tags:
+      - posts
+  /api/posts/{id}/delete:
+    delete:
+      description: Deletes a post by ID, only allowed for the post author or admins
+      parameters:
+      - description: Post UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete post
+      tags:
+      - posts
+  /api/posts/{id}/update:
+    patch:
+      consumes:
+      - application/json
+      description: Updates fields of an existing post, only allowed for the post author
+        or admins
+      parameters:
+      - description: Post UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/post.UpdatePostInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update post
+      tags:
+      - posts
+  /api/posts/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new post for the current user
+      parameters:
+      - description: Post data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/post.CreatePostInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create post
+      tags:
+      - posts
   /api/projects:
     get:
       description: Returns a list of all projects with their members
@@ -1070,6 +1744,9 @@ paths:
         type: file
       - in: formData
         name: authorId
+        type: string
+      - in: formData
+        name: projectAbout
         type: string
       - in: formData
         name: projectDescription
@@ -1528,6 +2205,36 @@ paths:
       summary: Delete task
       tags:
       - tasks
+  /api/tasks/{id}/participants/{userId}/add:
+    post:
+      description: Adds a user as a participant to a task
+      parameters:
+      - description: Task UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User UUID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add task participant
+      tags:
+      - tasks
   /api/tasks/{id}/reopen:
     post:
       description: Reopens a closed task by clearing its closed_at timestamp
@@ -1610,7 +2317,7 @@ paths:
             type: string
       summary: Get task categories
       tags:
-      - categories
+      - task/categories
   /api/tasks/{project_id}/categories/add:
     post:
       consumes:
@@ -1643,7 +2350,7 @@ paths:
             type: string
       summary: Add task category
       tags:
-      - categories
+      - task/categories
   /api/tasks/add:
     post:
       consumes:
@@ -1699,7 +2406,7 @@ paths:
             type: string
       summary: Delete task category
       tags:
-      - categories
+      - task/categories
   /api/tasks/categories/{id}/update:
     patch:
       consumes:
@@ -1732,7 +2439,110 @@ paths:
             type: string
       summary: Update task category
       tags:
-      - categories
+      - task/categories
+  /api/tasks/metrics/deadline:
+    get:
+      description: Returns overdue and upcoming tasks for deadline pressure visualization
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/task.DeadlinePressure'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get deadline pressure metrics
+      tags:
+      - tasks
+  /api/tasks/metrics/status-distribution:
+    get:
+      description: Returns the count of tasks grouped by status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/task.StatusDistributionItem'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get task status distribution
+      tags:
+      - tasks
+  /api/tasks/metrics/status-tasks:
+    get:
+      description: Returns a paginated list of tasks filtered by a specific status
+      parameters:
+      - description: Status ID
+        in: query
+        name: statusId
+        required: true
+        type: integer
+      - description: Page number
+        in: query
+        name: pageNumber
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/task.StatusTasksPage'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get tasks by status
+      tags:
+      - tasks
+  /api/tasks/metrics/velocity:
+    get:
+      description: Returns task completion velocity comparing this week vs last week
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/task.VelocityData'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get task velocity metrics
+      tags:
+      - tasks
+  /api/tasks/suggestions:
+    get:
+      description: Returns a paginated list of task suggestions for search/autocomplete
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/task.Suggestion'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get task suggestions
+      tags:
+      - tasks
   /api/teams:
     get:
       description: Returns a list of all teams with their members
@@ -1775,6 +2585,39 @@ paths:
           schema:
             type: string
       summary: Delete team
+      tags:
+      - teams
+  /api/teams/{id}/links:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the links list for a team
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Links payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/team.UpdateLinksInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update team links
       tags:
       - teams
   /api/teams/{id}/members:
@@ -2154,6 +2997,323 @@ paths:
       summary: Update user by ID
       tags:
       - user
+  /api/users/hours:
+    get:
+      description: Returns total logged hours per user within a date range (admin
+        only)
+      parameters:
+      - description: Start date (RFC3339)
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: End date (RFC3339)
+        in: query
+        name: to
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/user.UserHoursStat'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all users hours
+      tags:
+      - user
+  /api/users/profile/{user_id}:
+    get:
+      description: Returns the full profile of a user by their UUID
+      parameters:
+      - description: User UUID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.Profile'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get user profile
+      tags:
+      - user
+    patch:
+      consumes:
+      - multipart/form-data
+      description: Updates profile fields (username, about, avatar, background) via
+        multipart form
+      parameters:
+      - description: User UUID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Avatar image
+        in: formData
+        name: avatar
+        type: file
+      - description: Background image
+        in: formData
+        name: background
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update user profile
+      tags:
+      - user
+  /api/users/profile/{user_id}/stats:
+    get:
+      description: Returns statistics for a user's profile (work dynamics, project
+        focus, task counts)
+      parameters:
+      - description: User UUID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Start date (RFC3339)
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: End date (RFC3339)
+        in: query
+        name: to
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.ProfileStats'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get user profile stats
+      tags:
+      - user
+  /api/worklogs/{log_id}/delete:
+    delete:
+      description: Deletes a worklog entry by its UUID
+      parameters:
+      - description: Worklog UUID
+        in: path
+        name: log_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete worklog
+      tags:
+      - worklogs
+  /api/worklogs/{log_id}/update:
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing worklog entry
+      parameters:
+      - description: Worklog UUID
+        in: path
+        name: log_id
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/worklog.UpdateLogInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update worklog
+      tags:
+      - worklogs
+  /api/worklogs/{user_id}/all:
+    get:
+      description: Returns a filtered list of worklogs for a specific user
+      parameters:
+      - description: User UUID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/worklog.Row'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all worklogs for a user
+      tags:
+      - worklogs
+  /api/worklogs/add:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new time log entry for a task
+      parameters:
+      - description: Worklog data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/worklog.CreateLogInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Add worklog
+      tags:
+      - worklogs
+  /api/worklogs/leaderboard:
+    get:
+      description: Returns users ranked by total logged minutes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/worklog.LeaderboardEntry'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get worklog leaderboard
+      tags:
+      - worklogs
+  /api/worklogs/leaderboard/recalculate:
+    post:
+      description: Triggers a recalculation of the leaderboard rankings (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Recalculate worklog leaderboard
+      tags:
+      - worklogs
+  /api/worklogs/tasks/{task_id}:
+    get:
+      description: Returns all worklogs associated with a specific task
+      parameters:
+      - description: Task UUID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/worklog.TaskRow'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get worklogs by task
+      tags:
+      - worklogs
   /auth/login:
     post:
       consumes:
@@ -2225,4 +3385,34 @@ paths:
       summary: Refresh
       tags:
       - auth
+  /users/backgrounds/{user_id}:
+    get:
+      description: Serves the background picture for a given user
+      parameters:
+      - description: User UUID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Background picture filename
+        in: query
+        name: filename
+        required: true
+        type: string
+      produces:
+      - image/*
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get user profile background
+      tags:
+      - pictures
 swagger: "2.0"

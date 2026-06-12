@@ -23,12 +23,15 @@
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  width: 22rem;
   overflow: hidden !important;
 
   .t-bar_vertical {
     top: 2.75rem !important;
   }
+}
+
+::ng-deep tui-dropdown:has(.navbar__notif-panel) {
+  width: 22rem;
 }
 
 .navbar__badge {
@@ -94,9 +97,6 @@
   font-size: 0.875rem;
   color: var(--tui-text-tertiary);
   text-align: center;
-}
-
-.navbar__notif-list {
 }
 
 .navbar__notif-item {
@@ -192,6 +192,7 @@
 
 .navbar__dropdown {
   min-width: 8rem;
+  max-width: 15rem;
 }
 
 .navbar__dropdown-user {

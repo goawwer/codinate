@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"strconv"
 	"strings"
 	"time"
 
@@ -42,7 +43,7 @@ func (db databaseWrapper) SelectContext(ctx context.Context, dst any, query stri
 	err := db.DB.SelectContext(ctx, dst, query, args...)
 	duration := time.Since(start)
 
-	db.logIfNeeded("SelectContext", query, duration, err)
+	db.logIfNeeded("SelectContext", query, duration, err, nil)
 	return err
 }
 
@@ -51,7 +52,7 @@ func (db databaseWrapper) Exec(query string, args ...any) (sql.Result, error) {
 	result, err := db.DB.Exec(query, args...)
 	duration := time.Since(start)
 
-	db.logIfNeeded("Exec", query, duration, err)
+	db.logIfNeeded("Exec", query, duration, err, result)
 	return result, err
 }
 
@@ -60,7 +61,7 @@ func (db databaseWrapper) ExecContext(ctx context.Context, query string, args ..
 	result, err := db.DB.ExecContext(ctx, query, args...)
 	duration := time.Since(start)
 
-	db.logIfNeeded("ExecContext", query, duration, err)
+	db.logIfNeeded("ExecContext", query, duration, err, result)
 	return result, err
 }
 
@@ -69,7 +70,7 @@ func (db databaseWrapper) Query(query string, args ...any) (*sqlx.Rows, error) {
 	rows, err := db.DB.Queryx(query, args...)
 	duration := time.Since(start)
 
-	db.logIfNeeded("Query", query, duration, err)
+	db.logIfNeeded("Query", query, duration, err, nil)
 	return rows, err
 }
 
@@ -78,7 +79,7 @@ func (db databaseWrapper) QueryContext(ctx context.Context, query string, args .
 	rows, err := db.DB.QueryxContext(ctx, query, args...)
 	duration := time.Since(start)
 
-	db.logIfNeeded("QueryContext", query, duration, err)
+	db.logIfNeeded("QueryContext", query, duration, err, nil)
 	return rows, err
 }
 
@@ -87,7 +88,7 @@ func (db databaseWrapper) QueryRowContext(ctx context.Context, query string, arg
 	row := db.DB.QueryRowxContext(ctx, query, args...)
 	duration := time.Since(start)
 
-	db.logIfNeeded("QueryRowContext", query, duration, nil)
+	db.logIfNeeded("QueryRowContext", query, duration, nil, nil)
 
 	return row
 }
@@ -97,7 +98,7 @@ func (db databaseWrapper) NamedQueryContext(ctx context.Context, query string, a
 	rows, err := db.DB.NamedQueryContext(ctx, query, arg)
 	duration := time.Since(start)
 
-	db.logIfNeeded("NamedQueryContext", query, duration, err)
+	db.logIfNeeded("NamedQueryContext", query, duration, err, nil)
 
 	return rows, err
 }
@@ -107,7 +108,7 @@ func (db databaseWrapper) GetContext(ctx context.Context, dst any, query string,
 	err := db.DB.GetContext(ctx, dst, query, args...)
 	duration := time.Since(start)
 
-	db.logIfNeeded("GetContext", query, duration, err)
+	db.logIfNeeded("GetContext", query, duration, err, nil)
 	return err
 }
 
@@ -133,29 +134,49 @@ func (db databaseWrapper) RunInTransaction(ctx context.Context, fn func(tx *sqlx
 	return fn(tx)
 }
 
-func (db *databaseWrapper) logIfNeeded(operation string, query string, duration time.Duration, err error) {
-	const maxLen = 400
-	const slowTreshold = 2 * time.Second
+func (db *databaseWrapper) logIfNeeded(operation string, query string, duration time.Duration, err error, result sql.Result) {
+	const maxFieldLen = 400
+	const maxSqlLen = 10000
+	const slowThreshold = 2 * time.Second
 
 	cleanQuery := strings.ReplaceAll(query, "\t", " ")
 	cleanQuery = strings.ReplaceAll(cleanQuery, "\n", " ")
-	if len(cleanQuery) > maxLen {
-		cleanQuery = cleanQuery[:maxLen]
+
+	sqlQuery := cleanQuery
+	if len(sqlQuery) > maxSqlLen {
+		sqlQuery = sqlQuery[:maxSqlLen]
+	}
+	if len(cleanQuery) > maxFieldLen {
+		cleanQuery = cleanQuery[:maxFieldLen]
 	}
 
-	fields := map[string]any{
-		"operation": operation,
-		"duration":  duration,
-		"query":     cleanQuery,
+	isRollback := strings.Contains(sqlQuery, "ROLLBACK")
+
+	if err != nil && !isRollback {
+		logger.ErrorWithFields(map[string]any{
+			"operation": operation,
+			"duration":  duration,
+			"query":     cleanQuery,
+			"error":     err.Error(),
+		}, "Database query failed")
+		logger.Sqlf("[%s] ERROR: %s | %v", operation, sqlQuery, err)
+		return
 	}
 
-	if err != nil {
-		fields["error"] = err.Error()
+	affected := "-"
+	if result != nil {
+		if n, e := result.RowsAffected(); e == nil {
+			affected = strconv.FormatInt(n, 10)
+		}
 	}
 
-	if err != nil && !strings.Contains(cleanQuery, "ROLLBACK") {
-		logger.ErrorWithFields(fields, "Database query failed")
-	} else if duration > slowTreshold {
-		logger.WarnWithFields(fields, "Slow query detected")
+	logger.Sqlf("[%s] %s | A:%s | Time: %s", operation, sqlQuery, affected, duration)
+
+	if duration > slowThreshold {
+		logger.WarnWithFields(map[string]any{
+			"operation": operation,
+			"duration":  duration,
+			"query":     cleanQuery,
+		}, "Slow query detected")
 	}
 }

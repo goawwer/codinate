@@ -159,14 +159,21 @@ export class CreatePostDialogComponent implements OnInit, OnDestroy {
 
     if (this.isEditMode) {
       const editPost = this.context.data!.editPost!;
-      const input: UpdatePostInput = { title: v.title, body: v.body };
-      this.postService.update(editPost.id, input).subscribe({
-        next: () => {
-          this.isSubmitting.set(false);
-          this.context.completeWith(true);
-        },
-        error: () => this.isSubmitting.set(false),
-      });
+      this.pendingUploads
+        .flush('posts', editPost.id, v.body)
+        .pipe(
+          switchMap((body) => {
+            const input: UpdatePostInput = { title: v.title, body };
+            return this.postService.update(editPost.id, input);
+          }),
+        )
+        .subscribe({
+          next: () => {
+            this.isSubmitting.set(false);
+            this.context.completeWith(true);
+          },
+          error: () => this.isSubmitting.set(false),
+        });
       return;
     }
 

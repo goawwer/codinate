@@ -127,7 +127,7 @@ func (r *worklogRepoImpl) GetLeaderboard(ctx context.Context, limit int) ([]work
 			ls.rank
 		FROM leaderboard_snapshots ls
 		JOIN users u ON u.id = ls.user_id
-		ORDER BY ls.rank ASC
+		ORDER BY ls.rank ASC, ls.user_id ASC
 		LIMIT $1
 	`, limit)
 	if err != nil {
@@ -144,12 +144,12 @@ func (r *worklogRepoImpl) GetLeaderboard(ctx context.Context, limit int) ([]work
 				COALESCE(u.avatar, '') AS avatar,
 				COALESCE(SUM(t.total_minutes), 0) AS total_minutes,
 				COUNT(t.id) AS log_count,
-				ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(t.total_minutes), 0) DESC)::int AS rank
+				ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(t.total_minutes), 0) DESC, u.id ASC)::int AS rank
 			FROM users u
 			JOIN time_logs t ON t.user_id = u.id AND t.created_at >= DATE_TRUNC('month', NOW())
 			WHERE u.disabled = false
 			GROUP BY u.id, u.username, u.name, u.surname, u.avatar
-			ORDER BY total_minutes DESC
+			ORDER BY total_minutes DESC, u.id ASC
 			LIMIT $1
 		`, limit)
 	}
@@ -172,7 +172,7 @@ func (r *worklogRepoImpl) RecalculateLeaderboard(ctx context.Context) error {
 				COALESCE(u.avatar, '')  AS avatar,
 				COALESCE(SUM(t.total_minutes), 0) AS total_minutes,
 				COUNT(t.id)             AS log_count,
-				ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(t.total_minutes), 0) DESC)::int AS rank,
+				ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(t.total_minutes), 0) DESC, u.id ASC)::int AS rank,
 				NOW()
 			FROM users u
 			LEFT JOIN time_logs t

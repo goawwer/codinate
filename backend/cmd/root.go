@@ -12,13 +12,8 @@ var (
 	serveCmd    = flag.NewFlagSet("serve", flag.ExitOnError)
 	serveConfig = serveCmd.String("config", "", "Path to .env config file (development only)")
 
-	createOwnerCmd      = flag.NewFlagSet("create_owner", flag.ExitOnError)
-	createOwnerConfig   = createOwnerCmd.String("config", "", "Path to .env config file (development only)")
-	createOwnerName     = createOwnerCmd.String("name", "", "owner's name")
-	createOwnerSurname  = createOwnerCmd.String("surname", "", "owner's surname")
-	createOwnerEmail    = createOwnerCmd.String("email", "", "owner's email")
-	createOwnerUsername = createOwnerCmd.String("username", "", "owner's username")
-	createOwnerPassword = createOwnerCmd.String("password", "", "owner's password")
+	createOwnerCmd    = flag.NewFlagSet("create_owner", flag.ExitOnError)
+	createOwnerConfig = createOwnerCmd.String("config", "", "Path to .env config file (development only)")
 )
 
 func Execute() {
@@ -38,16 +33,8 @@ func execute() {
 
 	case "create_owner":
 		createOwnerCmd.Parse(os.Args[2:])
-		fmt.Printf("Args: %v\n", os.Args)
 		validateConfigIfDevelopmentMode(*createOwnerConfig)
-		createOwner(ownerParams{
-			cfgPath:  *createOwnerConfig,
-			name:     *createOwnerName,
-			surname:  *createOwnerSurname,
-			email:    *createOwnerEmail,
-			username: *createOwnerUsername,
-			password: *createOwnerPassword,
-		})
+		createOwner(*createOwnerConfig)
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", os.Args[1])

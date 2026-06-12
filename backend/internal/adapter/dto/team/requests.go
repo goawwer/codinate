@@ -32,7 +32,7 @@ type Row struct {
 	AuthorId    uuid.UUID           `db:"author_id" json:"authorId"`
 	Name        string              `db:"name" json:"name"`
 	Description string              `db:"description" json:"description"`
-	PictureName string              `db:"picture_name" json:"pictureName"`
+	PictureName *string             `db:"picture_name" json:"pictureName"`
 	Links       TeamLinks           `db:"links" json:"links"`
 	CreatedAt   time.Time           `db:"created_at" json:"createdAt"`
 	UpdatedAt   time.Time           `db:"updated_at" json:"updatedAt"`

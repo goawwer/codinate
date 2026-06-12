@@ -28,7 +28,7 @@ type TaskRow struct {
 	UserId       uuid.UUID `db:"user_id" json:"userId"`
 	UserName     string    `db:"user_name" json:"userName"`
 	UserSurname  string    `db:"user_surname" json:"userSurname"`
-	UserAvatar   string    `db:"user_avatar" json:"userAvatar"`
+	UserAvatar   *string   `db:"user_avatar" json:"userAvatar"`
 }
 
 type LeaderboardEntry struct {
@@ -36,7 +36,7 @@ type LeaderboardEntry struct {
 	Username     string    `db:"username" json:"username"`
 	Name         string    `db:"name" json:"name"`
 	Surname      string    `db:"surname" json:"surname"`
-	Avatar       string    `db:"avatar" json:"avatar"`
+	Avatar       *string   `db:"avatar" json:"avatar"`
 	TotalMinutes int64     `db:"total_minutes" json:"totalMinutes"`
 	LogCount     int       `db:"log_count" json:"logCount"`
 	Rank         int       `db:"rank" json:"rank"`

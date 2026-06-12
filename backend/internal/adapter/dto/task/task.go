@@ -10,9 +10,9 @@ import (
 
 type Row struct {
 	Id               uuid.UUID  `db:"id" json:"id"`
-	AssigneeUsername string     `db:"assignee_username" json:"assigneeUsername"`
+	AssigneeUsername *string    `db:"assignee_username" json:"assigneeUsername"`
 	ProjectName      string     `db:"project_name" json:"projectName"`
-	ProjectPicture   string     `db:"project_picture" json:"projectPicture"`
+	ProjectPicture   *string    `db:"project_picture" json:"projectPicture"`
 	ProjectRelease   string     `db:"release" json:"projectRelease"`
 	CategoryName     string     `db:"category" json:"category"`
 	Priority         string     `db:"priority" json:"priority"`
@@ -36,7 +36,7 @@ type RowDetailed struct {
 	AssigneeId          uuid.UUID           `db:"assignee_id" json:"assigneeId"`
 	AssigneeName        string              `db:"assignee_name" json:"assigneeName"`
 	AssigneeSurname     string              `db:"assignee_surname" json:"assigneeSurname"`
-	AssigneePictureName string              `db:"assignee_picture" json:"assigneePicture"`
+	AssigneePictureName *string             `db:"assignee_picture" json:"assigneePicture"`
 	Members             shared.MembersShort `db:"members" json:"members"`
 	AttachedFiles       file.AttachedFiles  `db:"attached_files" json:"attachedFiles"`
 	UpdatedAt           time.Time           `db:"updated_at" json:"updatedAt"`

@@ -240,20 +240,20 @@ func (s *service) suggestionsBy(ctx context.Context, b controller.BasicQueryPara
 	return repository.GetTaskRepo().GetTasksSuggestion(ctx, b)
 }
 
-func (s *service) getDeadlinePressure(ctx context.Context) (task.DeadlinePressure, error) {
-	return repository.GetTaskRepo().GetDeadlinePressure(ctx)
+func (s *service) getDeadlinePressure(ctx context.Context, userId uuid.UUID) (task.DeadlinePressure, error) {
+	return repository.GetTaskRepo().GetDeadlinePressure(ctx, userId)
 }
 
-func (s *service) getStatusDistribution(ctx context.Context) ([]task.StatusDistributionItem, error) {
-	return repository.GetTaskRepo().GetStatusDistribution(ctx)
+func (s *service) getStatusDistribution(ctx context.Context, userId uuid.UUID) ([]task.StatusDistributionItem, error) {
+	return repository.GetTaskRepo().GetStatusDistribution(ctx, userId)
 }
 
-func (s *service) getTasksByStatus(ctx context.Context, statusId, page int) (task.StatusTasksPage, error) {
-	return repository.GetTaskRepo().GetTasksByStatus(ctx, statusId, page)
+func (s *service) getTasksByStatus(ctx context.Context, statusId, page int, userId uuid.UUID) (task.StatusTasksPage, error) {
+	return repository.GetTaskRepo().GetTasksByStatus(ctx, statusId, page, userId)
 }
 
-func (s *service) getVelocity(ctx context.Context) (task.VelocityData, error) {
-	return repository.GetTaskRepo().GetVelocity(ctx)
+func (s *service) getVelocity(ctx context.Context, userId uuid.UUID) (task.VelocityData, error) {
+	return repository.GetTaskRepo().GetVelocity(ctx, userId)
 }
 
 // detectTaskChanges builds history entries comparing snapshot (with resolved names) against

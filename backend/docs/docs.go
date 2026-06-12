@@ -570,6 +570,367 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/notifications": {
+            "get": {
+                "description": "Returns notifications for the current user, optionally filtered by a since timestamp",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "List notifications",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "RFC3339 timestamp to fetch notifications after",
+                        "name": "since",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/notification.Row"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/notifications/read-all": {
+            "post": {
+                "description": "Marks all notifications for the current user as read",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "Mark all notifications as read",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/notifications/unread-count": {
+            "get": {
+                "description": "Returns the number of unread notifications for the current user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "Get unread notification count",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/notification.UnreadCount"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/notifications/{id}/read": {
+            "post": {
+                "description": "Marks a specific notification as read for the current user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "Mark notification as read",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Notification UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/posts": {
+            "get": {
+                "description": "Returns a filtered list of posts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Get all posts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/post.Row"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/posts/create": {
+            "post": {
+                "description": "Creates a new post for the current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Create post",
+                "parameters": [
+                    {
+                        "description": "Post data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/post.CreatePostInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/posts/{id}": {
+            "get": {
+                "description": "Returns a single post by its UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Get post by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/post.Row"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/posts/{id}/delete": {
+            "delete": {
+                "description": "Deletes a post by ID, only allowed for the post author or admins",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Delete post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/posts/{id}/update": {
+            "patch": {
+                "description": "Updates fields of an existing post, only allowed for the post author or admins",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Update post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Fields to update",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/post.UpdatePostInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/projects": {
             "get": {
                 "description": "Returns a list of all projects with their members",
@@ -622,6 +983,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "authorId",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "projectAbout",
                         "in": "formData"
                     },
                     {
@@ -1565,7 +1931,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "task/categories"
                 ],
                 "summary": "Delete task category",
                 "parameters": [
@@ -1606,7 +1972,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "task/categories"
                 ],
                 "summary": "Update task category",
                 "parameters": [
@@ -1635,6 +2001,163 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/metrics/deadline": {
+            "get": {
+                "description": "Returns overdue and upcoming tasks for deadline pressure visualization",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get deadline pressure metrics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/task.DeadlinePressure"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/metrics/status-distribution": {
+            "get": {
+                "description": "Returns the count of tasks grouped by status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get task status distribution",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/task.StatusDistributionItem"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/metrics/status-tasks": {
+            "get": {
+                "description": "Returns a paginated list of tasks filtered by a specific status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get tasks by status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Status ID",
+                        "name": "statusId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "pageNumber",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/task.StatusTasksPage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/metrics/velocity": {
+            "get": {
+                "description": "Returns task completion velocity comparing this week vs last week",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get task velocity metrics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/task.VelocityData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/suggestions": {
+            "get": {
+                "description": "Returns a paginated list of task suggestions for search/autocomplete",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get task suggestions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/task.Suggestion"
+                            }
                         }
                     },
                     "500": {
@@ -1769,6 +2292,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/tasks/{id}/participants/{userId}/add": {
+            "post": {
+                "description": "Adds a user as a participant to a task",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Add task participant",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User UUID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/tasks/{id}/reopen": {
             "post": {
                 "description": "Reopens a closed task by clearing its closed_at timestamp",
@@ -1864,7 +2432,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "task/categories"
                 ],
                 "summary": "Get task categories",
                 "parameters": [
@@ -1905,7 +2473,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "task/categories"
                 ],
                 "summary": "Add task category",
                 "parameters": [
@@ -2060,6 +2628,56 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/teams/{id}/links": {
+            "patch": {
+                "description": "Updates the links list for a team",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "Update team links",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Links payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/team.UpdateLinksInput"
+                        }
                     }
                 ],
                 "responses": {
@@ -2589,6 +3207,481 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/users/hours": {
+            "get": {
+                "description": "Returns total logged hours per user within a date range (admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get all users hours",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (RFC3339)",
+                        "name": "from",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (RFC3339)",
+                        "name": "to",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/user.UserHoursStat"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/profile/{user_id}": {
+            "get": {
+                "description": "Returns the full profile of a user by their UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get user profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User UUID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.Profile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Updates profile fields (username, about, avatar, background) via multipart form",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update user profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User UUID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Avatar image",
+                        "name": "avatar",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Background image",
+                        "name": "background",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/profile/{user_id}/stats": {
+            "get": {
+                "description": "Returns statistics for a user's profile (work dynamics, project focus, task counts)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get user profile stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User UUID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start date (RFC3339)",
+                        "name": "from",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (RFC3339)",
+                        "name": "to",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.ProfileStats"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worklogs/add": {
+            "post": {
+                "description": "Creates a new time log entry for a task",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "worklogs"
+                ],
+                "summary": "Add worklog",
+                "parameters": [
+                    {
+                        "description": "Worklog data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/worklog.CreateLogInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worklogs/leaderboard": {
+            "get": {
+                "description": "Returns users ranked by total logged minutes",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "worklogs"
+                ],
+                "summary": "Get worklog leaderboard",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/worklog.LeaderboardEntry"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worklogs/leaderboard/recalculate": {
+            "post": {
+                "description": "Triggers a recalculation of the leaderboard rankings (admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "worklogs"
+                ],
+                "summary": "Recalculate worklog leaderboard",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worklogs/tasks/{task_id}": {
+            "get": {
+                "description": "Returns all worklogs associated with a specific task",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "worklogs"
+                ],
+                "summary": "Get worklogs by task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task UUID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/worklog.TaskRow"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worklogs/{log_id}/delete": {
+            "delete": {
+                "description": "Deletes a worklog entry by its UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "worklogs"
+                ],
+                "summary": "Delete worklog",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Worklog UUID",
+                        "name": "log_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worklogs/{log_id}/update": {
+            "patch": {
+                "description": "Updates an existing worklog entry",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "worklogs"
+                ],
+                "summary": "Update worklog",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Worklog UUID",
+                        "name": "log_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Fields to update",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/worklog.UpdateLogInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worklogs/{user_id}/all": {
+            "get": {
+                "description": "Returns a filtered list of worklogs for a specific user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "worklogs"
+                ],
+                "summary": "Get all worklogs for a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User UUID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/worklog.Row"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Post body with username and password",
@@ -2696,6 +3789,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/backgrounds/{user_id}": {
+            "get": {
+                "description": "Serves the background picture for a given user",
+                "produces": [
+                    "image/*"
+                ],
+                "tags": [
+                    "pictures"
+                ],
+                "summary": "Get user profile background",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User UUID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Background picture filename",
+                        "name": "filename",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/{entity_type}": {
             "get": {
                 "description": "Serves a picture file for a given entity type (e.g. teams, projects)",
@@ -2771,7 +3909,23 @@ const docTemplate = `{
                 },
                 "entityType": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "string"
                 }
+            }
+        },
+        "comment.HistoryChange": {
+            "type": "object",
+            "properties": {
+                "fieldName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "newValue": {},
+                "oldValue": {}
             }
         },
         "comment.Row": {
@@ -2785,6 +3939,12 @@ const docTemplate = `{
                 },
                 "body": {
                     "type": "string"
+                },
+                "changes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/comment.HistoryChange"
+                    }
                 },
                 "createdAt": {
                     "type": "string"
@@ -2802,6 +3962,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "employeeUsername": {
+                    "type": "string"
+                },
+                "entityId": {
+                    "type": "string"
+                },
+                "entityType": {
                     "type": "string"
                 },
                 "id": {
@@ -2829,6 +3995,12 @@ const docTemplate = `{
                 },
                 "entityType": {
                     "type": "string"
+                },
+                "newAttachedFiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/file.AttachedFileInput"
+                    }
                 }
             }
         },
@@ -2845,6 +4017,30 @@ const docTemplate = `{
                 "AdminPermissionRole",
                 "UserPermissionRole",
                 "NoPermissionRole"
+            ]
+        },
+        "enum.PostParentType": {
+            "type": "string",
+            "enum": [
+                "project",
+                "team"
+            ],
+            "x-enum-varnames": [
+                "PostParentProject",
+                "PostParentTeam"
+            ]
+        },
+        "enum.PostType": {
+            "type": "string",
+            "enum": [
+                "basic",
+                "announcement",
+                "poll"
+            ],
+            "x-enum-varnames": [
+                "PostBasic",
+                "PostAnnouncement",
+                "PostPoll"
             ]
         },
         "file.AttachedFileInfo": {
@@ -2885,6 +4081,160 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "notification.JSONField": {
+            "type": "object",
+            "additionalProperties": {}
+        },
+        "notification.Row": {
+            "type": "object",
+            "properties": {
+                "actorName": {
+                    "type": "string"
+                },
+                "actorPicture": {
+                    "type": "string"
+                },
+                "actorSurname": {
+                    "type": "string"
+                },
+                "body": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "notificationType": {
+                    "type": "string"
+                },
+                "readAt": {
+                    "type": "string"
+                },
+                "related": {
+                    "$ref": "#/definitions/notification.JSONField"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "notification.UnreadCount": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "post.CreatePostInput": {
+            "type": "object",
+            "properties": {
+                "attachedFiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/file.AttachedFileInput"
+                    }
+                },
+                "authorId": {
+                    "type": "string"
+                },
+                "body": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "parents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/post.PostParent"
+                    }
+                },
+                "postType": {
+                    "$ref": "#/definitions/enum.PostType"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "post.PostParent": {
+            "type": "object",
+            "properties": {
+                "parentId": {
+                    "type": "integer"
+                },
+                "postParentType": {
+                    "$ref": "#/definitions/enum.PostParentType"
+                }
+            }
+        },
+        "post.Row": {
+            "type": "object",
+            "properties": {
+                "attachedFiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/file.AttachedFileInfo"
+                    }
+                },
+                "authorName": {
+                    "type": "string"
+                },
+                "authorPicture": {
+                    "type": "string"
+                },
+                "authorSurname": {
+                    "type": "string"
+                },
+                "authorUsername": {
+                    "type": "string"
+                },
+                "body": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "post.UpdatePostInput": {
+            "type": "object",
+            "properties": {
+                "attachedFiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/file.AttachedFileInput"
+                    }
+                },
+                "body": {
+                    "type": "string"
+                },
+                "parents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/post.PostParent"
+                    }
+                },
+                "postType": {
+                    "$ref": "#/definitions/enum.PostType"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -2946,6 +4296,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/shared.MemberShort"
                     }
+                },
+                "projectAbout": {
+                    "type": "string"
                 },
                 "projectDescription": {
                     "type": "string"
@@ -3009,6 +4362,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "picture": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string"
                 },
@@ -3069,6 +4425,37 @@ const docTemplate = `{
                 }
             }
         },
+        "task.DeadlinePressure": {
+            "type": "object",
+            "properties": {
+                "overdue": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/task.DeadlineTask"
+                    }
+                },
+                "upcoming": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/task.DeadlineTask"
+                    }
+                }
+            }
+        },
+        "task.DeadlineTask": {
+            "type": "object",
+            "properties": {
+                "dueAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "task.Row": {
             "type": "object",
             "properties": {
@@ -3123,6 +4510,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "assigneeName": {
+                    "type": "string"
+                },
+                "assigneePicture": {
                     "type": "string"
                 },
                 "assigneeSurname": {
@@ -3205,10 +4595,52 @@ const docTemplate = `{
                 }
             }
         },
+        "task.StatusDistributionItem": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "task.StatusTasksPage": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/task.Row"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "task.Suggestion": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "identifier": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "task.UpdateTaskInput": {
             "type": "object",
             "properties": {
                 "assigneeId": {
+                    "type": "string"
+                },
+                "assigneeName": {
                     "type": "string"
                 },
                 "attachedFiles": {
@@ -3223,7 +4655,13 @@ const docTemplate = `{
                 "categoryId": {
                     "type": "integer"
                 },
+                "categoryName": {
+                    "type": "string"
+                },
                 "closedAt": {
+                    "type": "string"
+                },
+                "commentBody": {
                     "type": "string"
                 },
                 "description": {
@@ -3238,16 +4676,62 @@ const docTemplate = `{
                 "priorityId": {
                     "type": "integer"
                 },
+                "priorityName": {
+                    "type": "string"
+                },
                 "projectId": {
                     "type": "integer"
                 },
                 "releaseId": {
                     "type": "integer"
                 },
+                "releaseName": {
+                    "type": "string"
+                },
                 "statusId": {
                     "type": "integer"
                 },
+                "statusName": {
+                    "type": "string"
+                },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "task.VelocityData": {
+            "type": "object",
+            "properties": {
+                "changePercent": {
+                    "type": "integer"
+                },
+                "lastWeek": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/task.VelocityDay"
+                    }
+                },
+                "lastWeekTotal": {
+                    "type": "integer"
+                },
+                "thisWeek": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/task.VelocityDay"
+                    }
+                },
+                "thisWeekTotal": {
+                    "type": "integer"
+                }
+            }
+        },
+        "task.VelocityDay": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "day": {
                     "type": "string"
                 }
             }
@@ -3267,6 +4751,12 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/team.TeamLink"
+                    }
+                },
                 "members": {
                     "type": "array",
                     "items": {
@@ -3281,6 +4771,28 @@ const docTemplate = `{
                 },
                 "updatedAt": {
                     "type": "string"
+                }
+            }
+        },
+        "team.TeamLink": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "team.UpdateLinksInput": {
+            "type": "object",
+            "properties": {
+                "links": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/team.TeamLink"
+                    }
                 }
             }
         },
@@ -3310,6 +4822,17 @@ const docTemplate = `{
                 }
             }
         },
+        "user.DailyWorkStat": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "spentMinutes": {
+                    "type": "integer"
+                }
+            }
+        },
         "user.DeleteMultiInput": {
             "type": "object",
             "properties": {
@@ -3318,6 +4841,93 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "user.Profile": {
+            "type": "object",
+            "properties": {
+                "about": {
+                    "type": "string"
+                },
+                "avatar": {
+                    "type": "string"
+                },
+                "backgroundPicture": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/user.UserProjectProfile"
+                    }
+                },
+                "recentMinutes": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.ProfileStats": {
+            "type": "object",
+            "properties": {
+                "assignedTasksCount": {
+                    "type": "integer"
+                },
+                "authoredTasksCount": {
+                    "type": "integer"
+                },
+                "commentsCount": {
+                    "type": "integer"
+                },
+                "participatedTasksCount": {
+                    "type": "integer"
+                },
+                "postsCount": {
+                    "type": "integer"
+                },
+                "projectFocus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/user.ProjectFocusStat"
+                    }
+                },
+                "workDynamics": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/user.DailyWorkStat"
+                    }
+                }
+            }
+        },
+        "user.ProjectFocusStat": {
+            "type": "object",
+            "properties": {
+                "projectId": {
+                    "type": "integer"
+                },
+                "projectName": {
+                    "type": "string"
+                },
+                "spentMinutes": {
+                    "type": "integer"
                 }
             }
         },
@@ -3359,6 +4969,20 @@ const docTemplate = `{
                 }
             }
         },
+        "user.TaskRef": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "identifier": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "user.UpdateInput": {
             "type": "object",
             "properties": {
@@ -3387,6 +5011,182 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.UserHoursStat": {
+            "type": "object",
+            "properties": {
+                "totalMinutes": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.UserProjectProfile": {
+            "type": "object",
+            "properties": {
+                "about": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "picture": {
+                    "type": "string"
+                },
+                "recentMinutes": {
+                    "type": "integer"
+                },
+                "spentMinutes": {
+                    "type": "integer"
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/user.TaskRef"
+                    }
+                }
+            }
+        },
+        "worklog.CreateLogInput": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "endAt": {
+                    "type": "string"
+                },
+                "startAt": {
+                    "type": "string"
+                },
+                "taskId": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "worklog.LeaderboardEntry": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "logCount": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "rank": {
+                    "type": "integer"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "totalMinutes": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "worklog.Row": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "projectName": {
+                    "type": "string"
+                },
+                "startAt": {
+                    "type": "string"
+                },
+                "taskId": {
+                    "type": "string"
+                },
+                "taskIdentifier": {
+                    "type": "integer"
+                },
+                "totalMinutes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "worklog.TaskRow": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "endAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "startAt": {
+                    "type": "string"
+                },
+                "taskId": {
+                    "type": "string"
+                },
+                "totalMinutes": {
+                    "type": "integer"
+                },
+                "userAvatar": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                },
+                "userSurname": {
+                    "type": "string"
+                }
+            }
+        },
+        "worklog.UpdateLogInput": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "endAt": {
+                    "type": "string"
+                },
+                "startAt": {
+                    "type": "string"
+                },
+                "taskId": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }

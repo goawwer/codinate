@@ -184,6 +184,12 @@ func Sqlf(format string, args ...any) {
 	mainSqlLogger.Debugf(format, args...)
 }
 
+var consoleMinLevel = logrus.DebugLevel
+
+func SetConsoleMinLevel(level logrus.Level) {
+	consoleMinLevel = level
+}
+
 type ColorConsoleHook struct {
 	Formatter logrus.Formatter
 }
@@ -193,6 +199,10 @@ func (h *ColorConsoleHook) Levels() []logrus.Level {
 }
 
 func (h *ColorConsoleHook) Fire(e *logrus.Entry) error {
+	if e.Level > consoleMinLevel {
+		return nil
+	}
+
 	line, err := h.Formatter.Format(e)
 	if err != nil {
 		return err

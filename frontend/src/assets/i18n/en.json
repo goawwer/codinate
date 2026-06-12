@@ -576,6 +576,7 @@
   "cmd": {
     "comments": {
       "success": {
+        "added": "Comment added successfully",
         "updated": "Comment updated successfully",
         "deleted": "Comment deleted successfully"
       }

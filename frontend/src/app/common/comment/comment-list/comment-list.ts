@@ -155,6 +155,7 @@ export class CommentList implements OnInit {
           this.newCommentControl.reset();
           this.isInputActive.set(false);
           this.isSubmitting.set(false);
+          this.alert.success(this.translate.instant('cmd.comments.success.added'));
           this.load();
           if (pendingFiles.length) this.filesChanged.emit();
         },

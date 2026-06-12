@@ -44,6 +44,21 @@ func (r *postRepoImpl) GetAllPosts(ctx context.Context, f *post.Filters) ([]post
 		)
 	}
 
+	memberCondition := ""
+	if f.MemberUserId != nil {
+		memberCondition = fmt.Sprintf(`
+			EXISTS (
+				SELECT 1 FROM post_parents pp_m
+				WHERE pp_m.post_id = p.id
+				  AND (
+				    (pp_m.parent_type = 'project' AND EXISTS (SELECT 1 FROM project_members WHERE project_id = pp_m.parent_id AND user_id = '%s'))
+				    OR
+				    (pp_m.parent_type = 'team'    AND EXISTS (SELECT 1 FROM team_members    WHERE team_id    = pp_m.parent_id AND user_id = '%s'))
+				  )
+			)
+		`, f.MemberUserId.String(), f.MemberUserId.String())
+	}
+
 	err := r.SelectContext(ctx, &res, `
 		SELECT
 			p.id,
@@ -65,6 +80,7 @@ func (r *postRepoImpl) GetAllPosts(ctx context.Context, f *post.Filters) ([]post
 		LEFT JOIN users u ON p.author_id = u.id
 		`+parentJoin+`
 		`+qb.
+		Raw(memberCondition).
 		FilterWithOperator("p.created_at::TIMESTAMP", f.DateRange.From, ">=").
 		FilterWithOperator("p.created_at::TIMESTAMP", f.DateRange.To, "<").
 		Like("p.title", f.SearchBy.Value).
