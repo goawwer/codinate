@@ -32,6 +32,8 @@ func newTokenWrapper(cfg *config) *tokenWrapper {
 }
 
 func loadAuthConfig() (*config, error) {
+	setupDefaults()
+
 	var cfg config
 
 	if err := viper.Unmarshal(&cfg); err != nil {
@@ -42,8 +44,6 @@ func loadAuthConfig() (*config, error) {
 		return nil, fmt.Errorf("unsupported signing method")
 	}
 
-	setupDefaults()
-
 	return &cfg, nil
 }
 
@@ -51,5 +51,5 @@ func setupDefaults() {
 	viper.SetDefault("TOKEN_SIGN_METHOD", "HS256")
 	viper.SetDefault("MAX_ACCESS_TOKEN_DURATION", "5m")
 	viper.SetDefault("MAX_REFRESH_TOKEN_DURATION", "168h")
-	viper.SetDefault("SESSION_TOKEN_DURATION", "720h")
+	viper.SetDefault("MAX_SESSION_DURATION", "720h")
 }

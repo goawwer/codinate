@@ -10,8 +10,11 @@ RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
 
 COPY . .
 
+# Build tags: "prod" (default) strips swagger; empty enables swagger for dev
+ARG BUILD_TAGS=prod
+
 RUN CGO_ENABLED=0 GOOS=linux go build \
-    -tags prod \
+    -tags "$BUILD_TAGS" \
     -ldflags="-s -w" \
     -o codinate-backend .
 
@@ -22,7 +25,7 @@ RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /app
 
 COPY --from=builder /build/codinate-backend .
-COPY --from=builder /root/go/bin/migrate /usr/local/bin/migrate
+COPY --from=builder /go/bin/migrate /usr/local/bin/migrate
 COPY --from=builder /build/internal/adapter/migrations ./migrations
 COPY docker-entrypoint.sh .
 RUN chmod +x docker-entrypoint.sh

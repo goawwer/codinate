@@ -8,6 +8,8 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       PGDATA: /var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -17,32 +19,59 @@ services:
       retries: 5
 
   backend:
-    image: goawwer/codinate-backend:latest
     build:
       context: ./backend
+      args:
+        BUILD_TAGS: ${BUILD_TAGS:-prod}
     container_name: codinate_backend
     restart: unless-stopped
     environment:
-      SERV_HOST: 0.0.0.0
-      SERV_PORT: 8080
+      SERV_HOST: ${SERV_HOST:-0.0.0.0}
+      SERV_PORT: ${SERV_PORT:-8080}
       SERV_REDIRECT_URL: ${FRONTEND_URL:-http://localhost}
       DB_HOST: db
-      DB_PORT: 5432
+      DB_PORT: ${DB_PORT:-5432}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       SECRET_KEY: ${SECRET_KEY}
+      TOKEN_SIGN_METHOD: ${TOKEN_SIGN_METHOD:-HS256}
+      MAX_ACCESS_TOKEN_DURATION: ${MAX_ACCESS_TOKEN_DURATION:-5m}
+      MAX_REFRESH_TOKEN_DURATION: ${MAX_REFRESH_TOKEN_DURATION:-168h}
+      MAX_SESSION_DURATION: ${MAX_SESSION_DURATION:-720h}
+      # database pool
+      DB_POOLSIZE: ${DB_POOLSIZE:-10}
+      DB_IDLE_TIMEOUT_MINUTE: ${DB_IDLE_TIMEOUT_MINUTE:-5}
+      DB_MAX_IDLE_CONNS: ${DB_MAX_IDLE_CONNS:-2}
+      DB_MAX_RETRIES: ${DB_MAX_RETRIES:-3}
+      DB_READ_TIMEOUT_MINUTE: ${DB_READ_TIMEOUT_MINUTE:-3}
+      DB_WRITE_TIMEOUT_MINUTE: ${DB_WRITE_TIMEOUT_MINUTE:-5}
+      # uploads
       UPLOADS_DIR: /app/data/
+      UPLOADS_MAX_SIZE_MB: ${UPLOADS_MAX_SIZE_MB:-10}
+      UPLOADS_PICTURE_MAX_WIDTH: ${UPLOADS_PICTURE_MAX_WIDTH:-500}
+      UPLOADS_PICTURE_MAX_HEIGHT: ${UPLOADS_PICTURE_MAX_HEIGHT:-500}
+      # logger
       LOG_DIR: /app/logs/
+      LOG_MAX_SIZE: ${LOG_MAX_SIZE:-10}
+      LOG_MAX_AGE: ${LOG_MAX_AGE:-3}
+      LOG_MAX_BACKUPS: ${LOG_MAX_BACKUPS:-3}
+      LOG_LOCAL_TIME: ${LOG_LOCAL_TIME:-true}
+      LOG_COMPRESS: ${LOG_COMPRESS:-false}
+      LOG_USE_CONSOLE_COLORS: ${LOG_USE_CONSOLE_COLORS:-false}
+      # owner setup (used only for create_owner command)
+      OWNER_NAME: ${OWNER_NAME:-}
+      OWNER_SURNAME: ${OWNER_SURNAME:-}
+      OWNER_USERNAME: ${OWNER_USERNAME:-}
+      OWNER_EMAIL: ${OWNER_EMAIL:-}
     depends_on:
       db:
         condition: service_healthy
     volumes:
-      - uploads:/app/data
-      - logs:/app/logs
+      - ${UPLOADS_DIR:-./data/uploads}:/app/data
+      - ${LOG_DIR:-./data/logs}:/app/logs
 
   frontend:
-    image: goawwer/codinate-frontend:latest
     build:
       context: ./frontend
     container_name: codinate_frontend
@@ -54,5 +83,3 @@ services:
 
 volumes:
   pgdata:
-  uploads:
-  logs:

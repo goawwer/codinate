@@ -18,7 +18,21 @@ func Initialize(configPath string) {
 
 	viper.AutomaticEnv()
 
-	viper.SetDefault("SERV_HOST", "localhost")
+	for _, key := range []string{
+		"SERV_HOST", "SERV_PORT", "SERV_REDIRECT_URL",
+		"SECRET_KEY", "TOKEN_SIGN_METHOD",
+		"MAX_ACCESS_TOKEN_DURATION", "MAX_REFRESH_TOKEN_DURATION", "MAX_SESSION_DURATION",
+		"LOG_DIR", "LOG_MAX_SIZE", "LOG_MAX_AGE", "LOG_MAX_BACKUPS",
+		"LOG_LOCAL_TIME", "LOG_COMPRESS", "LOG_USE_CONSOLE_COLORS",
+		"UPLOADS_DIR", "UPLOADS_MAX_SIZE_MB", "UPLOADS_PICTURE_MAX_WIDTH", "UPLOADS_PICTURE_MAX_HEIGHT",
+		"OWNER_NAME", "OWNER_SURNAME", "OWNER_USERNAME", "OWNER_EMAIL",
+	} {
+		if err := viper.BindEnv(key); err != nil {
+			panic(fmt.Errorf("failed to bind env %s: %w", key, err))
+		}
+	}
+
+	viper.SetDefault("SERV_HOST", "0.0.0.0")
 	viper.SetDefault("SERV_PORT", "8080")
 	viper.SetDefault("DB_HOST", "localhost")
 	viper.SetDefault("DB_PORT", 5432)

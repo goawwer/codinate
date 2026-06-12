@@ -10,7 +10,8 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TuiDialogContext } from '@taiga-ui/core';
 import { injectContext } from '@taiga-ui/polymorpheus';
-import { filter, forkJoin, startWith } from 'rxjs';
+import { filter, forkJoin, startWith, switchMap } from 'rxjs';
+import { PendingEditorUploads } from '../../../../common/editor/pending-editor-uploads.service';
 import { POST_DIALOG_IMPORTS } from './post-dialog.imports';
 import { Post, PostComment, PostParent, UpdatePostInput } from '../../types/post.model';
 import { PostService } from '../../service/post.service';
@@ -45,6 +46,7 @@ export class PostDialogComponent implements OnInit {
   private readonly dialogs = inject(AppDialogService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
+  private readonly pendingUploads = inject(PendingEditorUploads);
 
   protected readonly context = injectContext<TuiDialogContext<boolean, PostDialogData>>();
 
@@ -163,21 +165,27 @@ export class PostDialogComponent implements OnInit {
     const v = this.editForm.getRawValue();
     this.isSaving.set(true);
 
-    const input: UpdatePostInput = { title: v.title, body: v.body };
-    if (v.parents.length) {
-      input.parents = v.parents.map((e) => ({
-        postParentType: ('projectName' in e ? 'project' : 'team') as 'project' | 'team',
-        parentId: e.id,
-      }));
-    }
-
-    this.postService.update(this.post.id, input).subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.context.completeWith(true);
-      },
-      error: () => this.isSaving.set(false),
-    });
+    this.pendingUploads
+      .flush('posts', this.post.id, v.body)
+      .pipe(
+        switchMap((body) => {
+          const input: UpdatePostInput = { title: v.title, body };
+          if (v.parents.length) {
+            input.parents = v.parents.map((e) => ({
+              postParentType: ('projectName' in e ? 'project' : 'team') as 'project' | 'team',
+              parentId: e.id,
+            }));
+          }
+          return this.postService.update(this.post.id, input);
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.context.completeWith(true);
+        },
+        error: () => this.isSaving.set(false),
+      });
   }
 
   protected confirmDelete(): void {

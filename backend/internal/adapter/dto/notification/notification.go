@@ -29,7 +29,7 @@ type Row struct {
 	Id               uuid.UUID  `db:"id" json:"id"`
 	ActorName        string     `db:"actor_name" json:"actorName"`
 	ActorSurname     string     `db:"actor_surname" json:"actorSurname"`
-	ActorPicture     string     `db:"actor_picture" json:"actorPicture"`
+	ActorPicture     *string    `db:"actor_picture" json:"actorPicture"`
 	NotificationType string     `db:"notification_type" json:"notificationType"`
 	Related          JSONField  `db:"related" json:"related"`
 	Title            string     `db:"title" json:"title"`
