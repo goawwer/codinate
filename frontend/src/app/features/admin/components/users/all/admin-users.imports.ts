@@ -12,6 +12,7 @@ import {
   TuiLink,
   TuiTextfield,
   TuiTitle,
+  TuiScrollbar,
 } from '@taiga-ui/core';
 import {
   TuiAvatar,
@@ -71,4 +72,5 @@ export const USERSDASHBOARDIMPORTS = [
   TuiDataListWrapper,
   TuiChevron,
   TuiLineClamp,
+  TuiScrollbar,
 ];
