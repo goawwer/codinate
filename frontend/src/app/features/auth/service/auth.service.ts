@@ -13,4 +13,8 @@ export class AuthApiService {
   signIn(body: LoginBody): Observable<void> {
     return this.http.post<void>(this.loginURL, body);
   }
+
+  public logout(): Observable<void> {
+    return this.http.get<void>('/auth/logout');
+  }
 }

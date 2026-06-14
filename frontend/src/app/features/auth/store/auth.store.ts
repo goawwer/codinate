@@ -6,7 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { WithErrorAlertOperator } from '../../../core/declarations/operators/with-error.operator';
 import { LoginBody } from '../model/auth.model';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { catchError, exhaustMap, firstValueFrom, of, pipe, tap } from 'rxjs';
+import { catchError, exhaustMap, finalize, firstValueFrom, of, pipe, tap } from 'rxjs';
 import { inject } from '@angular/core';
 import { AuthStateService } from '../../../core/services/auth-state.service';
 import { UserApiService } from '../../user/service/user.service';
@@ -80,10 +80,17 @@ export const AuthStore = signalStore(
       },
 
       logout(): void {
-        patchState(store, { ...initialAuthState });
-        authState.initialized.set(false);
-        userStore.clearUser();
-        router.navigate(['/auth/login']);
+        authApiService
+          .logout()
+          .pipe(
+            finalize(() => {
+              patchState(store, { ...initialAuthState });
+              authState.initialized.set(false);
+              userStore.clearUser();
+              router.navigate(['/auth/login']);
+            }),
+          )
+          .subscribe();
       },
     }),
   ),
