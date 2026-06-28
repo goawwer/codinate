@@ -9,7 +9,7 @@ import {
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { forkJoin, filter, of, switchMap } from 'rxjs';
+import { forkJoin, filter, of, switchMap, combineLatest } from 'rxjs';
 import { TuiDay } from '@taiga-ui/cdk';
 import { TuiEditorTool, provideTuiEditor } from '@taiga-ui/editor';
 import { EDITOR_RU_PROVIDER } from '../../../../common/editor/editor-i18n';
@@ -30,6 +30,7 @@ import { tuiScrollbarOptionsProvider } from '@taiga-ui/core';
 import { WorklogDialogComponent } from '../../../worklog/components/dialog/worklog-dialog.component';
 import { WorklogDialogData, TaskWorklogRow } from '../../../worklog/types/worklog.model';
 import { WorklogService } from '../../../worklog/service/worklog.service';
+import { TaskCommentComposerComponent } from '../task-comment-composer/task-comment-composer';
 
 @Component({
   selector: 'app-detailed',
@@ -54,6 +55,7 @@ export class Detailed implements OnInit {
   protected readonly userStore = inject(UserStore);
   private readonly dialogs = inject(AppDialogService);
   private readonly worklogService = inject(WorklogService);
+  protected readonly showComments = signal(true);
 
   protected readonly task = signal<TaskDetailed | null>(null);
   protected readonly isLoading = signal(true);
@@ -179,35 +181,46 @@ export class Detailed implements OnInit {
   protected readonly stringifyCategory = (c: TaskCategory): string => c.name;
 
   ngOnInit(): void {
-    this.taskId = this.route.snapshot.paramMap.get('id')!;
-    const commentParam = this.route.snapshot.queryParamMap.get('comment');
-    if (commentParam) this.highlightCommentId = commentParam;
+    combineLatest([this.route.paramMap, this.route.queryParamMap])
+      .pipe(
+        switchMap(([params, queryParams]) => {
+          this.taskId = params.get('id')!;
+          this.highlightCommentId = queryParams.get('comment') ?? undefined;
 
-    forkJoin([
-      this.taskService.getById(this.taskId),
-      this.statusesService.getAll(),
-      this.prioritiesService.getAll(),
-      this.userApiService.getAll(),
-    ]).subscribe({
-      next: ([task, statuses, priorities, users]) => {
-        this.task.set(task);
-        this.statuses.set(statuses);
-        this.priorities.set(priorities);
-        this.users.set(users);
-        this.isLoading.set(false);
-        this.loadWorklogs();
+          this.isLoading.set(true);
 
-        forkJoin([
-          this.releaseService.getByProject(task.projectId),
-          this.categoriesService.getAll(task.projectId),
-        ]).subscribe(([releases, categories]) => {
-          this.releases.set(releases);
-          this.categories.set(categories);
-          this.patchForm(task, statuses, priorities, users, releases, categories);
-        });
-      },
-      error: () => this.isLoading.set(false),
-    });
+          return forkJoin([
+            this.taskService.getById(this.taskId),
+            this.statusesService.getAll(),
+            this.prioritiesService.getAll(),
+            this.userApiService.getAll(),
+          ]);
+        }),
+      )
+      .subscribe({
+        next: ([task, statuses, priorities, users]) => {
+          this.task.set(task);
+          this.statuses.set(statuses);
+          this.priorities.set(priorities);
+          this.users.set(users);
+          this.isLoading.set(false);
+
+          this.loadWorklogs();
+
+          forkJoin([
+            this.releaseService.getByProject(task.projectId),
+            this.categoriesService.getAll(task.projectId),
+          ]).subscribe(([releases, categories]) => {
+            this.releases.set(releases);
+            this.categories.set(categories);
+
+            this.patchForm(task, statuses, priorities, users, releases, categories);
+          });
+        },
+        error: () => {
+          this.isLoading.set(false);
+        },
+      });
   }
 
   private patchForm(
@@ -347,6 +360,10 @@ export class Detailed implements OnInit {
 
   protected reloadTask(): void {
     this.taskService.getById(this.taskId).subscribe((task) => this.task.set(task));
+  }
+
+  protected reloadPage(): void {
+    window.location.reload();
   }
 
   private loadWorklogs(): void {

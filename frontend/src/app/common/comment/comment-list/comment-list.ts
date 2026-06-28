@@ -90,10 +90,19 @@ export class CommentList implements OnInit {
         this.comments.set(comments);
         this.isLoading.set(false);
         if (this.highlightCommentId) {
+          const element = document.getElementById('comment-' + this.highlightCommentId);
+
           setTimeout(() => {
-            document
-              .getElementById('comment-' + this.highlightCommentId)
-              ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (element) {
+              window.scrollTo({
+                top: element.getBoundingClientRect().top + window.scrollY,
+                behavior: 'smooth',
+              });
+            }
+
+            setTimeout(() => {
+              this.highlightCommentId = undefined;
+            }, 2000);
           }, 150);
         }
       },

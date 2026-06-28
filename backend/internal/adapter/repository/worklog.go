@@ -13,6 +13,7 @@ import (
 
 type WorklogRepo interface {
 	GetAll(ctx context.Context, userId uuid.UUID, f *worklog.Filters) ([]worklog.Row, error)
+	GetById(ctx context.Context, logId uuid.UUID) (model.Worklog, error)
 	GetByTask(ctx context.Context, taskId uuid.UUID) ([]worklog.TaskRow, error)
 	GetLeaderboard(ctx context.Context, limit int) ([]worklog.LeaderboardEntry, error)
 	RecalculateLeaderboard(ctx context.Context) error
@@ -28,6 +29,17 @@ type worklogRepoImpl struct {
 func GetWorklogRepo() WorklogRepo {
 	r := database.GetCoreRepository()
 	return &worklogRepoImpl{r}
+}
+
+func (r *worklogRepoImpl) GetById(ctx context.Context, logId uuid.UUID) (model.Worklog, error) {
+	var res model.Worklog
+
+	err := r.GetContext(ctx, &res, `
+		SELECT * FROM time_logs
+	 	WHERE id = $1
+	`, logId)
+
+	return res, err
 }
 
 func (r *worklogRepoImpl) GetAll(ctx context.Context, userId uuid.UUID, f *worklog.Filters) ([]worklog.Row, error) {

@@ -30,6 +30,30 @@ func (s *service) recalculateLeaderboard(ctx context.Context) error {
 }
 
 func (s *service) update(ctx context.Context, id uuid.UUID, input worklog.UpdateLogInput) error {
+	log, err := repository.GetWorklogRepo().GetById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	start := log.StartAt
+	if input.StartAt != nil {
+		start, err = time.Parse(time.RFC3339, *input.StartAt)
+		if err != nil {
+			return err
+		}
+	}
+
+	end := log.EndAt
+	if input.EndAt != nil {
+		end, err = time.Parse(time.RFC3339, *input.EndAt)
+		if err != nil {
+			return err
+		}
+	}
+
+	minutes := int(end.Sub(start).Minutes())
+	input.TotalMinutes = &minutes
+
 	return repository.GetWorklogRepo().UpdateBy(ctx, id, input)
 }
 

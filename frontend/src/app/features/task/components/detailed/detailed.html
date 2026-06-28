@@ -259,7 +259,7 @@
                   [priorities]="priorities()"
                   [releases]="releases()"
                   [users]="users()"
-                  (submitted)="reloadTask()"
+                  (submitted)="reloadPage()"
                 />
                 <app-comment-list entityType="task" [entityId]="taskId" [hideComposer]="true" [highlightCommentId]="highlightCommentId" (filesChanged)="reloadTask()" />
               }
