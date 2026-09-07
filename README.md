@@ -1,119 +1,120 @@
 # Codinate
 
-Платформа для управления проектами и командами: задачи, релизы, статистика, лента активности и уведомления.
+A platform for managing projects and teams: tasks, releases, statistics, activity feed, and notifications.
 
-## Стек
+## Tech Stack
 
-| Слой | Технологии |
-|------|-----------|
+| Layer | Technologies |
+|------|-------------|
 | Backend | Go 1.25, chi, sqlx, PostgreSQL, JWT |
 | Frontend | Angular 20, Taiga UI, nginx |
-| Инфраструктура | Docker Compose, golang-migrate |
+| Infrastructure | Docker Compose, golang-migrate |
 
-Все сервисы поднимаются через `docker compose`. nginx во frontend-контейнере отдаёт SPA и проксирует API на backend, поэтому наружу торчит только один порт.
+All services are started via `docker compose`. nginx in the frontend container serves the SPA and proxies API requests to the backend, so only a single port is exposed externally.
 
 ---
 
-## Требования
+## Requirements
 
 - [Docker](https://docs.docker.com/get-docker/) 24+
 - Docker Compose v2+
 
 ---
 
-## Быстрый старт
+## Quick Start
 
-### 1. Настроить окружение
+### 1. Configure the environment
 
 ```bash
 mv .env.example .env
+````
+
+ Make sure to fill in the following variables in `.env`:
+
+ | Variable | Description |
+| --- | --- |
+| `DB_NAME`, `DB_USER`, `DB_PASSWORD` | Database credentials |
+| `SECRET_KEY` | JWT signing key — `openssl rand -hex 32` |
+| `OWNER_*` | Initial owner details (see step 3) |
+
+ The remaining variables have working default values.
+
+ ### 2\. Start the application
+
 ```
-
-Обязательно заполни в `.env`:
-
-| Переменная | Описание |
-|-----------|----------|
-| `DB_NAME`, `DB_USER`, `DB_PASSWORD` | Доступы к базе |
-| `SECRET_KEY` | Ключ подписи JWT — `openssl rand -hex 32` |
-| `OWNER_*` | Данные первого владельца (см. шаг 3) |
-
-Остальное имеет рабочие значения по умолчанию.
-
-### 2. Запустить
-
-```bash
 docker compose up --build -d
 ```
 
-Поднимутся три контейнера: `codinate_db`, `codinate_backend`, `codinate_frontend`.
-Миграции БД накатываются автоматически при старте backend.
+ Three containers will be started: `codinate_db`, `codinate_backend`, and `codinate_frontend`.
 
-Приложение откроется на `http://localhost` (порт задаётся в `FRONTEND_PORT`).
+ Database migrations are applied automatically when the backend starts.
 
-### 3. Создать владельца
+ The application will be available at `http://localhost` (the port is configured via `FRONTEND_PORT`).
 
-Имя, фамилия, username и email берутся из `.env` (`OWNER_NAME`, `OWNER_SURNAME`, `OWNER_USERNAME`, `OWNER_EMAIL`). Пароль вводится интерактивно и нигде не сохраняется:
+ ### 3\. Create the owner
 
-```bash
+ The first name, last name, username, and email are taken from `.env` (`OWNER_NAME`, `OWNER_SURNAME`, `OWNER_USERNAME`, `OWNER_EMAIL`). The password is entered interactively and is not stored anywhere:
+
+```
 docker exec -it codinate_backend ./codinate-backend create_owner
 ```
 
-> Флаг `-it` обязателен — без него терминал не сможет запросить пароль.
+ > The `-it` flags are required — without them, the terminal cannot prompt for the password.
 
-После этого можно войти в систему под созданным владельцем.
+ After that, you can log in using the newly created owner account.
 
 ---
 
-## Режимы сборки backend
+ ## Backend Build Modes
 
-Backend собирается с build-тегами, которые управляются переменной `BUILD_TAGS`:
+ The backend is built with build tags controlled by the `BUILD_TAGS` environment variable:
 
-| Тег | Что делает |
-|-----|-----------|
-| `prod` | Конфиг читается из переменных окружения (нужно для Docker). Без него backend требует файл `-config`. |
-| `swagger` | Включает Swagger UI на `/swagger/index.html`. |
+ | Tag | Description |
+| --- | --- |
+| `prod` | Reads configuration from environment variables (required for Docker). Without it, the backend requires a `-config` file. |
+| `swagger` | Enables Swagger UI at `/swagger/index.html`. |
 
-**Прод (по умолчанию):**
+ **Production (default):**
 
-```bash
+```
 docker compose up --build -d
 ```
 
-**Со Swagger (для разработки):**
+ **With Swagger (for development):**
 
-```bash
+```
 BUILD_TAGS="prod swagger" docker compose build backend
 docker compose up -d backend
 ```
 
-Swagger будет доступен на `http://localhost/swagger/index.html`.
+ Swagger will be available at `http://localhost/swagger/index.html`.
 
 ---
 
-## Миграции
+ ## Migrations
 
-Команды в `Makefile` работают локально (нужны `migrate` CLI и заполненный `.env`):
+ The `Makefile` commands run locally (`migrate` CLI and a populated `.env` are required):
 
-```bash
-make migrate_create name=add_something   # создать миграцию
-make migrate_up                          # накатить
-make migrate_down                        # откатить
-make migrate_force v=<version>           # выставить версию вручную
+```
+make migrate_create name=add_something   # create a migration
+make migrate_up                          # apply migrations
+make migrate_down                        # roll back the last migration
+make migrate_force v=<version>           # manually set the migration version
 ```
 
-В Docker миграции применяются автоматически при запуске backend.
+ In Docker, migrations are applied automatically when the backend starts.
 
 ---
 
-## Управление
+ ## Management
 
-```bash
-docker compose logs backend --tail=50    # логи backend
-docker compose restart backend           # перезапустить сервис
-docker compose down                      # остановить (данные сохраняются)
-docker compose down -v                   # остановить и удалить данные БД
+```
+docker compose logs backend --tail=50    # backend logs
+docker compose restart backend           # restart the service
+docker compose down                      # stop services (data is preserved)
+docker compose down -v                   # stop services and remove database data
 ```
 
-Загруженные файлы и логи лежат на хосте: `${UPLOADS_DIR}` и `${LOG_DIR}` (по умолчанию `./data/uploads` и `./data/logs`).
+ Uploaded files and logs are stored on the host in `${UPLOADS_DIR}` and `${LOG_DIR}` (by default, `./data/uploads` and `./data/logs`).
 
 ---
